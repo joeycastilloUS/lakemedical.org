@@ -22,7 +22,6 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 ## Board 28 — NOUS Auth Gate (16 pts)
 
 ### Ready
-- {auth-gate.css WesternU brand, update in, alumni/css/} · 3 · ~u
 - {auth-gate.js login + register via wire triples, update in, alumni/js/} · 5 · ~u
 - {QR encoder for TOTP registration, add to, alumni/js/utils/qr.js} · 5 · ~a
 - {session timer + auto-expire + re-auth gate, add to, auth-gate.js} · 3 · ~a
@@ -30,6 +29,7 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 ### In Progress
 
 ### Done
+- {auth-gate.css WesternU brand, update in, alumni/css/} · 3 · ~U ✅
 
 ---
 

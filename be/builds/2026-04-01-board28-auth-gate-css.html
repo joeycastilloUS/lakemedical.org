@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build: Board 28.1 — auth-gate.css WesternU Brand</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-green { background: #1A1A1A; border-left: 3px solid #2ecc71; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  ul { padding-left: 20px; margin: 6px 0; }
+  li { margin: 4px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .swatch { display: inline-block; width: 16px; height: 16px; border-radius: 3px; vertical-align: middle; margin-right: 6px; border: 1px solid #444; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 8px; border-bottom: 1px solid #222; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~u Board 28.1 &mdash; auth-gate.css</h1>
+<p style="color:#888;">Item: {auth-gate.css WesternU brand, update in, alumni/css/} &middot; 3 pts &middot; ~u</p>
+
+<h2>What Was Updated</h2>
+<div class="card-green">
+  <p>Complete rebrand of auth gate from Be dark theme to WesternU COMP brand.</p>
+  <ul>
+    <li>Background: cream <code>#faf9f7</code> (was dark <code>#111</code>)</li>
+    <li>Card: white with burgundy top accent border (was dark surface)</li>
+    <li>WesternU logo added above title</li>
+    <li>Subtitle &ldquo;College of Osteopathic Medicine&rdquo; added</li>
+    <li>Login button: burgundy <code>#8b2230</code> (was tron blue)</li>
+    <li>Register button: gold border <code>#d4a24a</code> (was gray)</li>
+    <li>Focus ring: burgundy glow (was tron blue)</li>
+    <li>Session timer styles pre-wired for Board 28.4</li>
+  </ul>
+</div>
+
+<h2>Before / After</h2>
+<div class="card">
+  <table>
+    <tr>
+      <td style="color:#888;">Element</td>
+      <td style="color:#888;">Before (Be dark)</td>
+      <td style="color:#888;">After (WesternU)</td>
+    </tr>
+    <tr>
+      <td>Overlay bg</td>
+      <td><span class="swatch" style="background:#111"></span><code>#111111</code></td>
+      <td><span class="swatch" style="background:#faf9f7"></span><code>#faf9f7</code> cream</td>
+    </tr>
+    <tr>
+      <td>Card bg</td>
+      <td><span class="swatch" style="background:#1A1A1A"></span><code>#1A1A1A</code></td>
+      <td><span class="swatch" style="background:#fff"></span><code>#fff</code> + burgundy top</td>
+    </tr>
+    <tr>
+      <td>Title color</td>
+      <td><span class="swatch" style="background:#6FC3DF"></span><code>#6FC3DF</code> tron</td>
+      <td><span class="swatch" style="background:#8b2230"></span><code>#8b2230</code> burgundy</td>
+    </tr>
+    <tr>
+      <td>Primary btn</td>
+      <td><span class="swatch" style="background:#6FC3DF"></span><code>#6FC3DF</code> tron</td>
+      <td><span class="swatch" style="background:#8b2230"></span><code>#8b2230</code> burgundy</td>
+    </tr>
+    <tr>
+      <td>Secondary btn</td>
+      <td><span class="swatch" style="background:#444"></span><code>#444</code> gray</td>
+      <td><span class="swatch" style="background:#d4a24a"></span><code>#d4a24a</code> gold</td>
+    </tr>
+    <tr>
+      <td>Input bg</td>
+      <td><span class="swatch" style="background:#111"></span><code>#111</code></td>
+      <td><span class="swatch" style="background:#faf9f7"></span><code>#faf9f7</code> cream</td>
+    </tr>
+    <tr>
+      <td>Focus ring</td>
+      <td><span class="swatch" style="background:#6FC3DF"></span><code>#6FC3DF</code></td>
+      <td><span class="swatch" style="background:#8b2230"></span>burgundy glow</td>
+    </tr>
+    <tr>
+      <td>Logo</td>
+      <td>none</td>
+      <td>WesternU horizontal logo</td>
+    </tr>
+    <tr>
+      <td>Subtitle</td>
+      <td>none</td>
+      <td>&ldquo;College of Osteopathic Medicine&rdquo;</td>
+    </tr>
+  </table>
+</div>
+
+<h2>Files Changed</h2>
+<div class="card">
+  <ul>
+    <li><code>alumni/css/auth-gate.css</code> &mdash; full rebrand (168 &rarr; 165 lines)</li>
+    <li><code>alumni/index.html</code> &mdash; added <code>&lt;img id="auth-logo"&gt;</code> + <code>&lt;div id="auth-subtitle"&gt;</code></li>
+  </ul>
+</div>
+
+<h2>What's Next</h2>
+<div class="card">
+  <p>Board 28 item 2: <strong>{auth-gate.js login + register via wire triples, update in, alumni/js/}</strong> &middot; 5 pts &middot; ~u</p>
+  <p>Rewrite auth-gate.js to call <code>nous_auth()</code> / <code>nous_register()</code> instead of JSON POST. Parse wire triple responses.</p>
+</div>
+
+<div class="footer">Generated 2026-04-01 02:00 &mdash; Be</div>
+</div>
+</body>
+</html>
