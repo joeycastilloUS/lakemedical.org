@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ship: NOUS Wire Protocol Layer + Auth Gate Brand</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .banner { background: linear-gradient(135deg, #1a2a1a 0%, #1A1A1A 100%); border: 1px solid #2ecc71; border-radius: 10px; padding: 24px; margin: 16px 0; text-align: center; }
+  .banner-title { color: #2ecc71; font-size: 1.4rem; font-weight: 700; }
+  .banner-sub { color: #888; margin-top: 4px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-green { background: #1A1A1A; border-left: 3px solid #2ecc71; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-gold { background: #1A1A1A; border-left: 3px solid #f1c40f; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  ul { padding-left: 20px; margin: 6px 0; }
+  li { margin: 4px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  td, th { padding: 8px 10px; text-align: left; border-bottom: 1px solid #222; }
+  th { color: #888; font-weight: 600; font-size: 0.85em; }
+  .hash { color: #6FC3DF; font-family: monospace; font-size: 0.85em; }
+  .stat { display: inline-block; background: #222; border-radius: 4px; padding: 4px 12px; margin: 2px 4px; font-size: 0.9em; }
+  .stat-num { color: #2ecc71; font-weight: 700; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<div class="banner">
+  <div class="banner-title">SHIPPED</div>
+  <div class="banner-sub">NOUS Wire Protocol Layer + Auth Gate WesternU Brand</div>
+</div>
+
+<h1>~s lakemedical.org</h1>
+<p style="color:#888;">Board 27 complete (16 pts) + Board 28.1 (3 pts) &middot; 19 pts shipped</p>
+
+<div style="margin:16px 0;">
+  <span class="stat"><span class="stat-num">6</span> commits</span>
+  <span class="stat"><span class="stat-num">12</span> files changed</span>
+  <span class="stat"><span class="stat-num">+1,350</span> lines</span>
+  <span class="stat"><span class="stat-num">90/90</span> tests</span>
+  <span class="stat"><span class="stat-num">17</span> functions</span>
+</div>
+
+<h2>What Shipped</h2>
+<div class="card-green">
+  <ul>
+    <li><strong>wire.js</strong> &mdash; NTRP0001 binary pack/unpack. Exact JS port of <code>wire.c</code>. Little-endian. 7 functions. 128KB max frame.</li>
+    <li><strong>nous.js</strong> &mdash; High-level NOUS client. Auth, register, session management. 10 functions. Triple contracts verified against <code>relay_server.c</code>.</li>
+    <li><strong>auth-gate.css</strong> &mdash; Full rebrand from Be dark theme to WesternU COMP: burgundy, gold, cream, logo, subtitle.</li>
+    <li><strong>CLAUDE.md</strong> &mdash; Production brief: wire protocol, 0xCA envelope, cockpit key derivation, relay DNS, auth triples, session lifecycle, 6 rules.</li>
+    <li><strong>be/</strong> &mdash; Board state, build reports, test report, artifact index.</li>
+    <li><strong>Full test suite</strong> &mdash; 90 tests across 13 sections. Pack/unpack, LE byte order, magic validation, edge cases, auth/register contracts, session management, error handling, full E2E auth flow.</li>
+  </ul>
+</div>
+
+<h2>Commits Included</h2>
+<div class="card">
+  <table>
+    <tr><th>Hash</th><th>Message</th></tr>
+    <tr><td class="hash">4a33735</td><td>~u: auth-gate.css WesternU brand &mdash; Board 28.1</td></tr>
+    <tr><td class="hash">0e50ad0</td><td>~t: Board 27 wire.js + nous.js &mdash; 90/90 tests pass</td></tr>
+    <tr><td class="hash">39e6507</td><td>~a: nous.js high-level NOUS client &mdash; Board 27.4 (Board 27 complete)</td></tr>
+    <tr><td class="hash">2b591ec</td><td>~a: wire.js NTRP0001 pack/unpack &mdash; Board 27.3</td></tr>
+    <tr><td class="hash">6b88797</td><td>~a: CLAUDE.md + be/ folder &mdash; production brief + board state</td></tr>
+    <tr><td class="hash">8934fa3</td><td>Initial extract: lakemedical.org production repo</td></tr>
+  </table>
+</div>
+
+<h2>Deploy Target</h2>
+<div class="card">
+  <table>
+    <tr><td style="color:#888;">Domain</td><td>lakemedical.org</td></tr>
+    <tr><td style="color:#888;">Platform</td><td>Cloudflare Pages</td></tr>
+    <tr><td style="color:#888;">Static dir</td><td><code>alumni/</code></td></tr>
+    <tr><td style="color:#888;">Auth protocol</td><td>NTRP wire via relay.3-nous.net</td></tr>
+    <tr><td style="color:#888;">Repo</td><td>github.com/joeycastilloUS/lakemedical.org</td></tr>
+    <tr><td style="color:#888;">Branch</td><td>main</td></tr>
+  </table>
+</div>
+
+<h2>Board Status</h2>
+<div class="card-gold">
+  <table>
+    <tr><th>Board</th><th>Name</th><th>Status</th><th>Points</th></tr>
+    <tr><td>27</td><td>Repo Extract + Wire.js</td><td style="color:#2ecc71;">Complete</td><td>16/16</td></tr>
+    <tr><td>28</td><td>NOUS Auth Gate</td><td style="color:#d4a24a;">In Progress</td><td>3/16</td></tr>
+    <tr><td>29</td><td>Worker Proxy + Deploy + E2E</td><td style="color:#888;">&9940; Blocked on 28</td><td>0/15</td></tr>
+  </table>
+  <p style="margin-top:12px; color:#888;">Total: 19/47 pts shipped &middot; 28 pts remaining across 2 boards</p>
+</div>
+
+<h2>Architecture Delivered</h2>
+<div class="card">
+<pre style="color:#aaa; font-size:0.85em;">
+Browser                        Worker (/api/wire)              Relay
+  |                                |                             |
+  |  wire.js: pack triples         |                             |
+  |  nous.js: nous_auth()          |                             |
+  |  ---- binary NTRP frame -----> |                             |
+  |       POST /api/wire           |  cockpit key derivation     |
+  |       octet-stream             |  ---- 0xCA envelope ------> |
+  |                                |       TCP relay.3-nous.net  |
+  |                                |                             |  unpack
+  |                                |                             |  dispatch
+  |                                |                             |  mint session
+  |                                |  <--- 0xCA response ------- |
+  |  <--- binary NTRP frame ------ |                             |
+  |  wire.js: unpack               |                             |
+  |  nous.js: extract token        |                             |
+  |  sessionStorage: save          |                             |
+</pre>
+</div>
+
+<h2>What Remains</h2>
+<div class="card">
+  <p><strong>Board 28</strong> (3 items, 13 pts remaining):</p>
+  <ul>
+    <li>{auth-gate.js login + register via wire triples, update in, alumni/js/} &middot; 5 &middot; ~u</li>
+    <li>{QR encoder for TOTP registration, add to, alumni/js/utils/qr.js} &middot; 5 &middot; ~a</li>
+    <li>{session timer + auto-expire + re-auth gate, add to, auth-gate.js} &middot; 3 &middot; ~a</li>
+  </ul>
+  <p style="margin-top:12px;"><strong>Board 29</strong> (3 items, 15 pts, blocked on 28):</p>
+  <ul>
+    <li>{wire.js Worker with 0xCA envelope, add to, functions/api/} &middot; 5 &middot; ~a</li>
+    <li>{NOUS_PSK + relay DNS + wrangler config, update in, deploy config} &middot; 5 &middot; ~u</li>
+    <li>{full wire auth E2E, test on, lakemedical.org + NOUS us-west2} &middot; 5 &middot; ~t</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-01 02:15 &mdash; Be</div>
+</div>
+</body>
+</html>
