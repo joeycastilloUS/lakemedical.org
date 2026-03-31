@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build: Board 27.4 — nous.js High-Level NOUS Client</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-green { background: #1A1A1A; border-left: 3px solid #2ecc71; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-blue { background: #1A1A1A; border-left: 3px solid #6FC3DF; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-gold { background: #1A1A1A; border-left: 3px solid #f1c40f; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  ul { padding-left: 20px; margin: 6px 0; }
+  li { margin: 4px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  pre { background: #0a0a0a; border: 1px solid #333; border-radius: 6px; padding: 14px; margin: 10px 0; overflow-x: auto; font-size: 0.85em; color: #aaa; }
+  .pass { color: #2ecc71; font-weight: 700; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~b Board 27.4 &mdash; nous.js</h1>
+<p style="color:#888;">Item: {nous.js high-level client, add to, alumni/js/} &middot; 3 pts &middot; ~a</p>
+
+<h2>What Was Added</h2>
+<div class="card-green">
+  <p><strong>alumni/js/nous.js</strong> &mdash; High-level NOUS wire client for the browser</p>
+  <ul>
+    <li>Wraps <code>wire.js</code> pack/unpack with <code>fetch('/api/wire')</code></li>
+    <li>Binary transport: <code>Content-Type: application/octet-stream</code></li>
+    <li>Auth triples match <code>relay_server.c</code> <code>handle_wire_auth()</code> exactly</li>
+    <li>Register triples match <code>handle_wire_register()</code> exactly</li>
+    <li>Session meta triple matches relay session validation</li>
+    <li>Session stored in <code>sessionStorage['nous-session']</code></li>
+  </ul>
+</div>
+
+<h2>API Surface</h2>
+<div class="card-blue">
+  <ul>
+    <li><code>nous_send(triples)</code> &mdash; Core: pack &rarr; POST /api/wire &rarr; unpack response</li>
+    <li><code>nous_auth(user, totp)</code> &mdash; Login: <code>{auth,action} + {user,entity} + {totp,signal}</code></li>
+    <li><code>nous_register(user)</code> &mdash; Register: <code>{register,action} + {user,entity}</code></li>
+    <li><code>nous_request(token, triples)</code> &mdash; Authenticated: prepends <code>{token,meta,session}</code></li>
+    <li><code>nous_session_check()</code> &mdash; Validates stored session against relay</li>
+    <li><code>nous_session_save(token)</code> / <code>get()</code> / <code>clear()</code> &mdash; sessionStorage wrapper</li>
+    <li><code>nous_find(triples, predicate)</code> &mdash; Extract subject by predicate</li>
+    <li><code>nous_status(triples)</code> &mdash; Extract <code>{resp,status,&lt;value&gt;}</code> object field</li>
+  </ul>
+</div>
+
+<h2>Data Flow</h2>
+<div class="card">
+  <pre>
+Browser                      Worker (/api/wire)              Relay
+  │                              │                             │
+  │  nous_auth('jc','123456')    │                             │
+  │  ─── wire_pack() ──────────► │                             │
+  │      POST /api/wire          │                             │
+  │      binary NTRP frame       │  derive cockpit key         │
+  │                              │  ─── 0xCA envelope ───────► │
+  │                              │      TCP relay.3-nous.net   │
+  │                              │                             │  unpack
+  │                              │                             │  find entity/signal
+  │                              │                             │  delegate to prime
+  │                              │                             │  mint session
+  │                              │  ◄── 0xCA response ─────── │
+  │                              │  decrypt, extract NTRP      │
+  │  ◄── binary NTRP ────────── │                             │
+  │  wire_unpack()               │                             │
+  │  nous_find(resp, 'signal')   │                             │
+  │  → token = 'abc123...'       │                             │
+  │  nous_session_save(token)    │                             │</pre>
+</div>
+
+<h2>C Code Contract Verification</h2>
+<div class="card">
+  <table style="width:100%; border-collapse:collapse;">
+    <tr style="border-bottom:1px solid #333;">
+      <td style="padding:6px; color:#888;">nous.js call</td>
+      <td style="padding:6px; color:#888;">relay_server.c handler</td>
+      <td style="padding:6px; color:#888;">Triple match</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:6px;"><code>nous_auth(user, totp)</code></td>
+      <td style="padding:6px;"><code>handle_wire_auth()</code> L1107</td>
+      <td style="padding:6px;"><span class="pass">exact</span> — entity+signal extraction at L1114-1118</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:6px;"><code>nous_register(user)</code></td>
+      <td style="padding:6px;"><code>handle_wire_register()</code> L1179</td>
+      <td style="padding:6px;"><span class="pass">exact</span> — entity extraction at L1185-1188</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:6px;"><code>nous_request(token, [...])</code></td>
+      <td style="padding:6px;"><code>handle_wire_forward()</code> L1232</td>
+      <td style="padding:6px;"><span class="pass">exact</span> — meta triple stripped, command forwarded</td>
+    </tr>
+    <tr>
+      <td style="padding:6px;">Response: <code>nous_find(r,'signal')</code></td>
+      <td style="padding:6px;">Auth response L1172</td>
+      <td style="padding:6px;"><span class="pass">exact</span> — token in signal subject</td>
+    </tr>
+  </table>
+</div>
+
+<h2>Test Results</h2>
+<div class="card-green">
+  <pre>
+nous_auth: returns triples                            <span class="pass">PASS</span>
+nous_auth: 3 response triples                         <span class="pass">PASS</span>
+nous_auth: sends Uint8Array body                      <span class="pass">PASS</span>
+nous_auth: request has 3 triples                      <span class="pass">PASS</span>
+nous_auth: triple[0] = {auth,action,none}             <span class="pass">PASS</span>
+nous_auth: triple[1] = {user,entity,none}             <span class="pass">PASS</span>
+nous_auth: triple[2] = {totp,signal,none}             <span class="pass">PASS</span>
+nous_find(signal): extracts token                     <span class="pass">PASS</span>
+nous_status: ok                                       <span class="pass">PASS</span>
+nous_register: returns triples                        <span class="pass">PASS</span>
+nous_register: otpauth URI in signal                  <span class="pass">PASS</span>
+session_save/get: roundtrip                           <span class="pass">PASS</span>
+session_clear: removes token                          <span class="pass">PASS</span>
+nous_request: 2 triples (meta + command)              <span class="pass">PASS</span>
+nous_request: triple[0] = {token,meta,session}        <span class="pass">PASS</span>
+nous_request: triple[1] = command                     <span class="pass">PASS</span>
+nous_session_check: true for valid session            <span class="pass">PASS</span>
+nous_session_check: false with no token               <span class="pass">PASS</span>
+nous_send(null): throws pack failed                   <span class="pass">PASS</span>
+
+--- ALL TESTS PASSED (19/19) ---</pre>
+</div>
+
+<h2>Board 27 Complete</h2>
+<div class="card-gold">
+  <p><strong>All 4 items done. 16/16 pts.</strong> Board 28 (NOUS Auth Gate) is now unblocked.</p>
+  <ul>
+    <li>27.1: lakemedical.org repo extract (32 files) ✅</li>
+    <li>27.2: CLAUDE.md + be/ folder ✅</li>
+    <li>27.3: wire.js NTRP pack/unpack ✅</li>
+    <li>27.4: nous.js high-level client ✅</li>
+  </ul>
+</div>
+
+<h2>What's Next</h2>
+<div class="card">
+  <p><strong>Board 28 — NOUS Auth Gate (16 pts)</strong> — now unblocked</p>
+  <ul>
+    <li>{auth-gate.css WesternU brand, update in, alumni/css/} &middot; 3 pts &middot; ~u</li>
+    <li>{auth-gate.js login + register via wire triples, update in, alumni/js/} &middot; 5 pts &middot; ~u</li>
+    <li>{QR encoder for TOTP registration, add to, alumni/js/utils/qr.js} &middot; 5 pts &middot; ~a</li>
+    <li>{session timer + auto-expire + re-auth gate, add to, auth-gate.js} &middot; 3 pts &middot; ~a</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-01 01:30 &mdash; Be</div>
+</div>
+</body>
+</html>

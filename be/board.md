@@ -8,7 +8,6 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 ## Board 27 — Repo Extract + Wire.js (16 pts)
 
 ### Ready
-- {nous.js high-level client, add to, alumni/js/} · 3 · ~a
 
 ### In Progress
 
@@ -16,10 +15,11 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 - {lakemedical.org GitHub repo + alumni/ + functions/ + config, add as, new production repo} · 5 · ~A ✅
 - {CLAUDE.md + be/ + board.md, add to, lakemedical.org} · 3 · ~A ✅
 - {wire.js NTRP pack/unpack, add to, alumni/js/} · 5 · ~A ✅
+- {nous.js high-level client, add to, alumni/js/} · 3 · ~A ✅
 
 ---
 
-## Board 28 — NOUS Auth Gate (16 pts) ⛔ blocked on Board 27
+## Board 28 — NOUS Auth Gate (16 pts)
 
 ### Ready
 - {auth-gate.css WesternU brand, update in, alumni/css/} · 3 · ~u
