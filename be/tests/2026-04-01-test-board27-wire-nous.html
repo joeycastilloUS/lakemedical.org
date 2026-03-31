@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test: Board 27 — wire.js + nous.js (90/90)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .summary { background: #1A1A1A; border-left: 3px solid #2ecc71; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+  .summary-fail { background: #1A1A1A; border-left: 3px solid #e74c3c; border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+  .big { font-size: 2.4rem; font-weight: 700; color: #2ecc71; }
+  .section { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .section-title { color: #6FC3DF; font-weight: 700; margin-bottom: 8px; }
+  .test { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #1f1f1f; }
+  .test-name { color: #aaa; font-size: 0.9em; }
+  .pass { color: #2ecc71; font-weight: 700; font-size: 0.85em; }
+  .fail { color: #e74c3c; font-weight: 700; font-size: 0.85em; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  ul { padding-left: 20px; margin: 6px 0; }
+  li { margin: 4px 0; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~t Board 27 &mdash; wire.js + nous.js</h1>
+<p style="color:#888;">Full test suite for NOUS wire protocol layer built today</p>
+
+<div class="summary">
+  <span class="big">90 / 90</span>
+  <span style="color:#2ecc71; margin-left:12px;">ALL TESTS PASSED</span>
+</div>
+
+<h2>What Was Tested</h2>
+<div class="card">
+  <ul>
+    <li><strong>wire.js</strong> &mdash; NTRP0001 binary pack/unpack, LE byte order, magic validation, edge cases, find functions, max frame, unicode</li>
+    <li><strong>nous.js</strong> &mdash; Auth/register triple contracts vs relay_server.c, session management, authenticated requests, session check, error handling, response helpers</li>
+    <li><strong>Integration</strong> &mdash; Full auth flow: register &rarr; login &rarr; save session &rarr; check session &rarr; authenticated request &rarr; logout</li>
+  </ul>
+</div>
+
+<h2>Test Results by Section</h2>
+
+<div class="section">
+  <div class="section-title">wire.js &mdash; Pack/Unpack (7 tests)</div>
+  <div class="test"><span class="test-name">pack returns Uint8Array</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">frame length = 78 bytes (16 hdr + 62 payload)</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unpack succeeds</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unpack returns 3 triples</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">triple[0] roundtrips</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">triple[1] roundtrips</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">triple[2] roundtrips</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">wire.js &mdash; Little-Endian Byte Order (7 tests)</div>
+  <div class="test"><span class="test-name">magic = NTRP0001</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">count bytes = [3,0,0,0] (LE)</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">payload_len bytes = [0x3E,0,0,0] (LE, 62 decimal)</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">first subject_len = [4,0] (LE)</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">long string packs ok</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">300-byte len = [0x2C,0x01] (LE)</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">300-byte string roundtrips</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">wire.js &mdash; Magic &amp; Validation (6 tests)</div>
+  <div class="test"><span class="test-name">wire_is_ntrp: valid frame &rarr; true</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_is_ntrp: null &rarr; false</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_is_ntrp: empty &rarr; false</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_is_ntrp: 15 bytes &rarr; false</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_is_ntrp: zero-filled 16B &rarr; false</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_is_ntrp: corrupted magic &rarr; false</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">wire.js &mdash; Edge Cases (12 tests)</div>
+  <div class="test"><span class="test-name">pack(null) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">pack([]) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unpack(8 bytes) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unpack(truncated payload) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unicode packs ok</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unicode caf&eacute;+accent roundtrips</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unicode umlauts roundtrip</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unicode CJK roundtrips</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">unicode emoji roundtrips</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">empty strings pack ok</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">empty triple = 22 bytes (16 hdr + 6 len fields)</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">empty strings roundtrip</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">wire.js &mdash; Find Functions (9 tests)</div>
+  <div class="test"><span class="test-name">wire_find(action) &rarr; auth</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_find(entity) &rarr; joey</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_find(nope) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_find2(auth,action) &rarr; none</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_find2(joey,entity) &rarr; none</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_find2(nope,action) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_action &rarr; auth</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_entities: 2 entities</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">wire_entities: alice, bob</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">wire.js &mdash; Max Frame Rejection (1 test)</div>
+  <div class="test"><span class="test-name">pack rejects &gt; 128KB frame</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">nous.js &mdash; Auth Triple Contract (13 tests)</div>
+  <div class="test"><span class="test-name">nous_auth returns triples</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">POST to /api/wire</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">method = POST</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">content-type = application/octet-stream</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">body is Uint8Array</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">auth request: 3 triples</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">auth req[0]: {auth,action,none}</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">auth req[1]: {user,entity,none}</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">auth req[2]: {totp,signal,none}</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">auth response: 64-char token in signal</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">auth response: TTL=900 in property</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">auth response: status=ok</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">numeric totp coerced to string</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">nous.js &mdash; Register Triple Contract (4 tests)</div>
+  <div class="test"><span class="test-name">register request: 2 triples</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">register req[0]: {register,action,none}</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">register req[1]: {user,entity,none}</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">register response: otpauth URI</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">nous.js &mdash; Session Management (4 tests)</div>
+  <div class="test"><span class="test-name">fresh: no session</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">save/get roundtrip (64 hex)</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">clear removes token</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">storage key = nous-session</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">nous.js &mdash; Authenticated Requests (4 tests)</div>
+  <div class="test"><span class="test-name">nous_request: meta + 2 command = 3 triples</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_request[0]: {token,meta,session}</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_request[1]: command triple preserved</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_request[2]: entity triple preserved</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">nous.js &mdash; Session Check (4 tests)</div>
+  <div class="test"><span class="test-name">session_check: true when relay says ok</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">session_check: false with no stored token</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">session_check: false when relay says expired</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">session_check: false on network error</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">nous.js &mdash; Error Handling (3 tests)</div>
+  <div class="test"><span class="test-name">nous_send(null): wire pack failed</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_send([]): wire pack failed</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_send: HTTP 500 &rarr; wire: 500</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">nous.js &mdash; Response Helpers (7 tests)</div>
+  <div class="test"><span class="test-name">nous_find(signal) &rarr; tok_xyz</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_find(property) &rarr; 900</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_find(nope) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_find(null) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_status &rarr; ok</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_status(null) &rarr; null</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">nous_status([]) &rarr; null</span><span class="pass">PASS</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Integration &mdash; Full Auth Flow (8 tests)</div>
+  <div class="test"><span class="test-name">flow: register returns otpauth URI</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">flow: login returns 64-char token</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">flow: login status ok</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">flow: session saved</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">flow: session check passes</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">flow: authenticated request has session meta</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">flow: session cleared</span><span class="pass">PASS</span></div>
+  <div class="test"><span class="test-name">flow: session check fails after clear</span><span class="pass">PASS</span></div>
+</div>
+
+<h2>Fixes Applied</h2>
+<div class="card">
+  <p>None required. Both modules passed all tests on first run.</p>
+</div>
+
+<h2>Remaining Issues</h2>
+<div class="card">
+  <p>None. Board 27 wire protocol layer is solid. Ready for Board 28 (auth gate rewrite using these modules).</p>
+</div>
+
+<h2>Coverage Summary</h2>
+<div class="card">
+  <table style="width:100%; border-collapse:collapse;">
+    <tr style="border-bottom:1px solid #333;">
+      <td style="padding:8px; color:#888;">Module</td>
+      <td style="padding:8px; color:#888;">Functions</td>
+      <td style="padding:8px; color:#888;">Tests</td>
+      <td style="padding:8px; color:#888;">Sections</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:8px;"><code>wire.js</code></td>
+      <td style="padding:8px;">7 (pack, unpack, is_ntrp, find, find2, action, entities)</td>
+      <td style="padding:8px;">42</td>
+      <td style="padding:8px;">Pack/Unpack, LE Byte Order, Magic, Edge Cases, Find, Max Frame</td>
+    </tr>
+    <tr>
+      <td style="padding:8px;"><code>nous.js</code></td>
+      <td style="padding:8px;">10 (send, auth, register, request, session_check, save, get, clear, find, status)</td>
+      <td style="padding:8px;">48</td>
+      <td style="padding:8px;">Auth Contract, Register Contract, Session, Auth Requests, Session Check, Errors, Helpers, Full Flow</td>
+    </tr>
+  </table>
+</div>
+
+<div class="footer">Generated 2026-04-01 01:45 &mdash; Be</div>
+</div>
+</body>
+</html>
