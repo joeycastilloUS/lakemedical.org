@@ -7,6 +7,14 @@ pages_build_output_dir = "alumni"
 compatibility_date = "2026-03-26"
 compatibility_flags = ["nodejs_compat"]
 
+# Secrets (set via: wrangler secret put NOUS_PSK):
+#   NOUS_PSK — 64-hex master pre-shared key (32 bytes)
+#              Used by functions/api/wire.js for cockpit key derivation
+#              HMAC-SHA-256(PSK, "nous-transport:cockpit") → AES-256-GCM key
+#
+# Wire proxy connects to relay.3-nous.net:8080 (dynamic DNS, never hardcoded)
+# Requires nodejs_compat flag for TCP connect() API
+
 # KV namespace for cached alumni data:
 # [[kv_namespaces]]
 # binding = "ALUMNI_DATA"

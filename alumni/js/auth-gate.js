@@ -1,15 +1,16 @@
-/* auth-gate.js — Be standard auth gate controller
+/* auth-gate.js — NOUS wire protocol auth gate
  *
- * Handles registration, login, session management.
- * Talks to the C auth gate server (/register, /auth, /session).
+ * Login + register via wire triples through nous.js.
+ * No JSON endpoints. Binary NTRP all the way.
  *
- * Pattern from kastil-systems/nous desktop.js.
+ * Depends: wire.js, nous.js (loaded before this script)
  * Vanilla JS. No frameworks.
  */
 (function () {
   'use strict';
 
-  var API_BASE = '';  /* same origin — gate server serves this file */
+  var SESSION_TTL = 900;  /* 15 minutes, matches RELAY_SESSION_TTL */
+  var WARN_AT = 120;      /* show warning with 2 min remaining */
 
   var gate        = document.getElementById('auth-gate');
   var content     = document.getElementById('protected-content');
@@ -24,58 +25,84 @@
   var qrTotpInput = document.getElementById('auth-qr-totp');
   var qrVerifyBtn = document.getElementById('auth-qr-verify-btn');
   var qrErrorSpan = document.getElementById('auth-qr-error');
+  var timerEl     = document.getElementById('auth-session-timer');
 
-  /* ── Session token storage ── */
-
-  function saveSession(token) {
-    try { sessionStorage.setItem('be-auth-session', token); } catch (e) {}
-  }
-
-  function getSession() {
-    try { return sessionStorage.getItem('be-auth-session'); } catch (e) { return null; }
-  }
-
-  function clearSession() {
-    try { sessionStorage.removeItem('be-auth-session'); } catch (e) {}
-  }
-
-  /* ── API calls ── */
-
-  function post(path, body, cb) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', API_BASE + path, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function () {
-      try { cb(null, JSON.parse(xhr.responseText)); }
-      catch (e) { cb('parse error'); }
-    };
-    xhr.onerror = function () { cb('network error'); };
-    xhr.send(JSON.stringify(body));
-  }
+  var sessionStart = 0;
+  var timerInterval = null;
 
   /* ── Dismiss gate, show content ── */
 
   function dismiss() {
     gate.classList.add('hidden');
     if (content) content.style.display = '';
-    /* Dispatch event for the host page */
     window.dispatchEvent(new CustomEvent('auth-gate-open'));
+    startTimer();
+  }
+
+  /* ── Raise gate, hide content ── */
+
+  function raise() {
+    gate.classList.remove('hidden');
+    if (content) content.style.display = 'none';
+    formView.style.display = '';
+    qrView.classList.add('hidden');
+    errorSpan.textContent = '';
+    totpInput.value = '';
+    stopTimer();
+    nous_session_clear();
+    window.dispatchEvent(new CustomEvent('auth-gate-close'));
+  }
+
+  /* ── Session timer ── */
+
+  function startTimer() {
+    sessionStart = Date.now();
+    stopTimer();
+    if (!timerEl) return;
+    timerEl.style.display = '';
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+  }
+
+  function stopTimer() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    if (timerEl) { timerEl.style.display = 'none'; timerEl.className = ''; }
+  }
+
+  function updateTimer() {
+    var elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+    var remaining = SESSION_TTL - elapsed;
+
+    if (remaining <= 0) {
+      raise();
+      return;
+    }
+
+    var min = Math.floor(remaining / 60);
+    var sec = remaining % 60;
+    timerEl.textContent = 'Session: ' + min + ':' + (sec < 10 ? '0' : '') + sec;
+
+    if (remaining <= WARN_AT) {
+      timerEl.className = remaining <= 60 ? 'critical' : 'warning';
+    } else {
+      timerEl.className = '';
+    }
   }
 
   /* ── QR rendering on canvas ── */
 
-  function renderQR(canvas, qrData, qrSize) {
+  function renderQR(canvas, matrix, size) {
     var ctx = canvas.getContext('2d');
-    var scale = Math.floor(canvas.width / (qrSize + 8));
-    var offset = Math.floor((canvas.width - qrSize * scale) / 2);
+    var scale = Math.floor(canvas.width / (size + 8));
+    var offset = Math.floor((canvas.width - size * scale) / 2);
 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = '#000000';
-    for (var r = 0; r < qrSize; r++) {
-      for (var c = 0; c < qrSize; c++) {
-        if (qrData[r * qrSize + c]) {
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        if (matrix[r * size + c]) {
           ctx.fillRect(offset + c * scale, offset + r * scale, scale, scale);
         }
       }
@@ -85,15 +112,8 @@
   /* ── Check existing session on load ── */
 
   function checkSession() {
-    var token = getSession();
-    if (!token) return;
-
-    post('/session', { session: token }, function (err, res) {
-      if (!err && res && res.status === 'ok') {
-        dismiss();
-      } else {
-        clearSession();
-      }
+    nous_session_check().then(function (valid) {
+      if (valid) dismiss();
     });
   }
 
@@ -107,18 +127,27 @@
     errorSpan.textContent = 'authenticating...';
     loginBtn.disabled = true;
 
-    post('/auth', { user: user, totp: parseInt(totp, 10) }, function (err, res) {
+    nous_auth(user, totp).then(function (triples) {
       loginBtn.disabled = false;
-      if (err) { errorSpan.textContent = 'network error'; return; }
+      var status = nous_status(triples);
 
-      if (res.status === 'ok') {
-        saveSession(res.session);
-        dismiss();
-      } else if (res.status === 'not_found') {
-        errorSpan.textContent = 'user not found — register below';
-      } else {
+      if (status === 'ok') {
+        var token = nous_find(triples, 'signal');
+        if (token) {
+          nous_session_save(token);
+          dismiss();
+        } else {
+          errorSpan.textContent = 'auth failed — no token';
+        }
+      } else if (status === 'rejected') {
         errorSpan.textContent = 'wrong code — try again';
+      } else {
+        var msg = nous_find(triples, 'message');
+        errorSpan.textContent = msg || 'authentication failed';
       }
+    }).catch(function () {
+      loginBtn.disabled = false;
+      errorSpan.textContent = 'network error';
     });
   });
 
@@ -135,24 +164,27 @@
     errorSpan.textContent = 'registering...';
     registerBtn.disabled = true;
 
-    post('/register', { user: user }, function (err, res) {
+    nous_register(user).then(function (triples) {
       registerBtn.disabled = false;
-      if (err) { errorSpan.textContent = 'network error'; return; }
+      var status = nous_status(triples);
 
-      if (res.status === 'ok') {
-        /* Show QR view */
+      if (status === 'ok') {
         formView.style.display = 'none';
         qrView.classList.remove('hidden');
         errorSpan.textContent = '';
 
-        if (res.qr_data && res.qr_size) {
-          renderQR(qrCanvas, res.qr_data, res.qr_size);
+        var otpUri = nous_find(triples, 'signal');
+        if (otpUri && typeof qr_encode === 'function') {
+          var qr = qr_encode(otpUri);
+          if (qr) renderQR(qrCanvas, qr.data, qr.size);
         }
-      } else if (res.error === 'user already registered') {
-        errorSpan.textContent = 'already registered — log in above';
       } else {
-        errorSpan.textContent = res.error || 'registration failed';
+        var msg = nous_find(triples, 'message');
+        errorSpan.textContent = msg || 'registration failed';
       }
+    }).catch(function () {
+      registerBtn.disabled = false;
+      errorSpan.textContent = 'network error';
     });
   });
 
@@ -166,16 +198,22 @@
     qrErrorSpan.textContent = 'verifying...';
     qrVerifyBtn.disabled = true;
 
-    post('/auth', { user: user, totp: parseInt(totp, 10) }, function (err, res) {
+    nous_auth(user, totp).then(function (triples) {
       qrVerifyBtn.disabled = false;
-      if (err) { qrErrorSpan.textContent = 'network error'; return; }
+      var status = nous_status(triples);
 
-      if (res.status === 'ok') {
-        saveSession(res.session);
-        dismiss();
+      if (status === 'ok') {
+        var token = nous_find(triples, 'signal');
+        if (token) {
+          nous_session_save(token);
+          dismiss();
+        }
       } else {
         qrErrorSpan.textContent = 'wrong code — try again';
       }
+    }).catch(function () {
+      qrVerifyBtn.disabled = false;
+      qrErrorSpan.textContent = 'network error';
     });
   });
 

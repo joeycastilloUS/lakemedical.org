@@ -22,24 +22,24 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 ## Board 28 — NOUS Auth Gate (16 pts)
 
 ### Ready
-- {auth-gate.js login + register via wire triples, update in, alumni/js/} · 5 · ~u
-- {QR encoder for TOTP registration, add to, alumni/js/utils/qr.js} · 5 · ~a
-- {session timer + auto-expire + re-auth gate, add to, auth-gate.js} · 3 · ~a
 
 ### In Progress
 
 ### Done
 - {auth-gate.css WesternU brand, update in, alumni/css/} · 3 · ~U ✅
+- {auth-gate.js login + register via wire triples, update in, alumni/js/} · 5 · ~U ✅
+- {QR encoder for TOTP registration, add to, alumni/js/utils/qr.js} · 5 · ~A ✅
+- {session timer + auto-expire + re-auth gate, add to, auth-gate.js} · 3 · ~A ✅
 
 ---
 
-## Board 29 — Worker Proxy + Deploy + E2E (15 pts) ⛔ blocked on Board 28
+## Board 29 — Worker Proxy + Deploy + E2E (15 pts)
 
 ### Ready
-- {wire.js Worker with 0xCA envelope encrypt/decrypt + relay proxy, add to, functions/api/} · 5 · ~a
-- {NOUS_PSK secret + relay.3-nous.net DNS + wrangler config, update in, deploy config} · 5 · ~u
 - {full wire auth E2E, test on, lakemedical.org + NOUS us-west2} · 5 · ~t
 
 ### In Progress
 
 ### Done
+- {wire.js Worker with 0xCA envelope encrypt/decrypt + relay proxy, add to, functions/api/} · 5 · ~A ✅
+- {NOUS_PSK secret + relay.3-nous.net DNS + wrangler config, update in, deploy config} · 5 · ~U ✅

@@ -33,6 +33,9 @@
     </div>
   </div>
 
+  <!-- Session Timer (visible when authenticated) -->
+  <div id="auth-session-timer" style="display:none;"></div>
+
   <!-- Desktop Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
@@ -133,6 +136,9 @@
   <!-- Chart.js from CDN (only dep) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script type="module" src="./js/app.js"></script>
+  <script src="./js/wire.js"></script>
+  <script src="./js/nous.js"></script>
+  <script src="./js/utils/qr.js"></script>
   <script src="./js/auth-gate.js"></script>
 </body>
 </html>
