@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build: Board 27.3 — wire.js NTRP0001 Pack/Unpack</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-green { background: #1A1A1A; border-left: 3px solid #2ecc71; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-blue { background: #1A1A1A; border-left: 3px solid #6FC3DF; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  ul { padding-left: 20px; margin: 6px 0; }
+  li { margin: 4px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  pre { background: #0a0a0a; border: 1px solid #333; border-radius: 6px; padding: 14px; margin: 10px 0; overflow-x: auto; font-size: 0.85em; color: #aaa; }
+  .pass { color: #2ecc71; font-weight: 700; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~b Board 27.3 &mdash; wire.js</h1>
+<p style="color:#888;">Item: {wire.js NTRP pack/unpack, add to, alumni/js/} &middot; 5 pts &middot; ~a</p>
+
+<h2>What Was Added</h2>
+<div class="card-green">
+  <p><strong>alumni/js/wire.js</strong> &mdash; Exact JS port of <code>kASTIL/nous/comms/skill/wire/wire.c</code></p>
+  <ul>
+    <li>Binary triple format: <code>{subject, predicate, object}</code></li>
+    <li>Frame layout: <code>[8B magic "NTRP0001"][4B count LE][4B payload_bytes LE][payload]</code></li>
+    <li>Each triple: <code>[2B subject_len LE][subject][2B predicate_len LE][predicate][2B object_len LE][object]</code></li>
+    <li>Byte order: <strong>LITTLE-ENDIAN</strong> &mdash; matches wire.c <code>w16()</code>/<code>w32()</code>/<code>r16()</code>/<code>r32()</code></li>
+    <li>Max frame: 128KB (<code>WIRE_BUF_SIZE</code>)</li>
+  </ul>
+</div>
+
+<h2>API Surface</h2>
+<div class="card-blue">
+  <ul>
+    <li><code>wire_pack(triples)</code> &mdash; Array of <code>{s, p, o}</code> &rarr; <code>Uint8Array</code> NTRP frame</li>
+    <li><code>wire_unpack(buf)</code> &mdash; <code>Uint8Array</code> &rarr; Array of <code>{s, p, o}</code></li>
+    <li><code>wire_is_ntrp(buf)</code> &mdash; Check magic header</li>
+    <li><code>wire_find(triples, predicate)</code> &mdash; First match by predicate, returns subject</li>
+    <li><code>wire_find2(triples, subject, predicate)</code> &mdash; Match by subject+predicate, returns object</li>
+    <li><code>wire_action(triples)</code> &mdash; Shorthand for <code>wire_find(triples, 'action')</code></li>
+    <li><code>wire_entities(triples)</code> &mdash; All triples with <code>predicate='entity'</code></li>
+  </ul>
+</div>
+
+<h2>C &harr; JS Mapping</h2>
+<div class="card">
+  <table style="width:100%; border-collapse:collapse;">
+    <tr style="border-bottom:1px solid #333;">
+      <td style="padding:6px; color:#888;">wire.c</td>
+      <td style="padding:6px; color:#888;">wire.js</td>
+      <td style="padding:6px; color:#888;">Notes</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:6px;"><code>w16(p, v)</code></td>
+      <td style="padding:6px;"><code>view.setUint16(pos, len, true)</code></td>
+      <td style="padding:6px;">LE via <code>true</code> param</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:6px;"><code>w32(p, v)</code></td>
+      <td style="padding:6px;"><code>view.setUint32(off, val, true)</code></td>
+      <td style="padding:6px;">LE via <code>true</code> param</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:6px;"><code>r16(p)</code></td>
+      <td style="padding:6px;"><code>view.getUint16(pos, true)</code></td>
+      <td style="padding:6px;">LE via <code>true</code> param</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:6px;"><code>r32(p)</code></td>
+      <td style="padding:6px;"><code>view.getUint32(off, true)</code></td>
+      <td style="padding:6px;">LE via <code>true</code> param</td>
+    </tr>
+    <tr style="border-bottom:1px solid #222;">
+      <td style="padding:6px;"><code>memcpy</code></td>
+      <td style="padding:6px;"><code>buf.set(bytes, pos)</code></td>
+      <td style="padding:6px;">Uint8Array.set()</td>
+    </tr>
+    <tr>
+      <td style="padding:6px;"><code>wire_is_ntrp()</code></td>
+      <td style="padding:6px;"><code>wire_is_ntrp()</code></td>
+      <td style="padding:6px;">Same name, same logic</td>
+    </tr>
+  </table>
+</div>
+
+<h2>Test Results</h2>
+<div class="card-green">
+  <pre>
+wire_pack: 3 triples → 77 bytes                     <span class="pass">PASS</span>
+LE byte order: count = [3, 0, 0, 0]                  <span class="pass">PASS</span>
+LE byte order: first len = [4, 0]                     <span class="pass">PASS</span>
+wire_is_ntrp: true                                    <span class="pass">PASS</span>
+wire_unpack: 3 triples recovered                      <span class="pass">PASS</span>
+Roundtrip: auth/action, user/entity, totp/signal      <span class="pass">PASS</span>
+wire_action: 'auth'                                   <span class="pass">PASS</span>
+wire_entities: ['user']                               <span class="pass">PASS</span>
+wire_find2('token','meta'): 'session'                 <span class="pass">PASS</span>
+Bad input: wire_pack(null) = null                     <span class="pass">PASS</span>
+Bad input: wire_unpack(bad) = null                    <span class="pass">PASS</span>
+Unicode: 'caf&eacute;' roundtrips                            <span class="pass">PASS</span>
+
+--- ALL TESTS PASSED ---</pre>
+</div>
+
+<h2>What's Next</h2>
+<div class="card">
+  <p>Board 27 item 4: <strong>{nous.js high-level client, add to, alumni/js/}</strong> &middot; 3 pts &middot; ~a</p>
+  <p>High-level client wrapping wire.js: <code>nous_login(user, totp)</code>, <code>nous_register(user)</code>, <code>nous_session_check()</code>. Handles 0xCA envelope via WebCrypto AES-256-GCM. Talks to relay via <code>relay.3-nous.net</code>.</p>
+</div>
+
+<div class="footer">Generated 2026-04-01 01:15 &mdash; Be</div>
+</div>
+</body>
+</html>

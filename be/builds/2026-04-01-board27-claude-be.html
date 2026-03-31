@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build: Board 27.2 — CLAUDE.md + be/ for lakemedical.org</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card-green { background: #1A1A1A; border-left: 3px solid #2ecc71; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  ul { padding-left: 20px; margin: 6px 0; }
+  li { margin: 4px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~b Board 27.2 &mdash; CLAUDE.md + be/</h1>
+<p style="color:#888;">Item: {CLAUDE.md + be/ + board.md, add to, lakemedical.org} &middot; 3 pts &middot; ~a</p>
+
+<h2>What Was Added</h2>
+<div class="card-green">
+  <ul>
+    <li><strong>CLAUDE.md</strong> &mdash; Production brief covering stack, architecture, wire protocol (NTRP0001 LE byte order), 0xCA envelope, cockpit key derivation, relay DNS discovery, auth triples, session lifecycle, deploy steps, and 6 hard rules.</li>
+    <li><strong>be/board.md</strong> &mdash; Boards 27-29 (11 items, 47 pts). Board 27 items 1-2 done. Mirrors Alumni-Artifacts board state.</li>
+    <li><strong>be/index.html</strong> &mdash; Artifact index for the production repo.</li>
+    <li><strong>be/ folder structure</strong> &mdash; docs/, plans/, builds/, tests/, ships/, retros/</li>
+  </ul>
+</div>
+
+<h2>Decisions Made</h2>
+<div class="card">
+  <ul>
+    <li><strong>CLAUDE.md is the single source of truth</strong> for anyone (human or AI) working in this repo. All wire protocol specs, byte orders, key derivation, and constraints documented here.</li>
+    <li><strong>Board state mirrored</strong> from Alumni-Artifacts. Both repos track the same boards 27-29. Alumni-Artifacts is the dev repo, lakemedical.org is the production repo.</li>
+    <li><strong>6 rules codified:</strong> No frameworks, no hardcoded IPs, wire protocol always, WesternU brand on auth gate, PSK server-side only, little-endian byte order.</li>
+  </ul>
+</div>
+
+<h2>Files Changed</h2>
+<div class="card">
+  <ul>
+    <li><code>CLAUDE.md</code> &mdash; new (production brief)</li>
+    <li><code>be/board.md</code> &mdash; new (kanban state)</li>
+    <li><code>be/index.html</code> &mdash; new (artifact index)</li>
+  </ul>
+</div>
+
+<h2>What's Next</h2>
+<div class="card">
+  <p>Board 27 item 3: <strong>{wire.js NTRP pack/unpack, add to, alumni/js/}</strong> &middot; 5 pts &middot; ~a</p>
+  <p>JS port of wire.h — <code>wire_pack()</code>, <code>wire_unpack()</code>, <code>wire_is_ntrp()</code>. Little-endian. Matches wire.c exactly.</p>
+</div>
+
+<div class="footer">Generated 2026-04-01 00:25 &mdash; Be</div>
+</div>
+</body>
+</html>

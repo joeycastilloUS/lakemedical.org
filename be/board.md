@@ -8,14 +8,14 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 ## Board 27 — Repo Extract + Wire.js (16 pts)
 
 ### Ready
-- {wire.js NTRP pack/unpack, add to, alumni/js/} · 5 · ~a
 - {nous.js high-level client, add to, alumni/js/} · 3 · ~a
 
 ### In Progress
-- {CLAUDE.md + be/ + board.md, add to, lakemedical.org} · 3 · ~a
 
 ### Done
 - {lakemedical.org GitHub repo + alumni/ + functions/ + config, add as, new production repo} · 5 · ~A ✅
+- {CLAUDE.md + be/ + board.md, add to, lakemedical.org} · 3 · ~A ✅
+- {wire.js NTRP pack/unpack, add to, alumni/js/} · 5 · ~A ✅
 
 ---
 
