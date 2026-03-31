@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro: NOUS Wire Auth</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  ul { padding-left: 20px; }
+  li { margin: 6px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .good { color: #4a4; }
+  .improve { color: #ca4; }
+  .stat { display: inline-block; background: #1A1A1A; border-radius: 6px; padding: 8px 16px; margin: 4px 8px 4px 0; }
+  .stat-val { color: #6FC3DF; font-weight: 700; font-size: 1.4rem; }
+  .stat-lbl { color: #888; font-size: 0.8rem; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+<h1>~retro: NOUS Wire Auth</h1>
+<p class="subtitle">Boards 27&ndash;29 &middot; 2026-04-01 &middot; lakemedical.org</p>
+
+<div style="margin: 16px 0;">
+  <span class="stat"><span class="stat-val">3</span><br><span class="stat-lbl">Boards</span></span>
+  <span class="stat"><span class="stat-val">10</span><br><span class="stat-lbl">Items Done</span></span>
+  <span class="stat"><span class="stat-val">42</span><br><span class="stat-lbl">Points Delivered</span></span>
+  <span class="stat"><span class="stat-val">142</span><br><span class="stat-lbl">Tests Pass</span></span>
+  <span class="stat"><span class="stat-val">9</span><br><span class="stat-lbl">Commits</span></span>
+</div>
+
+<h2>What Happened</h2>
+<div class="card">
+  <ul>
+    <li><strong>Board 27 (16 pts):</strong> Extracted lakemedical.org into its own production repo. Built wire.js (NTRP0001 binary protocol) and nous.js (high-level auth client). 4/4 items complete.</li>
+    <li><strong>Board 28 (16 pts):</strong> Rebranded auth gate to WesternU COMP (burgundy/gold/cream). Rewired auth-gate.js from JSON to wire triples. Built QR encoder from scratch. Added session timer with auto-expire. 4/4 items complete.</li>
+    <li><strong>Board 29 (10/15 pts):</strong> Built Worker proxy with 0xCA envelope encryption. Configured NOUS_PSK + DNS. 2/3 items complete. E2E test remains (requires live relay).</li>
+    <li><strong>Testing:</strong> 90/90 for Board 27 (wire.js + nous.js). 52/52 for Board 28+29 (QR, auth gate, session, Worker). Total: 142 tests, 0 failures.</li>
+  </ul>
+</div>
+
+<h2>What Went Well <span class="good">&#10004;</span></h2>
+<div class="card">
+  <ul>
+    <li><strong>Zero-dependency QR encoder.</strong> 413 lines, ISO 18004, versions 1&ndash;10. No CDN, no library. Exactly what "roll your own" means.</li>
+    <li><strong>Wire protocol byte-compatibility.</strong> WebCrypto [ct+tag] layout matches C code's [ct][tag]. No translation layer needed between browser and relay.</li>
+    <li><strong>Chain reaction speed.</strong> Board 28 items 2&ndash;4 + Board 29 items 1&ndash;2 built in a single pass. All 5 items committed together, 705 lines, clean first-run tests.</li>
+    <li><strong>Clean separation:</strong> wire.js (protocol) &rarr; nous.js (client) &rarr; auth-gate.js (UI) &rarr; Worker (proxy). Each layer does one thing.</li>
+    <li><strong>Test design.</strong> Integration chain test (section 7) exercises the full flow: register &rarr; QR &rarr; login &rarr; session &rarr; auth request &rarr; logout. Catches contract breaks between layers.</li>
+  </ul>
+</div>
+
+<h2>What Could Be Better <span class="improve">&#9888;</span></h2>
+<div class="card">
+  <ul>
+    <li><strong>Premature ship report.</strong> First ~s was triggered at 19 pts (Board 27 + 28.1) and presented as if work was done. User caught it. Ship reports should clearly indicate remaining work or only fire when all boards are complete.</li>
+    <li><strong>HTML entity bug.</strong> Ship report had <code>&amp;9940;</code> instead of <code>&amp;#9940;</code>. Missed the <code>#</code> for numeric character references. Caught and fixed, but should be right the first time.</li>
+    <li><strong>Context recovery.</strong> Session hit context limit mid-chain. The summary preserved enough state to resume cleanly, but one context break in a chain reaction adds friction.</li>
+    <li><strong>Board 29.3 blocked on infra.</strong> E2E test requires live relay + NOUS_PSK secret. Can't test locally. This item should have been flagged as infra-dependent from the estimate phase.</li>
+  </ul>
+</div>
+
+<h2>Tool Failures</h2>
+<div class="card">
+  <ul>
+    <li><strong>Heredoc with single quotes:</strong> Test file containing single quotes inside a bash heredoc caused EOF error. Switched to Write tool. No data loss.</li>
+    <li><strong>Test assertion mismatches (Board 27 ~T):</strong> 3 of 90 tests failed on first run due to off-by-one in expected payload sizes. Fixed and rerun &mdash; all passed. Root cause: hand-calculated byte counts didn't account for padding.</li>
+  </ul>
+</div>
+
+<h2>Performance Notes</h2>
+<div class="card">
+  <ul>
+    <li>Context hit limit during chain reaction. Summary+resume worked but cost ~2 minutes of re-orientation.</li>
+    <li>All 52 Board 28+29 tests passed on first run &mdash; no iteration needed.</li>
+    <li>Single commit for 5 board items is efficient but makes rollback coarser. Trade-off accepted for speed.</li>
+  </ul>
+</div>
+
+<h2>Commitments</h2>
+<div class="card">
+  <ul>
+    <li>Board 29.3 (E2E test against live relay) to be completed when NOUS infrastructure is online.</li>
+    <li>Ship reports will clearly indicate scope and remaining work.</li>
+    <li>HTML entity references will be double-checked in all generated reports.</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-01 21:47</div>
+</div>
+</body>
+</html>

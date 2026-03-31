@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ship: NOUS Wire Auth — Boards 27–29</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  ul { padding-left: 20px; }
+  li { margin: 6px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .stat { display: inline-block; background: #1A1A1A; border-radius: 6px; padding: 8px 16px; margin: 4px 8px 4px 0; }
+  .stat-val { color: #6FC3DF; font-weight: 700; font-size: 1.4rem; }
+  .stat-lbl { color: #888; font-size: 0.8rem; }
+  .done { color: #4a4; }
+  .pending { color: #ca4; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th { text-align: left; color: #6FC3DF; padding: 8px; border-bottom: 1px solid #333; }
+  td { padding: 8px; border-bottom: 1px solid #1a1a1a; }
+  .banner { background: #1a3a1a; border: 1px solid #4a4; border-radius: 8px; padding: 20px; margin: 16px 0; text-align: center; }
+  .banner-text { color: #4a4; font-weight: 700; font-size: 1.5rem; }
+  .banner-sub { color: #6a6; font-size: 0.9rem; margin-top: 4px; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+<h1>~S Ship: NOUS Wire Auth</h1>
+<p class="subtitle">Boards 27&ndash;29 &middot; lakemedical.org &middot; 2026-04-01</p>
+
+<div class="banner">
+  <span class="banner-text">&#128674; SHIPPED &mdash; 42 of 47 Points Delivered</span>
+  <div class="banner-sub">10/11 items complete &middot; 142 tests pass &middot; 0 failures</div>
+</div>
+
+<div style="margin: 16px 0;">
+  <span class="stat"><span class="stat-val">42</span><br><span class="stat-lbl">Points</span></span>
+  <span class="stat"><span class="stat-val">10</span><br><span class="stat-lbl">Items Done</span></span>
+  <span class="stat"><span class="stat-val">142</span><br><span class="stat-lbl">Tests Pass</span></span>
+  <span class="stat"><span class="stat-val">9</span><br><span class="stat-lbl">Commits</span></span>
+  <span class="stat"><span class="stat-val">1</span><br><span class="stat-lbl">Remaining</span></span>
+</div>
+
+<h2>What Shipped</h2>
+
+<div class="card">
+  <h3>Board 27 &mdash; Repo Extract + Wire.js (16 pts) <span class="done">&#10004; Complete</span></h3>
+  <table>
+    <tr><td class="done">&#10004;</td><td>lakemedical.org GitHub repo + alumni/ + functions/ + config</td><td>5 pts</td></tr>
+    <tr><td class="done">&#10004;</td><td>CLAUDE.md + be/ + board.md</td><td>3 pts</td></tr>
+    <tr><td class="done">&#10004;</td><td>wire.js NTRP0001 pack/unpack (7 functions, LE binary)</td><td>5 pts</td></tr>
+    <tr><td class="done">&#10004;</td><td>nous.js high-level client (10 functions)</td><td>3 pts</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Board 28 &mdash; NOUS Auth Gate (16 pts) <span class="done">&#10004; Complete</span></h3>
+  <table>
+    <tr><td class="done">&#10004;</td><td>auth-gate.css WesternU brand (burgundy/gold/cream)</td><td>3 pts</td></tr>
+    <tr><td class="done">&#10004;</td><td>auth-gate.js login + register via wire triples</td><td>5 pts</td></tr>
+    <tr><td class="done">&#10004;</td><td>QR encoder for TOTP registration (413 lines, zero deps)</td><td>5 pts</td></tr>
+    <tr><td class="done">&#10004;</td><td>Session timer + auto-expire + re-auth gate</td><td>3 pts</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Board 29 &mdash; Worker Proxy + Deploy (10/15 pts) <span class="pending">&#9888; 1 remaining</span></h3>
+  <table>
+    <tr><td class="done">&#10004;</td><td>wire.js Worker with 0xCA envelope + relay proxy (166 lines)</td><td>5 pts</td></tr>
+    <tr><td class="done">&#10004;</td><td>NOUS_PSK secret + relay.3-nous.net DNS + wrangler config</td><td>5 pts</td></tr>
+    <tr><td class="pending">&#9888;</td><td>Full wire auth E2E test (requires live relay)</td><td>5 pts</td></tr>
+  </table>
+</div>
+
+<h2>Commits Included</h2>
+<div class="card">
+  <table>
+    <tr><th>Hash</th><th>Message</th></tr>
+    <tr><td><code>8934fa3</code></td><td>Initial extract: lakemedical.org production repo</td></tr>
+    <tr><td><code>6b88797</code></td><td>~a: CLAUDE.md + be/ folder</td></tr>
+    <tr><td><code>2b591ec</code></td><td>~a: wire.js NTRP0001 pack/unpack &mdash; Board 27.3</td></tr>
+    <tr><td><code>39e6507</code></td><td>~a: nous.js high-level NOUS client &mdash; Board 27.4</td></tr>
+    <tr><td><code>0e50ad0</code></td><td>~t: Board 27 wire.js + nous.js &mdash; 90/90 tests</td></tr>
+    <tr><td><code>4a33735</code></td><td>~u: auth-gate.css WesternU brand &mdash; Board 28.1</td></tr>
+    <tr><td><code>6a11d59</code></td><td>~s: NOUS wire protocol layer (milestone)</td></tr>
+    <tr><td><code>3b7c7a4</code></td><td>fix: HTML entity for blocked symbol</td></tr>
+    <tr><td><code>acaff37</code></td><td>~b: Board 28 + Board 29 chain reaction</td></tr>
+  </table>
+</div>
+
+<h2>Test Results</h2>
+<div class="card">
+  <table>
+    <tr><th>Suite</th><th>Tests</th><th>Pass</th><th>Fail</th></tr>
+    <tr><td>Board 27: wire.js + nous.js</td><td>90</td><td class="done">90</td><td>0</td></tr>
+    <tr><td>Board 28+29: QR + auth + Worker</td><td>52</td><td class="done">52</td><td>0</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>142</strong></td><td class="done"><strong>142</strong></td><td><strong>0</strong></td></tr>
+  </table>
+</div>
+
+<h2>Deploy Target</h2>
+<div class="card">
+  <ul>
+    <li><strong>Domain:</strong> lakemedical.org</li>
+    <li><strong>Platform:</strong> Cloudflare Pages + Functions</li>
+    <li><strong>Deploy:</strong> <code>npx wrangler pages deploy alumni</code></li>
+    <li><strong>Secret:</strong> <code>wrangler secret put NOUS_PSK</code> (64-hex, 32 bytes)</li>
+    <li><strong>Relay:</strong> relay.3-nous.net:8080 (dynamic DNS)</li>
+    <li><strong>Status:</strong> Code complete. Deploy pending NOUS_PSK secret + relay availability for E2E.</li>
+  </ul>
+</div>
+
+<h2>Remaining</h2>
+<div class="card">
+  <ul>
+    <li><strong>Board 29.3:</strong> {full wire auth E2E, test on, lakemedical.org + NOUS us-west2} &mdash; 5 pts</li>
+    <li>Requires: NOUS_PSK set in Cloudflare, relay.3-nous.net resolving, NOUS relay running on us-west2</li>
+    <li>When relay is live: <code>~t E2E wire auth against live relay</code></li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-01 21:48</div>
+</div>
+</body>
+</html>

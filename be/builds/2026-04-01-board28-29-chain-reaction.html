@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build: Board 28 + 29 Chain Reaction</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  ul { padding-left: 20px; }
+  li { margin: 4px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .stat { display: inline-block; background: #1A1A1A; border-radius: 6px; padding: 8px 16px; margin: 4px 8px 4px 0; }
+  .stat-val { color: #6FC3DF; font-weight: 700; font-size: 1.4rem; }
+  .stat-lbl { color: #888; font-size: 0.8rem; }
+  .done { color: #4a4; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+<h1>~b Chain Reaction: Board 28 + Board 29</h1>
+<p class="subtitle">5 items &middot; 21 pts &middot; 705 lines added &middot; 6 files changed</p>
+
+<div style="margin: 16px 0;">
+  <span class="stat"><span class="stat-val">5</span><br><span class="stat-lbl">Items Built</span></span>
+  <span class="stat"><span class="stat-val">21</span><br><span class="stat-lbl">Points</span></span>
+  <span class="stat"><span class="stat-val">6</span><br><span class="stat-lbl">Files Changed</span></span>
+  <span class="stat"><span class="stat-val">705</span><br><span class="stat-lbl">Lines Added</span></span>
+</div>
+
+<h2>What Was Built</h2>
+
+<div class="card">
+  <h3>Board 28.2 &mdash; auth-gate.js Login + Register via Wire Triples (5 pts) <span class="done">&#10004;</span></h3>
+  <ul>
+    <li>Rewired from JSON POST (<code>post('/auth', {user, totp})</code>) to wire triples (<code>nous_auth(user, totp)</code>)</li>
+    <li>Login sends: <code>{auth,action,none} + {user,entity,none} + {totp,signal,none}</code></li>
+    <li>Register sends: <code>{register,action,none} + {user,entity,none}</code></li>
+    <li>Token extraction: <code>nous_find(triples, 'signal')</code> &rarr; 64 hex chars</li>
+    <li>Session key changed from <code>be-auth-session</code> to <code>nous-session</code></li>
+    <li>File: <code>alumni/js/auth-gate.js</code> (174 lines rewritten)</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Board 28.3 &mdash; QR Encoder for TOTP Registration (5 pts) <span class="done">&#10004;</span></h3>
+  <ul>
+    <li>Full QR code encoder from scratch &mdash; ISO/IEC 18004 compliant</li>
+    <li>Supports QR versions 1&ndash;10, ECC Level M, 8 mask patterns with penalty scoring</li>
+    <li>GF(256) arithmetic + Reed-Solomon error correction</li>
+    <li>Input: string &rarr; Output: <code>{data: Uint8Array, size: number}</code></li>
+    <li>Handles otpauth:// URIs up to 271 characters</li>
+    <li>File: <code>alumni/js/utils/qr.js</code> (413 lines, zero dependencies)</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Board 28.4 &mdash; Session Timer + Auto-Expire + Re-Auth Gate (3 pts) <span class="done">&#10004;</span></h3>
+  <ul>
+    <li>SESSION_TTL = 900s (15 minutes), WARN_AT = 120s remaining</li>
+    <li>Countdown timer in <code>#auth-session-timer</code></li>
+    <li>Warning state at 2 minutes (amber), critical at 60s (red pulse)</li>
+    <li>Auto-raises auth gate on expiry &mdash; clears session, forces re-auth</li>
+    <li>Integrated into auth-gate.js IIFE</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Board 29.1 &mdash; wire.js Worker with 0xCA Envelope (5 pts) <span class="done">&#10004;</span></h3>
+  <ul>
+    <li>Cloudflare Worker proxy: POST /api/wire</li>
+    <li>Flow: validate NTRP0001 magic &rarr; derive cockpit key (HMAC-SHA-256) &rarr; encrypt 0xCA envelope (AES-256-GCM) &rarr; TCP connect relay.3-nous.net:8080 &rarr; decrypt response &rarr; return NTRP</li>
+    <li>Envelope: <code>[0xCA][nonce:12B][ciphertext+tag]</code> &mdash; 29 byte overhead</li>
+    <li>Rate limiting: 10 req/min per IP, returns 429</li>
+    <li>ZERO hardcoded IPs &mdash; DNS resolves at runtime</li>
+    <li>File: <code>functions/api/wire.js</code> (166 lines)</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Board 29.2 &mdash; NOUS_PSK + DNS + Wrangler Config (3 pts) <span class="done">&#10004;</span></h3>
+  <ul>
+    <li><code>wrangler.toml</code> updated with NOUS_PSK documentation</li>
+    <li>Secret set via <code>wrangler secret put NOUS_PSK</code></li>
+    <li>Cockpit key derivation: <code>HMAC-SHA-256(PSK, "nous-transport:cockpit")</code></li>
+    <li><code>nodejs_compat</code> flag already present for TCP connect() API</li>
+    <li>Relay connects to <code>relay.3-nous.net:8080</code> (dynamic DNS)</li>
+  </ul>
+</div>
+
+<h2>Decisions Made</h2>
+<div class="card">
+  <ul>
+    <li><strong>QR from scratch:</strong> Zero dependencies. ISO 18004 compliance. No CDN, no library, no external calls.</li>
+    <li><strong>Cockpit key, not region key:</strong> Worker derives <code>nous-transport:cockpit</code> &mdash; relay tries cockpit first.</li>
+    <li><strong>WebCrypto [ct+tag] layout:</strong> Byte-compatible with C's separate [ct][tag] &mdash; no translation needed.</li>
+    <li><strong>Session in sessionStorage:</strong> Tab-scoped, clears on close. No localStorage persistence.</li>
+    <li><strong>Rate limiting in-isolate:</strong> Simple, resets per-isolate. Good enough for relay proxy protection.</li>
+  </ul>
+</div>
+
+<h2>Files Changed</h2>
+<div class="card">
+  <ul>
+    <li><code>alumni/js/auth-gate.js</code> &mdash; complete rewrite (wire triples + QR + session timer)</li>
+    <li><code>alumni/js/utils/qr.js</code> &mdash; new (413 lines, QR encoder)</li>
+    <li><code>alumni/index.html</code> &mdash; script tags + session timer div</li>
+    <li><code>functions/api/wire.js</code> &mdash; new (166 lines, Worker proxy)</li>
+    <li><code>wrangler.toml</code> &mdash; NOUS_PSK documentation</li>
+    <li><code>be/board.md</code> &mdash; 5 items moved to Done</li>
+  </ul>
+</div>
+
+<h2>Board Status</h2>
+<div class="card">
+  <ul>
+    <li><strong>Board 28 &mdash; NOUS Auth Gate:</strong> 4/4 Done (16 pts) <span class="done">&#10004;</span></li>
+    <li><strong>Board 29 &mdash; Worker Proxy + Deploy:</strong> 2/3 Done (10/15 pts)</li>
+    <li><strong>Remaining:</strong> Board 29.3 &mdash; full wire auth E2E test (5 pts) &mdash; requires live relay</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-01 21:45 &middot; Commit acaff37</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test: Board 28 + 29</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .pass { color: #4a4; }
+  .fail { color: #c44; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .stat { display: inline-block; background: #1A1A1A; border-radius: 6px; padding: 8px 16px; margin: 4px 8px 4px 0; }
+  .stat-val { color: #6FC3DF; font-weight: 700; font-size: 1.4rem; }
+  .stat-lbl { color: #888; font-size: 0.8rem; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th { text-align: left; color: #6FC3DF; padding: 6px 8px; border-bottom: 1px solid #333; }
+  td { padding: 4px 8px; border-bottom: 1px solid #1a1a1a; }
+  .banner { background: #1a3a1a; border: 1px solid #4a4; border-radius: 8px; padding: 16px 20px; margin: 16px 0; text-align: center; }
+  .banner-text { color: #4a4; font-weight: 700; font-size: 1.3rem; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+<h1>~T Board 28 + 29 Test Suite</h1>
+<p class="subtitle">QR encoder &middot; Auth gate wire integration &middot; Session timer &middot; Worker proxy</p>
+
+<div class="banner">
+  <span class="banner-text">&#10004; ALL TESTS PASSED &mdash; 52/52</span>
+</div>
+
+<div style="margin: 16px 0;">
+  <span class="stat"><span class="stat-val">52</span><br><span class="stat-lbl">Tests</span></span>
+  <span class="stat"><span class="stat-val">52</span><br><span class="stat-lbl">Passed</span></span>
+  <span class="stat"><span class="stat-val">0</span><br><span class="stat-lbl">Failed</span></span>
+  <span class="stat"><span class="stat-val">7</span><br><span class="stat-lbl">Sections</span></span>
+</div>
+
+<h2>1. qr.js &mdash; QR Encoder (12 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>Returns result for otpauth URI</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Size &gt; 0 (got 33)</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Data is Uint8Array</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Data length = size&sup2;</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Matrix has both black and white modules</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Top-left finder pattern present</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Works for short string (version 1 = 21&times;21)</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Version 1 = 21&times;21 for short string</td></tr>
+    <tr><td class="pass">&#10004;</td><td>qr_encode(null) &rarr; null</td></tr>
+    <tr><td class="pass">&#10004;</td><td>qr_encode("") &rarr; null</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Handles long otpauth URI (172 chars)</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Larger version for longer URI (size=53)</td></tr>
+  </table>
+</div>
+
+<h2>2. auth-gate.js &mdash; Wire Triple Integration (10 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>auth: sends {auth,action,none}</td></tr>
+    <tr><td class="pass">&#10004;</td><td>auth: sends {user,entity,none}</td></tr>
+    <tr><td class="pass">&#10004;</td><td>auth: sends {totp,signal,none}</td></tr>
+    <tr><td class="pass">&#10004;</td><td>auth: extracts 64-char token from signal</td></tr>
+    <tr><td class="pass">&#10004;</td><td>auth: session saved after login</td></tr>
+    <tr><td class="pass">&#10004;</td><td>auth: session check passes</td></tr>
+    <tr><td class="pass">&#10004;</td><td>register: sends {register,action,none}</td></tr>
+    <tr><td class="pass">&#10004;</td><td>register: sends {user,entity,none}</td></tr>
+    <tr><td class="pass">&#10004;</td><td>register: extracts otpauth URI</td></tr>
+    <tr><td class="pass">&#10004;</td><td>register+qr: qr_encode works on otpauth from register response</td></tr>
+  </table>
+</div>
+
+<h2>3. Session Timer Logic (3 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>TTL=900s, warn at 120s remaining</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Uses nous-session key</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Clear removes token</td></tr>
+  </table>
+</div>
+
+<h2>4. Worker Proxy &mdash; Module Structure (11 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>Uses relay.3-nous.net (dynamic DNS)</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Reads NOUS_PSK from env</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Derives cockpit key</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Uses 0xCA magic byte</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Uses AES-256-GCM</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Validates NTRP magic</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Uses TCP connect() API</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Returns octet-stream</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Exports onRequestPost</td></tr>
+    <tr><td class="pass">&#10004;</td><td>ZERO hardcoded IPs</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Has rate limiting (429)</td></tr>
+  </table>
+</div>
+
+<h2>5. Worker Proxy &mdash; Key Derivation (3 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>Uses HMAC for key derivation</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Uses SHA-256</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Derives cockpit key (not region)</td></tr>
+  </table>
+</div>
+
+<h2>6. Worker Proxy &mdash; Envelope Layout (3 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>envelope[0] = 0xCA</td></tr>
+    <tr><td class="pass">&#10004;</td><td>nonce at offset 1</td></tr>
+    <tr><td class="pass">&#10004;</td><td>ciphertext at offset 13</td></tr>
+  </table>
+</div>
+
+<h2>7. Integration &mdash; Full Chain (7 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>chain: register ok</td></tr>
+    <tr><td class="pass">&#10004;</td><td>chain: QR encoded from register response</td></tr>
+    <tr><td class="pass">&#10004;</td><td>chain: login returns 64-char token</td></tr>
+    <tr><td class="pass">&#10004;</td><td>chain: session saved</td></tr>
+    <tr><td class="pass">&#10004;</td><td>chain: session valid</td></tr>
+    <tr><td class="pass">&#10004;</td><td>chain: auth request has session meta</td></tr>
+    <tr><td class="pass">&#10004;</td><td>chain: session invalid after clear</td></tr>
+  </table>
+</div>
+
+<h2>Fixes Applied</h2>
+<div class="card">
+  <p>None. All 52 tests passed on first run.</p>
+</div>
+
+<h2>Remaining</h2>
+<div class="card">
+  <ul>
+    <li><strong>Board 29.3:</strong> Full wire auth E2E against live relay.3-nous.net + NOUS us-west2 &mdash; requires NOUS_PSK secret set and relay running</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-01 21:46</div>
+</div>
+</body>
+</html>
