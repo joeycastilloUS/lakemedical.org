@@ -1,0 +1,202 @@
+[
+  {
+    "id": "trigger_001",
+    "alumni_id": "alumni_0665",
+    "alumni_name": "Dr. Eric Sandefur",
+    "alumni_class": 2017,
+    "alumni_specialty": "Orthopedic Surgery",
+    "trigger_type": "practice_move",
+    "trigger_icon": "🔄",
+    "trigger_label": "Practice Move Detected",
+    "detected_date": "2026-03-22",
+    "detail": {
+      "summary": "Moved from Sacramento, CA to Baker City, OR",
+      "from": "Sacramento, CA",
+      "to": "Baker City, OR",
+      "campus_proximity": "42 miles from Lebanon campus",
+      "last_touchpoint": "2 years, 5 months ago",
+      "student_match": "3 third-year students listed Orthopedic Surgery as primary interest at COMP-Northwest"
+    },
+    "suggested_outreach": {
+      "subject": "Welcome to Oregon — COMP-Northwest connection",
+      "body": "Dr. Sandefur,\n\nCongratulations on your move to Baker City — that's beautiful country out there.\n\nI wanted to reach out because COMP-Northwest is just up the road in Lebanon, and we have students rotating through Central Oregon who would benefit enormously from connecting with someone in your specialty.\n\nNo pressure at all — but if you'd ever be open to a brief conversation about what a mentorship connection might look like, I'd love to set that up.\n\nWarm regards,\nDr. Lisa Warren, DO, MBA\nDean, COMP & COMP-Northwest"
+    },
+    "status": "pending",
+    "priority": "high",
+    "campus": "pomona"
+  },
+  {
+    "id": "trigger_002",
+    "alumni_id": "alumni_0176",
+    "alumni_name": "Dr. John Charochak",
+    "alumni_class": 2015,
+    "alumni_specialty": "Sports Medicine",
+    "trigger_type": "new_credential",
+    "trigger_icon": "🎓",
+    "trigger_label": "Credential Update",
+    "detected_date": "2026-03-18",
+    "detail": {
+      "summary": "Board certified in Sports Medicine (added subspecialty)",
+      "credential": "Sports Medicine Board Certification",
+      "source": "NPI taxonomy code change",
+      "last_touchpoint": "9 months ago — RCME event at Pomona",
+      "student_match": "5 COMP students listed Sports Medicine as primary interest"
+    },
+    "suggested_outreach": {
+      "subject": "Congratulations on your Sports Medicine certification",
+      "body": "Dr. Charochak,\n\nCongratulations on earning your Sports Medicine board certification. That's a significant achievement, and I wanted to make sure you heard it from us.\n\nI also wanted to mention — we have several current students with a strong interest in Sports Medicine. If you'd ever be open to a conversation with one of them, I know it would mean a great deal.\n\nNo obligation at all. Just an open door.\n\nWarm regards,\nDr. Lisa Warren, DO, MBA\nDean, COMP & COMP-Northwest"
+    },
+    "status": "pending",
+    "priority": "medium",
+    "campus": "pomona"
+  },
+  {
+    "id": "trigger_003",
+    "alumni_id": "alumni_0013",
+    "alumni_name": "Dr. Keith Kesler",
+    "alumni_class": 1982,
+    "alumni_specialty": "Psychiatry",
+    "trigger_type": "publication",
+    "trigger_icon": "📄",
+    "trigger_label": "New Publication",
+    "detected_date": "2026-03-15",
+    "detail": {
+      "summary": "Published in JAMA Psychiatry: mindfulness-based interventions",
+      "publication": "\"Integrating Mindfulness-Based Interventions in Community Psychiatric Practice\" — JAMA Psychiatry, March 2026",
+      "source": "PubMed",
+      "last_touchpoint": "Never contacted by COMP",
+      "student_match": "7 COMP students listed Psychiatry as primary interest"
+    },
+    "suggested_outreach": {
+      "subject": "Your JAMA Psychiatry publication — congratulations",
+      "body": "Dr. Kesler,\n\nI saw your recent publication in JAMA Psychiatry on mindfulness-based interventions — congratulations. That's the kind of work that makes me deeply proud to be connected to our COMP graduates.\n\nI'll admit we haven't been in touch as much as we should have been. That's something I'm working to change.\n\nIf you'd be open to it, I'd love to explore a few possibilities — a guest lecture for our students, a feature in our alumni spotlight, or simply a conversation about what you're building.\n\nWarm regards,\nDr. Lisa Warren, DO, MBA\nDean, COMP & COMP-Northwest"
+    },
+    "status": "pending",
+    "priority": "medium",
+    "campus": "pomona"
+  },
+  {
+    "id": "trigger_004",
+    "alumni_id": "alumni_0557",
+    "alumni_name": "Dr. Jiri Konecny",
+    "alumni_class": 2018,
+    "alumni_specialty": "Cardiology",
+    "trigger_type": "follow_up_due",
+    "trigger_icon": "⏰",
+    "trigger_label": "Follow-Up Overdue",
+    "detected_date": "2026-03-24",
+    "detail": {
+      "summary": "Advisory board conversation — promised follow-up in March",
+      "context": "Met at AOA Conference Jan 15. Expressed interest in advisory board role. You said you'd follow up in March.",
+      "last_touchpoint": "2 months ago — AOA Conference, Portland",
+      "days_overdue": 9
+    },
+    "suggested_outreach": {
+      "subject": "Following up — advisory board conversation",
+      "body": "Dr. Konecny,\n\nI've been meaning to follow up on our conversation at AOA in January. You mentioned interest in the advisory board, and I wanted to circle back on that.\n\nWe're putting together the next cohort and I think your perspective — clinician, researcher, mentor — would be invaluable.\n\nWould you have 20 minutes for a call this month? I'd love to share more about what we're building.\n\nWarmly,\nDr. Lisa Warren"
+    },
+    "status": "pending",
+    "priority": "high",
+    "campus": "pomona"
+  },
+  {
+    "id": "trigger_005",
+    "alumni_id": null,
+    "alumni_name": "Class of 2016",
+    "alumni_class": null,
+    "alumni_specialty": null,
+    "trigger_type": "milestone",
+    "trigger_icon": "🎉",
+    "trigger_label": "Reunion Year Approaching",
+    "detected_date": "2026-03-20",
+    "detail": {
+      "summary": "10-year reunion — Class of 2016",
+      "context": "Class of 2016 will reach their 10-year milestone in 2026. 48 graduates across both campuses. 6 have active engagement with COMP. 3 have lost contact.",
+      "graduates_count": 48,
+      "engaged_count": 6,
+      "lost_contact_count": 3
+    },
+    "suggested_outreach": {
+      "subject": "Class of 2016 — your 10-year reunion",
+      "body": "Dear Class of 2016,\n\nIt's hard to believe it's been 10 years. A lot has changed — at COMP, in medicine, and I'm sure in your own lives and careers.\n\nWe're planning a reunion event and I'd love for you to be part of it. Whether you're nearby or across the country, there's a place for you.\n\nMore details coming soon. For now, I just wanted you to know — we remember you, we're proud of you, and the door is always open.\n\nWarm regards,\nDr. Lisa Warren, DO, MBA\nDean, COMP & COMP-Northwest"
+    },
+    "status": "pending",
+    "priority": "medium",
+    "campus": "all"
+  },
+  {
+    "id": "trigger_006",
+    "alumni_id": "alumni_0125",
+    "alumni_name": "Dr. Ashley Forsyth",
+    "alumni_class": 2022,
+    "alumni_specialty": "Emergency Medicine",
+    "trigger_type": "reengagement",
+    "trigger_icon": "🔕",
+    "trigger_label": "Re-engagement Opportunity",
+    "detected_date": "2026-03-20",
+    "detail": {
+      "summary": "Practicing in Newport, OR — near Lebanon campus, zero engagement since graduation",
+      "context": "NPI shows Dr. Forsyth at Samaritan Health Services in Newport, OR — close to COMP-Northwest. No touchpoint since graduation day.",
+      "campus_proximity": "Near Lebanon campus",
+      "last_touchpoint": "Graduation day — June 2022",
+      "years_since_contact": 3.75
+    },
+    "suggested_outreach": {
+      "subject": "A neighbor and an alumna — coffee sometime?",
+      "body": "Dr. Forsyth,\n\nI realized we have an alumna practicing near us in Oregon and we've never properly connected since you graduated. That's on us.\n\nI'd love to buy you a coffee and hear how things are going. No agenda — just genuinely curious how your path has unfolded since COMP.\n\nIf you're ever open to it, my door is always open.\n\nWarmly,\nDr. Lisa Warren\nDean, COMP & COMP-Northwest"
+    },
+    "status": "pending",
+    "priority": "medium",
+    "campus": "pomona"
+  },
+  {
+    "id": "trigger_007",
+    "alumni_id": null,
+    "alumni_name": "SOAP Mentor Network",
+    "alumni_class": null,
+    "alumni_specialty": null,
+    "trigger_type": "soap_prep",
+    "trigger_icon": "🤝",
+    "trigger_label": "SOAP Season Preparation",
+    "detected_date": "2026-03-22",
+    "detail": {
+      "summary": "Match Day 2026 complete — 14 of 15 SOAP students placed. Begin planning for 2027.",
+      "context": "Marion Safawi coordinated 3 SOAP alumni mentors for Match Day 2026. Results: 14 of 15 unmatched students placed. Begin identifying and recruiting standby mentors for Match Day 2027 (est. March 2027).",
+      "soap_alumni_identified": 3,
+      "soap_alumni_names": [
+        "Dr. Maria Santos (FM, Bakersfield)",
+        "Dr. Ryan Park (IM, Portland)",
+        "Dr. Nicole Adams (Peds, Eugene)"
+      ],
+      "students_helped": 14,
+      "students_total": 15
+    },
+    "suggested_outreach": null,
+    "status": "pending",
+    "priority": "high",
+    "campus": "all"
+  },
+  {
+    "id": "trigger_008",
+    "alumni_id": "alumni_0213",
+    "alumni_name": "Dr. Carl Powell",
+    "alumni_class": 2005,
+    "alumni_specialty": "General Surgery",
+    "trigger_type": "notable_achievement",
+    "trigger_icon": "⭐",
+    "trigger_label": "Notable Achievement",
+    "detected_date": "2026-03-10",
+    "detail": {
+      "summary": "Promoted to Department Chair — Surgery, Cedars-Sinai Medical Center",
+      "context": "Dr. Powell's NPI taxonomy updated to reflect administrative role alongside clinical. Cross-referenced with hospital announcement. Board candidate material.",
+      "last_touchpoint": "4 months ago — guest lecture at Pomona"
+    },
+    "suggested_outreach": {
+      "subject": "Department chair — well deserved",
+      "body": "Dr. Powell,\n\nI just heard about your appointment as Department Chair. I can't say I'm surprised — but I am deeply proud.\n\nYou've always gone above and beyond for our students, and this recognition is well deserved. COMP is better because of alumni like you.\n\nI'd love to catch up when you have a moment. There are some exciting things happening here that I think you'd want to be part of.\n\nWarmly,\nDr. Lisa Warren"
+    },
+    "status": "pending",
+    "priority": "medium",
+    "campus": "pomona"
+  }
+]

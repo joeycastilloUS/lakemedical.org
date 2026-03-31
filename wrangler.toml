@@ -1,0 +1,14 @@
+# lakemedical.org — Cloudflare Pages
+# Deploy: npx wrangler pages deploy alumni
+# Domain: lakemedical.org
+
+name = "lakemedical-org"
+pages_build_output_dir = "alumni"
+compatibility_date = "2026-03-26"
+compatibility_flags = ["nodejs_compat"]
+
+# KV namespace for cached alumni data:
+# [[kv_namespaces]]
+# binding = "ALUMNI_DATA"
+# id = ""
+# preview_id = ""

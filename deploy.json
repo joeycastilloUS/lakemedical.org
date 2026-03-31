@@ -1,0 +1,18 @@
+{
+  "project": "lakemedical-org",
+  "domain": "lakemedical.org",
+  "platform": "cloudflare-pages",
+  "auth": {
+    "enabled": true,
+    "type": "totp",
+    "protocol": "ntrp-wire",
+    "relay": "relay.3-nous.net",
+    "relay_port": 8080,
+    "session_ttl": 900,
+    "session_storage": "relay-triple-store"
+  },
+  "build": {
+    "static_dir": "alumni/",
+    "auth_gate": true
+  }
+}
