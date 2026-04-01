@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro: Close the Loop — Boards 27-30</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 6px 0; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Retro: Close the Loop</h1>
+<p class="subtitle">Boards 27&ndash;30 &middot; 68 pts &middot; 16 items &middot; lakemedical.org NOUS Wire Auth</p>
+
+<h2>What Went Well</h2>
+<div class="card">
+  <ul>
+    <li><span class="label">Wire protocol is solid.</span> NTRP0001 binary format, pack/unpack in C and JS, triple-based commands &mdash; all worked on first try across all layers.</li>
+    <li><span class="label">Double-hop encryption works.</span> Cockpit key (client &harr; relay) + transport key (relay &harr; prime) &mdash; two different HMAC-derived keys, AES-256-GCM on both hops. Zero plaintext on the wire.</li>
+    <li><span class="label">Cloudflare Worker TCP connect.</span> The <code>connect()</code> API handles raw TCP beautifully. The Worker is a clean 160-line proxy with zero state.</li>
+    <li><span class="label">catalog_server compiles and runs.</span> The full NOUS C stack &mdash; memory, security, comms, intelligence skills &mdash; builds and runs on GCE with one gcc command.</li>
+    <li><span class="label">Session minting on relay.</span> 64-hex token, IP-bound, 900s TTL, per-user limits. Security-first design proved out in testing (rate limit caught double-auth).</li>
+  </ul>
+</div>
+
+<h2>What Didn't Go Well</h2>
+<div class="card">
+  <ul>
+    <li><span class="label">Prime selection was a silent killer.</span> <code>find_first_prime()</code> returns the first DNS-discovered prime. With two regions in DNS (asia-east1 + us-west2), the wrong-region prime was selected. Transport key mismatch caused silent failure &mdash; relay just returned "prime unreachable" with no indication of which prime was tried or why.</li>
+    <li><span class="label">TRACEF vs printf confusion.</span> All diagnostic output uses TRACEF (ring buffer, port 9090) not printf (journal). When debugging via <code>journalctl</code>, critical information was invisible. <code>stdbuf -oL</code> fixed printf buffering, but the real diagnostic data was always on the trace port.</li>
+    <li><span class="label">DNS verification is signature-only.</span> The relay verifies DNS TXT records by checking ed25519 signatures, not TCP reachability. Stopped instances still "verify" because the signed record persists. This is by design (crypto trust, not network trust) but surprising when debugging.</li>
+    <li><span class="label">startup.sh was incomplete.</span> Missing include paths for qr.h, execute.h, translate.h. The compile failed silently until manually inspected. The build script should error loudly.</li>
+  </ul>
+</div>
+
+<h2>Lessons</h2>
+<div class="card">
+  <ul>
+    <li><span class="label">find_first_prime() needs region awareness.</span> The relay knows its own region (NOUS_NODE_REGION). It should prefer primes in the same region, or at minimum try multiple primes before giving up. One prime failure should not be fatal.</li>
+    <li><span class="label">Add printf to relay_wire_to_prime().</span> A single printf of the target host:port would have cut debugging time by 80%. The TRACEF-only approach is clean for production but brutal for initial deployment.</li>
+    <li><span class="label">DNS TXT records = persistent infrastructure.</span> Treat DNS prime entries like server deployments. Don't leave stale entries for stopped instances. The asia-east1 entry should have been removed when that prime was mothballed.</li>
+    <li><span class="label">Test from outside the VPC.</span> Initial tests from localhost on the relay worked (internal routing). The real failure path (external IP + DNS primes) only showed up when testing from outside.</li>
+  </ul>
+</div>
+
+<h2>Recommendations</h2>
+<div class="card">
+  <h3>For NOUS Core</h3>
+  <ul>
+    <li>Add <code>relay_wire_to_prime()</code> printf: <code>"relay: forwarding to %s:%d\n"</code></li>
+    <li>Implement prime fallback: try next prime if first returns error or timeout</li>
+    <li>Add region-preference to <code>find_first_prime()</code>: same-region primes first</li>
+    <li>Add <code>--no-dns</code> flag to relay for controlled deployments</li>
+  </ul>
+  <h3>For lakemedical.org</h3>
+  <ul>
+    <li>Deploy Worker to Cloudflare Pages: <code>wrangler pages deploy alumni/</code></li>
+    <li>Run E2E test in browser: <code>lakemedical.org/e2e-auth.html</code></li>
+    <li>Monitor relay sessions: check for session limit hits in production</li>
+  </ul>
+</div>
+
+<h2>Timeline</h2>
+<div class="card">
+  <ul>
+    <li><span class="label">Day 1 (Apr 1):</span> Boards 27-29 complete. Repo, wire.js, nous.js, auth gate, Worker, deploy config. 142 tests pass. Ship: NOUS Wire Auth.</li>
+    <li><span class="label">Day 2 (Apr 2):</span> Board 30 &mdash; Close the Loop. 502 diagnosis, prime deployment, startup.sh fix, firewall fix, DNS prime fix, test user registration, full auth round-trip, E2E test script. Ship: Close the Loop.</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-02 17:37 &middot; Retro: Close the Loop &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
