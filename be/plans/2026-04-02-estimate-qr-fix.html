@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~E: Fix QR Code — 2 items, 1 board, 8 pts</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  .total { color: #6FC3DF; font-weight: 700; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~E: Fix QR Code Encoder</h1>
+<p class="subtitle">2 items &middot; 1 board (31) &middot; 8 pts &middot; lakemedical.org</p>
+
+<h2>Board 31 &mdash; Fix QR Code (8 pts)</h2>
+<div class="card">
+  <table>
+    <tr><th>#</th><th>Work Item</th><th>Command</th><th>Pts</th></tr>
+    <tr><td>31.1</td><td>{qr.js, replace with, faithful C port of qr.c}</td><td>~u</td><td>5</td></tr>
+    <tr><td>31.2</td><td>{QR scannable output, test on, browser register flow}</td><td>~t</td><td>3</td></tr>
+  </table>
+  <p class="total" style="margin-top:12px">Total: 8 pts</p>
+</div>
+
+<h2>Item Details</h2>
+
+<div class="card">
+  <h3>31.1 &mdash; Replace qr.js with faithful C port (5 pts)</h3>
+  <p>Port every function from <code>C:\metal\auth\qr.c</code> (606 lines) to JavaScript. Includes:</p>
+  <ul>
+    <li>GF(256) log/exp tables + multiply</li>
+    <li>Reed-Solomon generator + encode</li>
+    <li>Bit buffer for byte-mode encoding</li>
+    <li>Version/capacity tables (matching C exactly)</li>
+    <li>BCH(15,5) format info with mask 0x5412</li>
+    <li>Matrix placement: finders, timing, alignment, format, data</li>
+    <li>All 8 mask patterns + all 4 penalty rules</li>
+    <li>Multi-block interleaving</li>
+    <li>Same API: <code>qr_encode(text) &rarr; {data, size}</code></li>
+  </ul>
+  <p><span class="label">5 pts</span> &mdash; substantial but mechanical. The C source is the spec. No design decisions.</p>
+</div>
+
+<div class="card">
+  <h3>31.2 &mdash; Test scannable QR output (3 pts)</h3>
+  <p>Deploy to Cloudflare Pages and verify:</p>
+  <ul>
+    <li>Register a new user via the browser auth gate</li>
+    <li>QR code renders correctly in the canvas</li>
+    <li>Scan with phone authenticator app (Google Authenticator / Authy)</li>
+    <li>Enter TOTP code from the app, verify login succeeds</li>
+    <li>Verify known test vector: encode <code>otpauth://totp/NOUS:joe?secret=JBSWY3DPEHPK3PXP&amp;issuer=NOUS</code> and confirm correct version/size</li>
+  </ul>
+  <p><span class="label">3 pts</span> &mdash; deploy + manual verification cycle.</p>
+</div>
+
+<h2>Value Rationale</h2>
+<div class="card">
+  <p>Without a scannable QR code, <strong>no one can register</strong> on lakemedical.org. This is the last blocker for self-service user registration. Auth already works (verified in Board 30). This board unblocks the full registration &rarr; TOTP setup &rarr; login flow.</p>
+</div>
+
+<div class="footer">Generated 2026-04-02 19:32 &middot; ~E Fix QR Code &middot; lakemedical.org</div>
+</div>
+</body>
+</html>

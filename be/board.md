@@ -1,6 +1,6 @@
 # Board: lakemedical.org — NOUS Wire Auth
 
-Updated 2026-04-02 · 16 items · 68 pts · 4 boards · ALL DONE
+Updated 2026-04-02 · 18 items · 76 pts · 5 boards
 Source: plan-lakemedical-repo-nous-auth-v3.html
 
 ---
@@ -60,3 +60,17 @@ Source: plan-close-the-loop.html → estimate-close-the-loop.html
 - {test user with TOTP secret, add to, prime user store} · 3 · ~a ✅
 - {full auth round-trip, test on, lakemedical.org → relay → prime} · 5 · ~t ✅
 - {E2E test script, update with, real auth assertions + session token check} · 3 · ~u ✅
+
+---
+
+## Board 31 — Fix QR Code (8 pts)
+
+Source: plan-qr-fix.html → estimate-qr-fix.html
+
+### Ready
+- {qr.js, replace with, faithful C port of qr.c} · 5 · ~u
+- {QR scannable output, test on, browser register flow} · 3 · ~t
+
+### In Progress
+
+### Done

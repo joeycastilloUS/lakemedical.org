@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~P: Fix QR Code — Port C qr.c to JS, Replace Broken Encoder</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .status { display: inline-block; padding: 6px 16px; border-radius: 4px; font-size: 1rem; font-weight: 700; background: #3a3a1a; color: #fbbf24; border: 1px solid #fbbf24; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #1A1A1A; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 6px 0; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~P: Fix QR Code Encoder</h1>
+<p class="subtitle">Port proven C qr.c to JS &middot; Replace broken browser encoder &middot; lakemedical.org</p>
+
+<span class="status">Plan &mdash; Awaiting Approval</span>
+
+<h2>Intent</h2>
+<div class="card">
+  <p><span class="label">Why:</span> Users cannot register on lakemedical.org because the QR code displayed after registration is unscannable. They can&rsquo;t set up their TOTP authenticator app.</p>
+  <p><span class="label">Purpose:</span> Replace the broken JS QR encoder with a faithful port of the proven C implementation (<code>qr.c</code>, 606 lines, 200+ test assertions).</p>
+  <p><span class="label">What:</span> A new <code>qr.js</code> that generates identical output to <code>qr.c</code> for any input.</p>
+</div>
+
+<h2>Scope</h2>
+<div class="card">
+  <h3>In Scope</h3>
+  <ul>
+    <li>Port <code>C:\metal\auth\qr.c</code> to JavaScript (line-by-line, algorithm-for-algorithm)</li>
+    <li>GF(256) arithmetic, Reed-Solomon, bit-stream encoding</li>
+    <li>Multi-block interleaving (the #1 fatal bug)</li>
+    <li>Correct format info placement (the #2 fatal bug)</li>
+    <li>All 4 penalty rules for mask selection (the #3 fatal bug)</li>
+    <li>Same API: <code>qr_encode(text)</code> &rarr; <code>{data: Uint8Array, size: number}</code></li>
+    <li>Versions 1&ndash;6 (matches C), EC level M (what otpauth needs)</li>
+    <li>Verify with real otpauth URI against phone scanner</li>
+  </ul>
+  <h3>Out of Scope</h3>
+  <ul>
+    <li>Numeric/alphanumeric encoding modes (byte mode only, like C)</li>
+    <li>Versions 7&ndash;40 (V6 = 41&times;41 modules, handles 108 bytes at EC M &mdash; plenty for otpauth)</li>
+    <li>Terminal rendering (browser uses canvas, not half-blocks)</li>
+    <li>Changes to auth-gate.js or nous.js (they already expect the right API)</li>
+  </ul>
+</div>
+
+<h2>Approach</h2>
+<div class="card">
+  <h3>Phase 1: Port qr.c &rarr; qr.js</h3>
+  <p>Direct translation of every function from C to JavaScript. No creative interpretation &mdash; match the C exactly.</p>
+  <pre>
+C function           &rarr; JS function
+─────────────────────────────────────
+gf_init()            &rarr; gfInit()
+qr_gf_mul()          &rarr; gfMul()
+rs_generator()       &rarr; rsGenerator()
+qr_rs_encode()       &rarr; rsEncode()
+bb_init/bb_append    &rarr; BitBuf class
+byte_capacity()      &rarr; byteCapacity()
+qr_format_bits()     &rarr; formatBits()
+place_finder()       &rarr; placeFinder()
+place_timing()       &rarr; placeTiming()
+place_alignment()    &rarr; placeAlignment()
+place_format()       &rarr; placeFormat()
+place_data()         &rarr; placeData()
+mask_condition()     &rarr; maskCondition()
+apply_mask()         &rarr; applyMask()
+penalty_score()      &rarr; penaltyScore() [ALL 4 RULES]
+qr_encode()          &rarr; qr_encode()   [same name, same API]</pre>
+
+  <h3>Phase 2: Replace &amp; Test</h3>
+  <ol>
+    <li>Replace <code>alumni/js/utils/qr.js</code> with the port</li>
+    <li>No changes to auth-gate.js &mdash; it already calls <code>qr_encode(uri)</code> and uses <code>{data, size}</code></li>
+    <li>Deploy to Cloudflare Pages</li>
+    <li>Register a test user in the browser, scan the QR with a phone</li>
+  </ol>
+</div>
+
+<h2>Constraints</h2>
+<div class="card">
+  <ul>
+    <li>Vanilla JS only &mdash; no frameworks, no build tools, no imports</li>
+    <li>Must expose <code>window.qr_encode</code> (existing API contract)</li>
+    <li>Byte mode only, EC level M (hardcoded, matches the C caller on the prime)</li>
+    <li>Versions 1&ndash;6 only (max 108 bytes at EC M &mdash; typical otpauth URI is ~75 bytes)</li>
+    <li>Tables must match C exactly &mdash; <code>data_codewords</code>, <code>ec_codewords_per_block</code>, <code>ec_blocks</code>, <code>align_pos</code></li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-02 19:30 &middot; ~P Fix QR Code Encoder &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
