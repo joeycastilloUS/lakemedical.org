@@ -51,7 +51,6 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 Source: plan-close-the-loop.html → estimate-close-the-loop.html
 
 ### Ready
-- {502 root cause, diagnose on, relay logs + prime reachability + PSK match} · 5 · ~f
 - {prime VMs + binary, verify on, GCE nodes + wire auth handler} · 5 · ~t
 - {test user with TOTP secret, add to, prime user store} · 3 · ~a
 - {full auth round-trip, test on, lakemedical.org → relay → prime} · 5 · ~t
@@ -60,3 +59,4 @@ Source: plan-close-the-loop.html → estimate-close-the-loop.html
 ### In Progress
 
 ### Done
+- {502 root cause, diagnose on, relay logs + prime reachability + PSK match} · 5 · ~f ✅

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board 30.1 — 502 Root Cause Diagnosis</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 6px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  pre { background: #0a0a0a; padding: 14px; border-radius: 6px; overflow-x: auto; margin: 10px 0; font-size: 0.85rem; color: #aaa; }
+  .pass { color: #4CAF50; }
+  .fail { color: #F44336; }
+  .fix { color: #FF9800; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th { text-align: left; color: #6FC3DF; padding: 8px; border-bottom: 1px solid #333; }
+  td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; vertical-align: top; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~F Board 30.1 &mdash; 502 Root Cause Diagnosis</h1>
+<p class="subtitle">{502 root cause, diagnose on, relay logs + prime reachability + PSK match}</p>
+
+<h2>Verdict</h2>
+<div class="card">
+  <p><strong class="fail">Primes are bare VMs with no software deployed.</strong></p>
+  <p>The relay correctly decrypts, dispatches, and attempts to forward auth to prime. The prime VMs are RUNNING but empty &mdash; no binary, no service, no data directory. TCP connect times out after 5 seconds, relay returns "prime unreachable", Worker gets malformed response &rarr; 502.</p>
+</div>
+
+<h2>Diagnostic Chain</h2>
+<div class="card">
+  <table>
+    <tr><th>Layer</th><th>Status</th><th>Evidence</th></tr>
+    <tr>
+      <td>Worker &rarr; relay TCP</td>
+      <td class="pass">PASS</td>
+      <td>relay.3-nous.net:8080 accepts connections, DNS resolves</td>
+    </tr>
+    <tr>
+      <td>PSK match</td>
+      <td class="pass">PASS</td>
+      <td>Envelope encrypted locally with relay's PSK &rarr; relay decrypted successfully</td>
+    </tr>
+    <tr>
+      <td>Cockpit key derivation</td>
+      <td class="pass">PASS</td>
+      <td>HMAC-SHA-256(PSK, "nous-transport:cockpit") &mdash; JS and C produce same key</td>
+    </tr>
+    <tr>
+      <td>0xCA envelope detect</td>
+      <td class="pass">PASS</td>
+      <td><code>[EW] wire request (83 bytes) from 127.0.0.1</code> in journal</td>
+    </tr>
+    <tr>
+      <td>NTRP unpack + dispatch</td>
+      <td class="pass">PASS</td>
+      <td>Auth action extracted, handle_wire_auth() called</td>
+    </tr>
+    <tr>
+      <td>Prime reachability</td>
+      <td class="fail">FAIL</td>
+      <td>Both 35.236.118.2:8080 and 34.81.178.230:8080 timeout from relay</td>
+    </tr>
+    <tr>
+      <td>Prime VMs</td>
+      <td class="fail">FAIL</td>
+      <td>VMs RUNNING but empty: no binary, no systemd service, no /var/nous, no /opt/nous</td>
+    </tr>
+    <tr>
+      <td>Error response</td>
+      <td class="pass">PASS</td>
+      <td>Relay returns encrypted NTRP: <code>(resp, status, error) (resp, message, prime unreachable)</code></td>
+    </tr>
+  </table>
+</div>
+
+<h2>Fixes Applied</h2>
+<div class="card">
+  <h3 class="fix">1. stdout buffering (fixed)</h3>
+  <p>Relay's <code>printf()</code> output was fully buffered when piped to systemd &mdash; all diagnostic output stuck in buffer. Added <code>stdbuf -oL</code> to systemd ExecStart for line-buffered output. All printf now appears in journalctl immediately.</p>
+  <pre>ExecStart=/usr/bin/stdbuf -oL /usr/local/bin/relay_server ...</pre>
+</div>
+
+<h2>Infrastructure Status</h2>
+<div class="card">
+  <table>
+    <tr><th>VM</th><th>Zone</th><th>Status</th><th>IP</th><th>Port 8080</th></tr>
+    <tr><td>nous-relay-us-west2</td><td>us-west2-a</td><td class="pass">RUNNING</td><td>35.236.92.148</td><td class="pass">LISTENING</td></tr>
+    <tr><td>nous-prime-us-west2</td><td>us-west2-a</td><td class="fail">EMPTY</td><td>35.236.118.2</td><td class="fail">NOTHING</td></tr>
+    <tr><td>nous-prime-asia-east</td><td>asia-east1-a</td><td class="fail">EMPTY</td><td>34.81.178.230</td><td class="fail">NOTHING</td></tr>
+  </table>
+  <p>GCE firewall rule <code>nous-mesh-allow</code> permits TCP 8080 to all instances (no tag filter). Network is not the issue.</p>
+</div>
+
+<h2>What Needs to Happen</h2>
+<div class="card">
+  <ol>
+    <li><strong>Build catalog_server binary</strong> &mdash; cross-compile from <code>C:\nous\intelligence\tool\catalog-server\</code> or compile on VM via <code>startup.sh</code></li>
+    <li><strong>Deploy to nous-prime-us-west2</strong> &mdash; binary + identity + operator key + systemd service</li>
+    <li><strong>Wire auth handler</strong> &mdash; verify catalog_server handles <code>wire_handle_gate_approve()</code> / TOTP validation</li>
+    <li><strong>Provision test user</strong> &mdash; add TOTP-enrolled user to prime's store</li>
+    <li><strong>Test round-trip</strong> &mdash; relay &rarr; prime &rarr; session token &rarr; gate opens</li>
+  </ol>
+  <p><strong>This is bigger than estimated.</strong> Board 30 assumed primes might just need starting. They need building and deploying from scratch.</p>
+</div>
+
+<h2>Wire Triple Format (confirmed)</h2>
+<div class="card">
+  <pre>
+NOUS wire triples: (word, role, "none")
+  NOT: (key, "is", value)
+
+Auth request:
+  ("auth",      "action", "none")
+  ("username",  "entity", "none")
+  ("123456",    "signal", "none")
+
+Auth response (success):
+  ("&lt;token&gt;",    "signal",   "none")
+  ("900",        "property", "none")
+  ("resp",       "status",   "ok")
+
+Auth response (error):
+  ("resp", "status",  "error")
+  ("resp", "message", "prime unreachable")</pre>
+</div>
+
+<div class="footer">Generated 2026-04-02 09:57 &middot; Be</div>
+</div>
+</body>
+</html>
