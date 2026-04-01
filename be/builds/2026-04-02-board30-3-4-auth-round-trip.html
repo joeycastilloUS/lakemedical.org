@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board 30.3+30.4 — Test User + Full Auth Round-Trip</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .status { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+  .pass { background: #1a3a1a; color: #4ade80; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #1A1A1A; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .chain { display: flex; align-items: center; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+  .chain .node { background: #1A1A1A; border: 1px solid #333; border-radius: 6px; padding: 6px 14px; font-size: 0.85rem; }
+  .chain .arrow { color: #6FC3DF; font-weight: bold; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Board 30.3 + 30.4 &mdash; Test User + Full Auth Round-Trip</h1>
+<p class="subtitle">8 pts &middot; ~a + ~t &middot; lakemedical.org Close the Loop</p>
+
+<span class="status pass">PASS &mdash; Full Chain Verified</span>
+
+<h2>What Was Done</h2>
+
+<div class="card">
+  <h3>30.3: Test User Registration (3 pts)</h3>
+  <p>Registered user <code>lake-test</code> on prime via wire protocol through the full relay chain.</p>
+  <ul>
+    <li><span class="label">Action:</span> <code>register</code> via NTRP wire triples</li>
+    <li><span class="label">Path:</span> Windows &rarr; relay (cockpit decrypt) &rarr; prime (transport decrypt, register)</li>
+    <li><span class="label">TOTP Secret:</span> <code>B7DVXIRZCE5ED2JTZNXHAZJJUW2PPQWT</code> (base32)</li>
+    <li><span class="label">TOTP URI:</span> <code>otpauth://totp/NOUS:lake-test?secret=B7DVXIRZCE5ED2JTZNXHAZJJUW2PPQWT&amp;issuer=NOUS</code></li>
+    <li><span class="label">Role:</span> admin (first user)</li>
+    <li><span class="label">QR Code:</span> 37&times;37 modules returned by prime</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>30.4: Full Auth Round-Trip (5 pts)</h3>
+  <p>Authenticated <code>lake-test</code> with a live TOTP code through the complete chain.</p>
+  <ul>
+    <li><span class="label">Session token:</span> <code>38e0eab4...dba9d7</code> (64 hex)</li>
+    <li><span class="label">TTL:</span> 900 seconds (15 minutes)</li>
+    <li><span class="label">Response triples:</span></li>
+  </ul>
+  <pre>(38e0eab48a01...dba9d7, signal, none)   -- session token
+(900, property, none)                     -- TTL
+(resp, status, ok)                        -- success</pre>
+</div>
+
+<h2>Auth Chain</h2>
+
+<div class="chain">
+  <span class="node">Windows Client</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">0xCA cockpit encrypt</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">relay:8080 (35.236.92.148)</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">cockpit decrypt</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">find_first_prime()</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">0xCA transport encrypt</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">prime:8080 (35.236.118.2)</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">transport decrypt</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">TOTP validate</span>
+  <span class="arrow">&rarr;</span>
+  <span class="node">session mint</span>
+</div>
+
+<h2>Issues Found &amp; Fixed</h2>
+
+<div class="card">
+  <h3>DNS Prime Selection (Critical)</h3>
+  <p><code>find_first_prime()</code> picks the first DNS-discovered prime. Asia-east1 prime (34.81.178.230) was discovered first &mdash; different region means different transport key. Every auth request silently failed.</p>
+  <p><span class="label">Root cause:</span> DNS TXT records for <code>_prime.3-nous.net</code> listed both asia-east1 and us-west2. The relay verified signatures (not reachability), adding asia-east1 first.</p>
+  <p><span class="label">Fix:</span></p>
+  <ul>
+    <li>Removed asia-east1 entry from DNS TXT records (Cloud DNS update)</li>
+    <li>Stopped <code>nous-prime-asia-east</code> instance</li>
+    <li>Removed <code>--prime 34.81.178.230:8080</code> from relay service CLI args</li>
+    <li>Restarted relay &mdash; now discovers only us-west2 prime</li>
+  </ul>
+</div>
+
+<h2>Relay Logs (confirmation)</h2>
+<pre>17:28:25 Transport encryption: ON (region=us-west2)
+17:28:25 DNS: verified prime 0 -- 35.236.118.2:8080
+17:28:25 DNS: discovered 1 verified primes
+17:28:25 PRIME: added 10.168.0.3:8080 from CLI
+17:28:25 Relay listening on port 8080
+17:28:50 [EW] wire request (83 bytes) from 116.91.209.49</pre>
+
+<h2>Prime Logs (confirmation)</h2>
+<pre>17:09:25 Transport encryption: ON (region=us-west2)
+17:09:25 Catalog server listening on port 8080
+17:28:50 [EW] encrypted wire request (83 bytes)</pre>
+
+<h2>Infrastructure Changes</h2>
+<ul>
+  <li><span class="label">DNS:</span> <code>_prime.3-nous.net</code> TXT &mdash; removed asia-east1 entry, us-west2 only</li>
+  <li><span class="label">GCE:</span> <code>nous-prime-asia-east</code> stopped (was running idle catalog_server)</li>
+  <li><span class="label">Relay service:</span> <code>--prime 34.81.178.230:8080</code> removed from ExecStart</li>
+  <li><span class="label">Relay service:</span> only <code>--prime 10.168.0.3:8080</code> (internal us-west2)</li>
+</ul>
+
+<div class="footer">Generated 2026-04-02 17:29 &middot; Board 30.3+30.4 &middot; lakemedical.org</div>
+</div>
+</body>
+</html>

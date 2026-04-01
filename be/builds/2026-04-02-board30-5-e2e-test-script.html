@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board 30.5 — E2E Test Script with Real Auth Assertions</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .status { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; }
+  .done { background: #1a3a1a; color: #4ade80; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #1A1A1A; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Board 30.5 &mdash; E2E Test Script</h1>
+<p class="subtitle">3 pts &middot; ~u &middot; Real auth assertions + session token check</p>
+
+<span class="status done">DONE</span>
+
+<h2>What Was Updated</h2>
+
+<div class="card">
+  <h3>New: alumni/e2e-auth.html</h3>
+  <p>Standalone E2E test page. Open in browser, click Run Tests. Tests the full auth chain through the Cloudflare Worker &rarr; relay &rarr; prime.</p>
+  <p><span class="label">7 tests:</span></p>
+  <ul>
+    <li><span class="label">1.</span> wire_pack/unpack round-trip</li>
+    <li><span class="label">2.</span> TOTP generation from live secret</li>
+    <li><span class="label">3.</span> Auth with valid TOTP &mdash; asserts status=ok + session token</li>
+    <li><span class="label">4.</span> Token format &mdash; asserts 64 hex chars</li>
+    <li><span class="label">5.</span> Session check &mdash; validates token against relay</li>
+    <li><span class="label">6.</span> Auth with bad TOTP &mdash; asserts rejected</li>
+    <li><span class="label">7.</span> Auth with unknown user &mdash; asserts rejected/error</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>New: alumni/js/utils/totp.js</h3>
+  <p>Browser TOTP generator (RFC 6238) using Web Crypto HMAC-SHA1. Zero dependencies. Base32 decode + 6-digit code generation.</p>
+</div>
+
+<h2>Files Changed</h2>
+<pre>A  alumni/e2e-auth.html          — 7-test E2E auth suite
+A  alumni/js/utils/totp.js       — TOTP generator for test automation</pre>
+
+<h2>Test User</h2>
+<pre>User:   lake-test
+Secret: B7DVXIRZCE5ED2JTZNXHAZJJUW2PPQWT (base32)
+Role:   admin
+Prime:  nous-prime-us-west2 (10.168.0.3)</pre>
+
+<h2>How to Run</h2>
+<pre>1. Deploy to Cloudflare Pages (wrangler pages deploy alumni/)
+2. Open https://lakemedical.org/e2e-auth.html
+3. Click "Run Tests"
+4. All 7 tests should pass green</pre>
+
+<div class="footer">Generated 2026-04-02 17:32 &middot; Board 30.5 &middot; lakemedical.org</div>
+</div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Board: lakemedical.org — NOUS Wire Auth
 
-Updated 2026-04-01 · 11 items · 47 pts · 3 boards · ALL DONE
+Updated 2026-04-02 · 16 items · 68 pts · 4 boards · ALL DONE
 Source: plan-lakemedical-repo-nous-auth-v3.html
 
 ---
@@ -51,12 +51,12 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 Source: plan-close-the-loop.html → estimate-close-the-loop.html
 
 ### Ready
-- {prime VMs + binary, verify on, GCE nodes + wire auth handler} · 5 · ~t
-- {test user with TOTP secret, add to, prime user store} · 3 · ~a
-- {full auth round-trip, test on, lakemedical.org → relay → prime} · 5 · ~t
-- {E2E test script, update with, real auth assertions + session token check} · 3 · ~u
 
 ### In Progress
 
 ### Done
 - {502 root cause, diagnose on, relay logs + prime reachability + PSK match} · 5 · ~f ✅
+- {prime VMs + binary, verify on, GCE nodes + wire auth handler} · 5 · ~t ✅
+- {test user with TOTP secret, add to, prime user store} · 3 · ~a ✅
+- {full auth round-trip, test on, lakemedical.org → relay → prime} · 5 · ~t ✅
+- {E2E test script, update with, real auth assertions + session token check} · 3 · ~u ✅

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E2E Auth Test — lakemedical.org</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  .container { max-width: 700px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.6rem; margin-bottom: 6px; }
+  .sub { color: #888; margin-bottom: 24px; font-size: 0.9rem; }
+  .test { background: #1A1A1A; border-radius: 8px; padding: 14px 18px; margin: 8px 0; display: flex; justify-content: space-between; align-items: center; }
+  .test-name { font-weight: 600; }
+  .badge { padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; }
+  .pass { background: #1a3a1a; color: #4ade80; }
+  .fail { background: #3a1a1a; color: #f87171; }
+  .skip { background: #3a3a1a; color: #fbbf24; }
+  .wait { background: #1a2a3a; color: #6FC3DF; }
+  .detail { color: #888; font-size: 0.8rem; margin-top: 4px; }
+  .summary { margin-top: 24px; padding: 16px; background: #1A1A1A; border-radius: 8px; font-size: 1.1rem; font-weight: 600; }
+  .summary.all-pass { border-left: 4px solid #4ade80; }
+  .summary.has-fail { border-left: 4px solid #f87171; }
+  button { background: #6FC3DF; color: #111; border: none; padding: 10px 24px; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; margin-top: 16px; }
+  button:hover { background: #5ab3cf; }
+  pre { background: #0a0a0a; padding: 12px; border-radius: 6px; font-size: 0.8rem; margin-top: 16px; overflow-x: auto; max-height: 300px; overflow-y: auto; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>E2E Auth Test</h1>
+<p class="sub">lakemedical.org &rarr; Worker &rarr; relay &rarr; prime &rarr; response</p>
+
+<button id="run-btn" onclick="runTests()">Run Tests</button>
+
+<div id="results"></div>
+<div id="summary"></div>
+<pre id="log"></pre>
+</div>
+
+<script src="js/wire.js"></script>
+<script src="js/nous.js"></script>
+<script src="js/utils/totp.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* Test user registered on prime during Board 30.3 */
+  var TEST_SECRET = 'B7DVXIRZCE5ED2JTZNXHAZJJUW2PPQWT';
+  var TEST_USER = 'lake-test';
+
+  var results = [];
+  var logLines = [];
+
+  function log(msg) {
+    logLines.push('[' + new Date().toISOString().substr(11, 12) + '] ' + msg);
+    document.getElementById('log').textContent = logLines.join('\n');
+  }
+
+  function addResult(name, status, detail) {
+    results.push({ name: name, status: status, detail: detail || '' });
+    var el = document.getElementById('results');
+    var div = document.createElement('div');
+    div.className = 'test';
+    div.innerHTML = '<div><span class="test-name">' + name + '</span>' +
+      (detail ? '<div class="detail">' + detail + '</div>' : '') +
+      '</div><span class="badge ' + status + '">' + status.toUpperCase() + '</span>';
+    el.appendChild(div);
+  }
+
+  function showSummary() {
+    var pass = 0, fail = 0, skip = 0;
+    for (var i = 0; i < results.length; i++) {
+      if (results[i].status === 'pass') pass++;
+      else if (results[i].status === 'fail') fail++;
+      else skip++;
+    }
+    var el = document.getElementById('summary');
+    el.className = 'summary ' + (fail > 0 ? 'has-fail' : 'all-pass');
+    el.textContent = pass + '/' + results.length + ' pass' +
+      (fail > 0 ? ', ' + fail + ' fail' : '') +
+      (skip > 0 ? ', ' + skip + ' skip' : '');
+  }
+
+  /* ── Test 1: wire_pack + wire_unpack round-trip ── */
+  function testWireRoundTrip() {
+    log('Test 1: wire_pack/unpack round-trip');
+    var triples = [
+      { s: 'auth', p: 'action', o: 'none' },
+      { s: 'test', p: 'entity', o: 'none' }
+    ];
+    var packed = wire_pack(triples);
+    if (!packed) {
+      addResult('wire_pack/unpack', 'fail', 'pack returned null');
+      return;
+    }
+    var unpacked = wire_unpack(packed);
+    if (!unpacked || unpacked.length !== 2) {
+      addResult('wire_pack/unpack', 'fail', 'unpack returned ' + (unpacked ? unpacked.length : 'null'));
+      return;
+    }
+    if (unpacked[0].s !== 'auth' || unpacked[1].p !== 'entity') {
+      addResult('wire_pack/unpack', 'fail', 'data mismatch');
+      return;
+    }
+    log('  packed: ' + packed.length + ' bytes, unpacked: ' + unpacked.length + ' triples');
+    addResult('wire_pack/unpack', 'pass', packed.length + ' bytes, 2 triples');
+  }
+
+  /* ── Test 2: TOTP generation ── */
+  function testTOTP() {
+    log('Test 2: TOTP generation');
+    return totp_generate(TEST_SECRET).then(function (code) {
+      if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+        addResult('TOTP generate', 'fail', 'got: ' + code);
+        return null;
+      }
+      log('  code: ' + code);
+      addResult('TOTP generate', 'pass', 'code=' + code);
+      return code;
+    });
+  }
+
+  /* ── Test 3: Auth with valid TOTP ── */
+  function testAuthValid(totp) {
+    if (!totp) {
+      addResult('Auth (valid TOTP)', 'skip', 'no TOTP code');
+      return Promise.resolve(null);
+    }
+    log('Test 3: Auth with valid TOTP (' + totp + ')');
+    return nous_auth(TEST_USER, totp).then(function (triples) {
+      if (!triples) {
+        addResult('Auth (valid TOTP)', 'fail', 'null response');
+        return null;
+      }
+      var status = nous_status(triples);
+      log('  status: ' + status);
+
+      if (status === 'ok') {
+        var token = nous_find(triples, 'signal');
+        var ttl = nous_find(triples, 'property');
+        log('  token: ' + (token ? token.substr(0, 16) + '...' : 'null'));
+        log('  ttl: ' + ttl);
+
+        if (!token || token.length !== 64 || !/^[0-9a-f]{64}$/.test(token)) {
+          addResult('Auth (valid TOTP)', 'fail', 'bad token format: ' + (token || 'null'));
+          return null;
+        }
+        addResult('Auth (valid TOTP)', 'pass', 'token=' + token.substr(0, 12) + '... ttl=' + ttl);
+        return token;
+      } else if (status === 'error') {
+        var msg = nous_find(triples, 'message');
+        addResult('Auth (valid TOTP)', 'fail', 'error: ' + msg);
+        return null;
+      } else {
+        addResult('Auth (valid TOTP)', 'fail', 'status: ' + status);
+        return null;
+      }
+    }).catch(function (err) {
+      log('  error: ' + err.message);
+      addResult('Auth (valid TOTP)', 'fail', err.message);
+      return null;
+    });
+  }
+
+  /* ── Test 4: Session token is 64 hex chars ── */
+  function testTokenFormat(token) {
+    log('Test 4: Token format');
+    if (!token) {
+      addResult('Token format (64 hex)', 'skip', 'no token from auth');
+      return;
+    }
+    var valid = token.length === 64 && /^[0-9a-f]{64}$/.test(token);
+    addResult('Token format (64 hex)', valid ? 'pass' : 'fail',
+      token.length + ' chars, ' + (valid ? 'valid hex' : 'INVALID'));
+  }
+
+  /* ── Test 5: Session check with token ── */
+  function testSessionCheck(token) {
+    if (!token) {
+      addResult('Session check', 'skip', 'no token');
+      return Promise.resolve();
+    }
+    log('Test 5: Session check');
+    nous_session_save(token);
+    return nous_session_check().then(function (valid) {
+      log('  session valid: ' + valid);
+      addResult('Session check', valid ? 'pass' : 'fail',
+        valid ? 'session active on relay' : 'session not recognized');
+      nous_session_clear();
+    }).catch(function (err) {
+      log('  error: ' + err.message);
+      addResult('Session check', 'fail', err.message);
+    });
+  }
+
+  /* ── Test 6: Auth with invalid TOTP ── */
+  function testAuthInvalid() {
+    log('Test 6: Auth with invalid TOTP');
+    return nous_auth(TEST_USER, '000000').then(function (triples) {
+      if (!triples) {
+        addResult('Auth (bad TOTP) rejected', 'fail', 'null response');
+        return;
+      }
+      var status = nous_status(triples);
+      log('  status: ' + status);
+      var ok = (status === 'rejected' || status === 'error');
+      addResult('Auth (bad TOTP) rejected', ok ? 'pass' : 'fail', 'status=' + status);
+    }).catch(function (err) {
+      log('  error: ' + err.message);
+      addResult('Auth (bad TOTP) rejected', 'fail', err.message);
+    });
+  }
+
+  /* ── Test 7: Auth with unknown user ── */
+  function testAuthUnknownUser() {
+    log('Test 7: Auth with unknown user');
+    return nous_auth('nonexistent-user-xyz', '123456').then(function (triples) {
+      if (!triples) {
+        addResult('Auth (unknown user) rejected', 'fail', 'null response');
+        return;
+      }
+      var status = nous_status(triples);
+      log('  status: ' + status);
+      var ok = (status === 'rejected' || status === 'error');
+      addResult('Auth (unknown user) rejected', ok ? 'pass' : 'fail', 'status=' + status);
+    }).catch(function (err) {
+      log('  error: ' + err.message);
+      addResult('Auth (unknown user) rejected', 'fail', err.message);
+    });
+  }
+
+  /* ── Run all ── */
+  window.runTests = function () {
+    results = [];
+    logLines = [];
+    document.getElementById('results').innerHTML = '';
+    document.getElementById('summary').innerHTML = '';
+    document.getElementById('log').textContent = '';
+    document.getElementById('run-btn').disabled = true;
+
+    log('Starting E2E auth tests');
+    log('User: ' + TEST_USER);
+    log('Secret: ' + TEST_SECRET.substr(0, 8) + '...');
+    log('');
+
+    testWireRoundTrip();
+
+    testTOTP().then(function (totp) {
+      return testAuthValid(totp).then(function (token) {
+        testTokenFormat(token);
+        return testSessionCheck(token);
+      });
+    }).then(function () {
+      return testAuthInvalid();
+    }).then(function () {
+      return testAuthUnknownUser();
+    }).then(function () {
+      log('');
+      log('Done.');
+      showSummary();
+      document.getElementById('run-btn').disabled = false;
+    });
+  };
+
+})();
+</script>
+</body>
+</html>
