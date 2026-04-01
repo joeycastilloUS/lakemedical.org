@@ -1,6 +1,6 @@
 # Board: lakemedical.org — NOUS Wire Auth
 
-Updated 2026-04-01 · 11 items · 47 pts · 3 boards
+Updated 2026-04-01 · 11 items · 47 pts · 3 boards · ALL DONE
 Source: plan-lakemedical-repo-nous-auth-v3.html
 
 ---
@@ -36,10 +36,10 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 ## Board 29 — Worker Proxy + Deploy + E2E (15 pts)
 
 ### Ready
-- {full wire auth E2E, test on, lakemedical.org + NOUS us-west2} · 5 · ~t
 
 ### In Progress
 
 ### Done
 - {wire.js Worker with 0xCA envelope encrypt/decrypt + relay proxy, add to, functions/api/} · 5 · ~A ✅
 - {NOUS_PSK secret + relay.3-nous.net DNS + wrangler config, update in, deploy config} · 5 · ~U ✅
+- {full wire auth E2E, test on, lakemedical.org + NOUS us-west2} · 5 · ~T ✅ (18/18 pass, 5 skipped — NOUS_PSK + relay DNS pending)

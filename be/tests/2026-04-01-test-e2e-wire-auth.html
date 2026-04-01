@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test: E2E Wire Auth — Board 29.3</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .pass { color: #4a4; }
+  .skip { color: #ca4; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .stat { display: inline-block; background: #1A1A1A; border-radius: 6px; padding: 8px 16px; margin: 4px 8px 4px 0; }
+  .stat-val { color: #6FC3DF; font-weight: 700; font-size: 1.4rem; }
+  .stat-lbl { color: #888; font-size: 0.8rem; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  td { padding: 4px 8px; border-bottom: 1px solid #1a1a1a; }
+  .banner { background: #1a3a1a; border: 1px solid #4a4; border-radius: 8px; padding: 16px 20px; margin: 16px 0; text-align: center; }
+  .banner-text { color: #4a4; font-weight: 700; font-size: 1.3rem; }
+  .banner-sub { color: #6a6; font-size: 0.9rem; margin-top: 4px; }
+  .warn-banner { background: #3a3a1a; border: 1px solid #ca4; border-radius: 8px; padding: 16px 20px; margin: 16px 0; text-align: center; }
+  .warn-text { color: #ca4; font-weight: 700; font-size: 1.1rem; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+<h1>~T Board 29.3: E2E Wire Auth</h1>
+<p class="subtitle">lakemedical.org &rarr; Worker &rarr; relay.3-nous.net &rarr; NOUS</p>
+
+<div class="banner">
+  <span class="banner-text">&#10004; ALL RUNNABLE TESTS PASSED &mdash; 18/18</span>
+  <div class="banner-sub">5 skipped &mdash; infra pending (NOUS_PSK + relay DNS)</div>
+</div>
+
+<div style="margin: 16px 0;">
+  <span class="stat"><span class="stat-val">18</span><br><span class="stat-lbl">Passed</span></span>
+  <span class="stat"><span class="stat-val">0</span><br><span class="stat-lbl">Failed</span></span>
+  <span class="stat"><span class="stat-val">5</span><br><span class="stat-lbl">Skipped</span></span>
+  <span class="stat"><span class="stat-val">7</span><br><span class="stat-lbl">Sections</span></span>
+</div>
+
+<h2>1. Site Availability (8 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>lakemedical.org returns 200</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Returns HTML content</td></tr>
+    <tr><td class="pass">&#10004;</td><td>index.html includes wire.js</td></tr>
+    <tr><td class="pass">&#10004;</td><td>index.html includes nous.js</td></tr>
+    <tr><td class="pass">&#10004;</td><td>index.html includes qr.js</td></tr>
+    <tr><td class="pass">&#10004;</td><td>index.html includes auth-gate.js</td></tr>
+    <tr><td class="pass">&#10004;</td><td>index.html includes auth-gate.css</td></tr>
+    <tr><td class="pass">&#10004;</td><td>index.html includes session timer div</td></tr>
+  </table>
+</div>
+
+<h2>2. Worker Endpoint (1 test)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>GET /api/wire: 200 (SPA fallthrough, POST-only handler)</td></tr>
+  </table>
+</div>
+
+<h2>3. NTRP Magic Validation (3 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>Invalid magic returns 400</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Body &lt; 16 bytes returns 400</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Valid NTRP frame: status=500 (NOUS_PSK not set)</td></tr>
+  </table>
+</div>
+
+<h2>4. Rate Limiting (1 test)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>Rate limiting triggered (429 after rapid requests)</td></tr>
+  </table>
+</div>
+
+<h2>5. DNS &mdash; relay.3-nous.net (1 skipped)</h2>
+<div class="card">
+  <table>
+    <tr><td class="skip">&#9888;</td><td>relay.3-nous.net DNS not resolving yet (ENOTFOUND)</td></tr>
+  </table>
+</div>
+
+<h2>6. Full Chain (4 skipped)</h2>
+<div class="card">
+  <table>
+    <tr><td class="skip">&#9888;</td><td>Full chain E2E blocked: NOUS_PSK not set</td></tr>
+    <tr><td class="skip">&#9888;</td><td>Auth request through Worker &rarr; relay</td></tr>
+    <tr><td class="skip">&#9888;</td><td>Response validation (octet-stream, body present)</td></tr>
+    <tr><td class="skip">&#9888;</td><td>NTRP response parse</td></tr>
+  </table>
+</div>
+
+<h2>7. Static Assets (5 tests)</h2>
+<div class="card">
+  <table>
+    <tr><td class="pass">&#10004;</td><td>/js/wire.js returns 200</td></tr>
+    <tr><td class="pass">&#10004;</td><td>/js/nous.js returns 200</td></tr>
+    <tr><td class="pass">&#10004;</td><td>/js/utils/qr.js returns 200</td></tr>
+    <tr><td class="pass">&#10004;</td><td>/js/auth-gate.js returns 200</td></tr>
+    <tr><td class="pass">&#10004;</td><td>/css/auth-gate.css returns 200</td></tr>
+  </table>
+</div>
+
+<h2>Blocked Items</h2>
+<div class="warn-banner">
+  <span class="warn-text">&#9888; 2 infra items needed for full E2E</span>
+</div>
+<div class="card">
+  <ul>
+    <li><code>wrangler secret put NOUS_PSK --project-name alumni-artifacts</code> &mdash; 64-hex master PSK</li>
+    <li>Configure <code>relay.3-nous.net</code> DNS A record &rarr; NOUS relay IP</li>
+    <li>NOUS relay must be running on us-west2:8080</li>
+    <li>Re-run: <code>node C:/tmp/test-e2e-wire-auth.js</code></li>
+  </ul>
+</div>
+
+<h2>What Was Verified</h2>
+<div class="card">
+  <ul>
+    <li>Site deployed and live at lakemedical.org</li>
+    <li>All auth gate scripts and CSS served correctly</li>
+    <li>Worker function deployed and processing POST /api/wire</li>
+    <li>NTRP magic validation works (rejects bad frames)</li>
+    <li>Rate limiting active (429 on 11th request per minute)</li>
+    <li>Worker correctly returns 500 when PSK not configured (not 502 or crash)</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-01 21:50</div>
+</div>
+</body>
+</html>
