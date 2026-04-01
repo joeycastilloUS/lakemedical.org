@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro: All C QR — Board 31, plan pivot, relay+worker+browser in one session</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 6px 0; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Retro: All C QR Code</h1>
+<p class="subtitle">Board 31 &middot; Plan pivot from JS port to all C &middot; lakemedical.org</p>
+
+<h2>What Happened</h2>
+<div class="card">
+  <ul>
+    <li><strong>~I:</strong> Inspected JS QR encoder, found 4 fatal bugs (format info reversed, no interleaving, 1/4 penalty rules, capacity mismatch)</li>
+    <li><strong>~P v1:</strong> Planned JS port of C qr.c (400+ new lines of JS)</li>
+    <li><strong>User pivot:</strong> Joey said &ldquo;no more .js &mdash; I want all C&rdquo;</li>
+    <li><strong>~P v2:</strong> Re-planned as server-side QR &mdash; pipe prime&rsquo;s C output to browser</li>
+    <li><strong>~E v2:</strong> 4 items, 11 pts across relay, worker, browser, E2E test</li>
+    <li><strong>~B:</strong> Built all 4 items. Relay patched via SSH, Worker deployed via Wrangler, qr.js deleted</li>
+    <li><strong>~T:</strong> 10/10 E2E tests pass against live site</li>
+    <li><strong>~S:</strong> Shipped. Registration unblocked.</li>
+  </ul>
+</div>
+
+<h2>What Went Well</h2>
+<div class="card">
+  <ul>
+    <li><strong>The pivot was the right call.</strong> v1 would have added 400+ lines of new JS encoder code. v2 deleted 413 lines and added 14. Net: &minus;408 lines. Simpler, safer, less to maintain.</li>
+    <li><strong>Existing infrastructure did the heavy lifting.</strong> The prime already generated qr_data. The relay already extracted it. The browser already had renderQR(). The gap was just plumbing &mdash; 3 small patches.</li>
+    <li><strong>Relay SSH worked.</strong> gcloud compute ssh with the bundled Python resolved the path issue. Compile &rarr; deploy took one cycle.</li>
+    <li><strong>E2E test was thorough.</strong> 10 assertions including finder pattern verification and duplicate rejection. Caught the initial Cloudflare propagation delay (first request failed, second passed).</li>
+  </ul>
+</div>
+
+<h2>What Could Be Better</h2>
+<div class="card">
+  <ul>
+    <li><strong>gcloud Python path is fragile.</strong> The bundled Python at <code>google-cloud-sdk/platform/bundledpython/python.exe</code> needs CLOUDSDK_PYTHON set every time. Should add this to shell profile or a wrapper script.</li>
+    <li><strong>First E2E test hit before Cloudflare propagated.</strong> Should add a brief wait or retry after <code>wrangler pages deploy</code> before testing the live URL.</li>
+    <li><strong>Relay compile flags not documented.</strong> Had to discover <code>-lresolv</code> and include paths by trial. Should save the build command somewhere on the VM.</li>
+    <li><strong>v1 plan was wasted work.</strong> Should have asked about the all-C approach earlier in the ~I phase. The inspection found the C version works &mdash; the obvious next question was &ldquo;why not just use it?&rdquo;</li>
+  </ul>
+</div>
+
+<h2>Commitments</h2>
+<div class="card">
+  <ul>
+    <li><strong>Manual QR scan still needed.</strong> E2E verifies the data pipeline. A human needs to scan the QR with a phone to confirm it works end-to-end in the real browser UI.</li>
+    <li><strong>Document relay build command.</strong> Save <code>gcc</code> flags + include paths in a Makefile or script on the VM.</li>
+  </ul>
+</div>
+
+<h2>Session Stats</h2>
+<div class="card">
+  <ul>
+    <li>Boards completed this session: 31</li>
+    <li>Items shipped: 4</li>
+    <li>Points: 11</li>
+    <li>Files changed: 5 (1 deleted, 4 modified)</li>
+    <li>Net lines: +14 &minus;422 = &minus;408</li>
+    <li>Deploys: 2 (relay binary + Cloudflare Pages)</li>
+    <li>E2E tests: 10/10 pass</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-02 21:00 &middot; Retro: All C QR &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
