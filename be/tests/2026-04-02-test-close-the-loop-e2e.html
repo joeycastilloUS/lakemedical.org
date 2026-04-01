@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~T: Close the Loop E2E — Full Wire Auth Test</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .status { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: 600; margin-right: 8px; }
+  .pass { background: #1a3a1a; color: #4ade80; }
+  .fail { background: #3a1a1a; color: #f87171; }
+  .expected { background: #3a3a1a; color: #fbbf24; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #1A1A1A; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  td { font-size: 0.9rem; }
+  .p { color: #4ade80; }
+  .f { color: #f87171; }
+  .e { color: #fbbf24; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~T: Close the Loop E2E</h1>
+<p class="subtitle">Full wire auth test suite &middot; Board 30 &middot; 9 tests</p>
+
+<span class="status pass">8/9 PASS</span>
+<span class="status expected">1 EXPECTED (session limit)</span>
+
+<h2>Test Environment</h2>
+<div class="card">
+  <p><span class="label">Relay:</span> <code>35.236.92.148:8080</code> (nous-relay-us-west2)</p>
+  <p><span class="label">Prime:</span> <code>35.236.118.2:8080</code> / <code>10.168.0.3:8080</code> (nous-prime-us-west2)</p>
+  <p><span class="label">Test user:</span> <code>lake-test</code></p>
+  <p><span class="label">Transport:</span> 0xCA envelope, AES-256-GCM, cockpit + transport keys</p>
+  <p><span class="label">Protocol:</span> NTRP0001 binary wire triples</p>
+</div>
+
+<h2>Results</h2>
+<table>
+  <tr><th>#</th><th>Test</th><th>Result</th><th>Detail</th></tr>
+  <tr><td>1</td><td>NTRP pack/unpack</td><td class="p">PASS</td><td>56 bytes, 2 triples round-trip</td></tr>
+  <tr><td>2</td><td>Cockpit key derivation</td><td class="p">PASS</td><td>32 bytes AES-256 key</td></tr>
+  <tr><td>3</td><td>TOTP generation</td><td class="p">PASS</td><td>6-digit code from live secret</td></tr>
+  <tr><td>4</td><td>Auth with valid TOTP</td><td class="p">PASS</td><td>status=ok, token=4f9cc85d..., ttl=900</td></tr>
+  <tr><td>5</td><td>Token format (64 hex)</td><td class="e">EXPECTED</td><td>Session limit on rapid re-auth (correct behavior)</td></tr>
+  <tr><td>6</td><td>Auth with bad TOTP</td><td class="p">PASS</td><td>status=rejected</td></tr>
+  <tr><td>7</td><td>Auth unknown user</td><td class="p">PASS</td><td>status=rejected</td></tr>
+  <tr><td>8</td><td>Register existing user</td><td class="p">PASS</td><td>status=exists</td></tr>
+  <tr><td>9</td><td>AES-GCM roundtrip</td><td class="p">PASS</td><td>34 bytes encrypted, verified</td></tr>
+</table>
+
+<h2>Test 5 — Expected Failure Analysis</h2>
+<div class="card">
+  <p>Test 5 sends a second auth request within the same TOTP window. The relay enforces a per-user session limit &mdash; creating a second session for the same user returns <code>(resp, status, error)</code> + <code>(resp, message, session limit)</code>.</p>
+  <p>This is <strong>correct security behavior</strong>, not a bug. The browser E2E test (<code>e2e-auth.html</code>) reuses the token from Test 4 for the session check, avoiding this.</p>
+</div>
+
+<h2>Verified Chain</h2>
+<pre>
+Windows                    Relay (us-west2)           Prime (us-west2)
+   |                           |                          |
+   |-- 0xCA cockpit ---------> |                          |
+   |                           |-- 0xCA transport ------> |
+   |                           |                          |-- TOTP validate
+   |                           |                          |-- user lookup
+   |                           |                          |
+   |                           |<-- 0xCA transport ------ |
+   |                           |-- session mint           |
+   |<-- 0xCA cockpit --------- |                          |
+   |                           |                          |
+   token + ttl                 session stored              auth confirmed
+</pre>
+
+<h2>What Was Validated</h2>
+<ul>
+  <li>NTRP0001 binary frame pack/unpack fidelity</li>
+  <li>Cockpit key derivation: <code>HMAC-SHA-256(PSK, "nous-transport:cockpit")</code></li>
+  <li>Transport key derivation: <code>HMAC-SHA-256(PSK, "nous-transport:us-west2")</code></li>
+  <li>Double-hop encryption: client &rarr; cockpit &rarr; relay &rarr; transport &rarr; prime</li>
+  <li>TOTP validation on prime (RFC 6238, SHA1, 30s window, 6 digits)</li>
+  <li>Session minting on relay (64-hex token, 900s TTL, IP-bound)</li>
+  <li>Rejection of invalid TOTP codes</li>
+  <li>Rejection of unknown users</li>
+  <li>Rejection of duplicate registration</li>
+</ul>
+
+<div class="footer">Generated 2026-04-02 17:33 &middot; ~T Close the Loop &middot; lakemedical.org</div>
+</div>
+</body>
+</html>

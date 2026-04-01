@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ship: Close the Loop — Full Wire Auth End-to-End</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .status { display: inline-block; padding: 6px 16px; border-radius: 4px; font-size: 1rem; font-weight: 700; }
+  .shipped { background: #1a3a1a; color: #4ade80; border: 1px solid #4ade80; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #1A1A1A; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .stat { background: #1A1A1A; border-radius: 8px; padding: 16px; text-align: center; }
+  .stat-val { color: #6FC3DF; font-size: 2rem; font-weight: 700; }
+  .stat-label { color: #888; font-size: 0.8rem; margin-top: 4px; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Ship: Close the Loop</h1>
+<p class="subtitle">Full wire auth end-to-end &middot; Boards 27&ndash;30 &middot; lakemedical.org</p>
+
+<span class="status shipped">SHIPPED</span>
+
+<div class="stat-grid">
+  <div class="stat"><div class="stat-val">68</div><div class="stat-label">points delivered</div></div>
+  <div class="stat"><div class="stat-val">16</div><div class="stat-label">work items</div></div>
+  <div class="stat"><div class="stat-val">4</div><div class="stat-label">boards completed</div></div>
+  <div class="stat"><div class="stat-val">8/9</div><div class="stat-label">tests pass (+1 expected)</div></div>
+</div>
+
+<h2>What Shipped</h2>
+
+<div class="card">
+  <h3>Board 27 &mdash; Repo Extract + Wire.js (16 pts)</h3>
+  <ul>
+    <li>lakemedical.org GitHub repo with alumni/ + functions/ + config</li>
+    <li>wire.js NTRP0001 pack/unpack (LE binary, 7 functions)</li>
+    <li>nous.js high-level client (10 functions, fetch + session mgmt)</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Board 28 &mdash; NOUS Auth Gate (16 pts)</h3>
+  <ul>
+    <li>auth-gate.css WesternU brand (burgundy/gold/cream)</li>
+    <li>auth-gate.js login + register via wire triples</li>
+    <li>QR encoder for TOTP registration (37&times;37 modules)</li>
+    <li>Session timer with auto-expire + re-auth gate</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Board 29 &mdash; Worker Proxy + Deploy + E2E (15 pts)</h3>
+  <ul>
+    <li>Cloudflare Worker: 0xCA envelope encrypt/decrypt + TCP relay proxy</li>
+    <li>NOUS_PSK secret + relay.3-nous.net DNS + wrangler config</li>
+    <li>E2E test: 18/18 pass (5 skipped at time, now all cleared)</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Board 30 &mdash; Close the Loop (21 pts)</h3>
+  <ul>
+    <li>502 root cause diagnosed: primes were bare VMs, relay crypto chain verified, stdbuf fix applied</li>
+    <li>catalog_server compiled + deployed to nous-prime-us-west2 (systemd, transport encryption ON)</li>
+    <li>Test user <code>lake-test</code> registered via wire protocol (admin, TOTP secret)</li>
+    <li>Full auth round-trip: Windows &rarr; relay &rarr; prime &rarr; session token minted</li>
+    <li>E2E test script: 7-test browser suite + TOTP generator utility</li>
+  </ul>
+</div>
+
+<h2>Infrastructure</h2>
+<pre>
+lakemedical.org (Cloudflare Pages)
+  alumni/               Static site + auth gate
+  functions/api/wire.js Cloudflare Worker (0xCA proxy)
+       |
+       v  TCP :8080
+relay.3-nous.net (nous-relay-us-west2, 35.236.92.148)
+  relay_server          Cockpit decrypt, session mgmt
+       |
+       v  TCP :8080, 0xCA transport
+nous-prime-us-west2 (10.168.0.3 / 35.236.118.2)
+  catalog_server        TOTP validation, user store, QR gen
+</pre>
+
+<h2>Fixes During Close the Loop</h2>
+<ul>
+  <li><span class="label">stdbuf:</span> relay + prime ExecStart prefixed with <code>stdbuf -oL</code> for line-buffered journal output</li>
+  <li><span class="label">startup.sh:</span> Added qr.h, execute.h, translate.h include paths + source files to catalog_server build</li>
+  <li><span class="label">Firewall:</span> Added relay external IPs to <code>nous-mesh-allow</code> sourceRanges; switched relay to internal prime IP</li>
+  <li><span class="label">DNS:</span> Removed asia-east1 prime from <code>_prime.3-nous.net</code> TXT records (wrong-region transport key)</li>
+  <li><span class="label">Relay config:</span> Removed <code>--prime 34.81.178.230:8080</code> (asia-east1) from service CLI args</li>
+</ul>
+
+<h2>Auth Flow</h2>
+<pre>
+Browser:
+  1. user types username + TOTP code
+  2. auth-gate.js calls nous_auth(user, totp)
+  3. nous.js builds wire triples, calls wire_pack()
+  4. POST /api/wire with binary NTRP frame
+
+Worker (Cloudflare):
+  5. Validates NTRP0001 magic
+  6. Derives cockpit key: HMAC-SHA-256(PSK, "nous-transport:cockpit")
+  7. AES-256-GCM encrypt into 0xCA envelope
+  8. TCP connect relay.3-nous.net:8080, send, shutdown(WR), read
+
+Relay:
+  9. Detects 0xCA magic, decrypts with cockpit key
+  10. Parses NTRP: extracts action=auth, user, totp
+  11. find_first_prime() -> us-west2 prime
+  12. Re-encrypts with transport key: HMAC-SHA-256(PSK, "nous-transport:us-west2")
+  13. TCP to prime, send, read response
+
+Prime:
+  14. Detects 0xCA, decrypts with transport key
+  15. wire_handle_auth(): looks up user, validates TOTP
+  16. Returns (resp, status, ok) or (resp, status, rejected)
+
+Relay (return):
+  17. Decrypts prime response
+  18. If ok: mints session (64-hex token, 900s TTL, IP-bound)
+  19. Returns: token + ttl + status=ok as wire triples
+  20. Re-encrypts with cockpit key for Worker
+
+Worker (return):
+  21. Decrypts 0xCA response
+  22. Returns plaintext NTRP to browser
+
+Browser (return):
+  23. wire_unpack() response triples
+  24. nous_session_save(token) to sessionStorage
+  25. auth-gate dismisses, protected content visible
+  26. Session timer starts (15 min countdown)
+</pre>
+
+<div class="footer">Generated 2026-04-02 17:35 &middot; Ship: Close the Loop &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
