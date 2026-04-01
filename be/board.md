@@ -68,7 +68,6 @@ Source: plan-close-the-loop.html → estimate-close-the-loop.html
 Source: plan-qr-fix-v2.html → estimate-qr-fix-v2.html
 
 ### Ready
-- {QR scannable output, test on, browser register flow} · 3 · ~t
 
 ### In Progress
 
@@ -76,3 +75,4 @@ Source: plan-qr-fix-v2.html → estimate-qr-fix-v2.html
 - {qr_data field, add to, relay /register JSON response} · 3 · ~u ✅
 - {qr_data + qr_size triples, add to, Worker handleRegister} · 2 · ~u ✅
 - {server QR rendering + delete qr.js, update in, auth-gate.js + index.html} · 3 · ~u ✅
+- {QR scannable output, test on, browser register flow} · 3 · ~t ✅

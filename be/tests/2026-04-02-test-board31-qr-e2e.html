@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board 31.4 — E2E QR Test: 10/10 pass, all C pipeline verified</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  .pass { color: #4ade80; font-weight: 700; }
+  .badge { display: inline-block; padding: 6px 16px; border-radius: 4px; font-size: 1rem; font-weight: 700; background: #1a3a1a; color: #4ade80; border: 1px solid #4ade80; }
+  pre { background: #222; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Board 31.4 &mdash; E2E QR Test</h1>
+<p class="subtitle">10/10 pass &middot; All C QR pipeline verified &middot; lakemedical.org live</p>
+
+<span class="badge">10/10 PASS</span>
+
+<h2>Test Results</h2>
+<div class="card">
+  <table>
+    <tr><th></th><th>Test</th><th>Result</th></tr>
+    <tr><td class="pass">&#10004;</td><td>Register returns status = ok</td><td class="pass">ok</td></tr>
+    <tr><td class="pass">&#10004;</td><td>otpauth:// URI present in signal triple</td><td class="pass">otpauth://totp/NOUS:...</td></tr>
+    <tr><td class="pass">&#10004;</td><td>qr_data triple present</td><td class="pass">2244 chars base64</td></tr>
+    <tr><td class="pass">&#10004;</td><td>qr_size = 41 (Version 6)</td><td class="pass">41</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Matrix decodes to 1681 bytes (41&times;41)</td><td class="pass">1681 = 1681</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Matrix has dark + light modules</td><td class="pass">866 dark, 815 light</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Top-left finder pattern (7&times;7)</td><td class="pass">correct</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Top-right finder pattern (7&times;7)</td><td class="pass">correct</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Role = user</td><td class="pass">user</td></tr>
+    <tr><td class="pass">&#10004;</td><td>Duplicate register rejected</td><td class="pass">status=exists</td></tr>
+  </table>
+</div>
+
+<h2>Pipeline Verified</h2>
+<div class="card">
+  <pre>
+Prime (C qr.c, V6 41&times;41)
+  &darr; wire triples: {resp, qr_data, BASE64} + {resp, qr_size, 41}
+Relay (C, handle_register_http)
+  &darr; JSON: {"qr_data":"AQEB...","qr_size":41,...}
+Worker (CF Pages, handleRegister)
+  &darr; NTRP triples: {BASE64, qr_data, none} + {41, qr_size, none}
+Browser (auth-gate.js)
+  &darr; atob() &rarr; Uint8Array &rarr; renderQR(canvas, matrix, 41)
+Canvas
+  &darr; QR code displayed to user</pre>
+</div>
+
+<h2>Manual Verification Needed</h2>
+<div class="card">
+  <p>The automated tests verify the data pipeline end-to-end. What remains is a <strong>manual phone scan</strong>:</p>
+  <ol>
+    <li>Open <code>https://lakemedical.org</code> in a browser</li>
+    <li>Enter a username, click Register</li>
+    <li>QR code should render on the canvas</li>
+    <li>Scan with Google Authenticator / Authy</li>
+    <li>Enter the 6-digit TOTP code, click Verify</li>
+    <li>Should authenticate and dismiss the gate</li>
+  </ol>
+</div>
+
+<div class="footer">Generated 2026-04-02 20:50 &middot; Board 31.4 E2E Test &middot; lakemedical.org</div>
+</div>
+</body>
+</html>

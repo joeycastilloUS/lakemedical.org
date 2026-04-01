@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board 31.1–31.3 — All C QR: relay qr_data, worker triples, delete qr.js</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #222; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .pass { color: #4ade80; }
+  .del { color: #f87171; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Board 31.1&ndash;31.3 &mdash; All C QR</h1>
+<p class="subtitle">Server-side QR via C qr.c &middot; 3 items &middot; 8 pts &middot; +14 &minus;422 lines</p>
+
+<h2>What Was Updated</h2>
+<div class="card">
+  <h3>31.1 &mdash; Relay: qr_data in /register JSON (3 pts)</h3>
+  <ul>
+    <li>Patched <code>handle_register_http()</code> in <code>relay_server.c</code></li>
+    <li>Added <code>qr_data</code> extraction via <code>wire_find2(reg_resp, n, "resp", "qr_data")</code></li>
+    <li>Added <code>"qr_data":"%s"</code> to JSON response format string</li>
+    <li>Bumped response buffer 8192 &rarr; 16384 (V5 QR base64 = ~1.8 KB)</li>
+    <li>Compiled, deployed, verified: <span class="pass">qr_data: 1828 chars, qr_size: 37</span></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>31.2 &mdash; Worker: qr_data + qr_size triples (2 pts)</h3>
+  <ul>
+    <li>Added 2 lines in <code>handleRegister()</code>:</li>
+  </ul>
+  <pre>if (json.qr_data) triples.push({ s: json.qr_data, p: 'qr_data', o: 'none' });
+if (json.qr_size) triples.push({ s: String(json.qr_size), p: 'qr_size', o: 'none' });</pre>
+  <ul>
+    <li>Deployed via <code>wrangler pages deploy</code></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>31.3 &mdash; Auth-gate: server QR rendering + delete qr.js (3 pts)</h3>
+  <p><span class="label">Changed:</span> <code>auth-gate.js</code> register handler</p>
+  <pre>/* Server QR matrix — base64 decode + render */
+var qrB64  = nous_find(triples, 'qr_data');
+var qrSize = parseInt(nous_find(triples, 'qr_size'), 10);
+if (qrB64 &amp;&amp; qrSize) {
+  var raw = atob(qrB64);
+  var matrix = new Uint8Array(raw.length);
+  for (var j = 0; j &lt; raw.length; j++) matrix[j] = raw.charCodeAt(j);
+  renderQR(qrCanvas, matrix, qrSize);
+}</pre>
+  <p><span class="del">Deleted:</span> <code>alumni/js/utils/qr.js</code> (413 lines)</p>
+  <p><span class="del">Removed:</span> <code>&lt;script src="./js/utils/qr.js"&gt;</code> from <code>index.html</code></p>
+</div>
+
+<h2>Files Changed</h2>
+<div class="card">
+  <ul>
+    <li><code>functions/api/wire.js</code> &mdash; +2 lines (qr_data + qr_size triples)</li>
+    <li><code>alumni/js/auth-gate.js</code> &mdash; +7 &minus;4 lines (server QR render)</li>
+    <li><code>alumni/index.html</code> &mdash; &minus;1 line (removed qr.js script tag)</li>
+    <li><span class="del"><code>alumni/js/utils/qr.js</code> &mdash; DELETED (413 lines)</span></li>
+    <li><code>be/board.md</code> &mdash; 31.1-31.3 moved to Done</li>
+  </ul>
+  <p style="margin-top:12px"><span class="label">Net:</span> +14 insertions, &minus;422 deletions</p>
+</div>
+
+<h2>Relay Verification</h2>
+<div class="card">
+  <pre>$ curl -X POST http://localhost:8080/register -d '{"user_id":"qrtest42"}'
+{
+  "status": "ok",
+  "otpauth": "otpauth://totp/NOUS:qrtest42?secret=...&amp;issuer=NOUS",
+  "qr_size": 37,
+  "qr_data": "AQEBAQEBAQABAAEBAAEAAQAAAQEAAAEBAQ..." (1828 chars),
+  "role": "user"
+}</pre>
+  <p><span class="pass">&#10004;</span> qr_data present, 1828 base64 chars = 1369 bytes = 37&times;37 matrix</p>
+</div>
+
+<h2>Data Flow (Verified)</h2>
+<div class="card">
+  <pre>
+Prime (C qr.c)     &rarr; 5 wire triples incl qr_data base64
+Relay (C)          &rarr; JSON with qr_data field        <span class="pass">&#10004; verified</span>
+Worker (CF Pages)  &rarr; NTRP triples with qr_data      <span class="pass">&#10004; deployed</span>
+Browser (auth-gate)&rarr; atob() + renderQR()             <span class="pass">&#10004; deployed</span></pre>
+</div>
+
+<h2>What&rsquo;s Next</h2>
+<div class="card">
+  <p>31.4 &mdash; E2E test: register on lakemedical.org, verify QR renders, scan with phone app, TOTP login.</p>
+</div>
+
+<div class="footer">Generated 2026-04-02 20:47 &middot; Board 31.1&ndash;31.3 Build &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
