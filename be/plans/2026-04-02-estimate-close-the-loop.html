@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estimate: Close the Loop — Full Auth Round-Trip</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  ul { padding-left: 20px; }
+  li { margin: 6px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th { text-align: left; color: #6FC3DF; padding: 8px; border-bottom: 1px solid #333; }
+  td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; }
+  .total { color: #6FC3DF; font-weight: 700; font-size: 1.1rem; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~E Estimate: Close the Loop</h1>
+<p class="subtitle">5 items &rarr; 1 board &rarr; 21 pts &mdash; sequential dependency chain</p>
+
+<h2>Board 30 &mdash; Close the Loop (21 pts)</h2>
+<div class="card">
+  <table>
+    <tr><th>Item</th><th>Pts</th><th>Cmd</th><th>Phase</th></tr>
+    <tr>
+      <td>{502 root cause, diagnose on, relay logs + prime reachability + PSK match}</td>
+      <td>5</td>
+      <td>~f</td>
+      <td>1 &mdash; Diagnose</td>
+    </tr>
+    <tr>
+      <td>{prime VMs + binary, verify on, GCE nodes + wire auth handler}</td>
+      <td>5</td>
+      <td>~t</td>
+      <td>2 &mdash; Prime Readiness</td>
+    </tr>
+    <tr>
+      <td>{test user with TOTP secret, add to, prime user store}</td>
+      <td>3</td>
+      <td>~a</td>
+      <td>2 &mdash; Prime Readiness</td>
+    </tr>
+    <tr>
+      <td>{full auth round-trip, test on, lakemedical.org &rarr; relay &rarr; prime}</td>
+      <td>5</td>
+      <td>~t</td>
+      <td>3 &mdash; Round-Trip</td>
+    </tr>
+    <tr>
+      <td>{E2E test script, update with, real auth assertions + session token check}</td>
+      <td>3</td>
+      <td>~u</td>
+      <td>3 &mdash; Round-Trip</td>
+    </tr>
+    <tr>
+      <td colspan="4" style="text-align:right;"><span class="total">21 pts total</span></td>
+    </tr>
+  </table>
+</div>
+
+<h2>Value Rationale</h2>
+<div class="card">
+  <ul>
+    <li><strong>Diagnosis first (5 pts).</strong> Highest value &mdash; everything else depends on understanding why 502 happens. May reveal the fix is trivial (start a VM) or deep (missing handler).</li>
+    <li><strong>Prime readiness (5+3 pts).</strong> Without a running prime + provisioned user, auth can't work. Split into verify (5) and provision (3) because verify is investigation, provision is action.</li>
+    <li><strong>Round-trip test (5+3 pts).</strong> The proof. Depends on everything above. Split into manual test (5 &mdash; browser + script) and E2E update (3 &mdash; code change).</li>
+  </ul>
+</div>
+
+<h2>Dependencies</h2>
+<div class="card">
+  <p><strong>Strictly sequential.</strong> Each item depends on the previous:</p>
+  <ul>
+    <li>Can't fix prime until we diagnose what's wrong</li>
+    <li>Can't provision user until prime is running</li>
+    <li>Can't test round-trip until user exists</li>
+    <li>Can't update E2E test until round-trip works</li>
+  </ul>
+  <p>One board, no parallelism. 21 pts at the ceiling &mdash; this is a deep investigation + fix chain.</p>
+</div>
+
+<div class="footer">Generated 2026-04-02 00:20 &middot; Be</div>
+</div>
+</body>
+</html>
