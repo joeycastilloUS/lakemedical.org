@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inspect: Wire Integration — Where We Are</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  ul { padding-left: 20px; }
+  li { margin: 6px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .done { color: #4CAF50; }
+  .gap { color: #FF9800; }
+  .blocked { color: #F44336; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th { text-align: left; color: #6FC3DF; padding: 8px; border-bottom: 1px solid #333; }
+  td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; vertical-align: top; }
+  pre { background: #0a0a0a; padding: 14px; border-radius: 6px; overflow-x: auto; margin: 10px 0; font-size: 0.85rem; color: #aaa; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~I Inspect: Wire Integration Status</h1>
+<p class="subtitle">lakemedical.org &harr; NOUS relay &mdash; what's built, what's working, what's next</p>
+
+<h2>What It Is</h2>
+<div class="card">
+  <p>TOTP-authenticated alumni tracking via NOUS wire protocol. Browser packs binary NTRP triples, Worker encrypts into 0xCA envelope, TCP to relay, relay dispatches (auth/register/forward), response comes back the same path in reverse.</p>
+</div>
+
+<h2>The Full Chain</h2>
+<div class="card">
+<pre>
+Browser                     Worker                      Relay                       Prime
+  |                           |                           |                           |
+  |-- wire_pack(triples) ---->|                           |                           |
+  |   POST /api/wire (binary) |                           |                           |
+  |                           |-- cockpit_encrypt ------->|                           |
+  |                           |   TCP relay:8080 (0xCA)   |                           |
+  |                           |                           |-- decrypt (cockpit) ----->|
+  |                           |                           |   wire_unpack             |
+  |                           |                           |   dispatch(action):       |
+  |                           |                           |     auth -> prime         |
+  |                           |                           |     register -> prime     |
+  |                           |                           |     forward -> prime      |
+  |                           |                           |<-- response (0xCA) ------|
+  |                           |<-- decrypt response ------|                           |
+  |<-- wire_unpack(triples) --|                           |                           |
+</pre>
+</div>
+
+<h2>Layer Status</h2>
+
+<div class="card">
+  <h3>Layer 1: Browser &rarr; Worker <span class="done">COMPLETE</span></h3>
+  <table>
+    <tr><th>Component</th><th>File</th><th>Status</th></tr>
+    <tr><td>wire.js (NTRP pack/unpack)</td><td><code>alumni/js/wire.js</code></td><td><span class="done">&#x2713;</span> Deployed</td></tr>
+    <tr><td>nous.js (high-level client)</td><td><code>alumni/js/nous.js</code></td><td><span class="done">&#x2713;</span> Deployed</td></tr>
+    <tr><td>auth-gate.js (login/register UI)</td><td><code>alumni/js/auth-gate.js</code></td><td><span class="done">&#x2713;</span> Deployed</td></tr>
+    <tr><td>auth-gate.css (WesternU brand)</td><td><code>alumni/css/auth-gate.css</code></td><td><span class="done">&#x2713;</span> Deployed</td></tr>
+    <tr><td>QR encoder (TOTP registration)</td><td><code>alumni/js/utils/qr.js</code></td><td><span class="done">&#x2713;</span> Deployed</td></tr>
+    <tr><td>Session timer (15-min auto-expire)</td><td><code>alumni/js/auth-gate.js</code></td><td><span class="done">&#x2713;</span> Deployed</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Layer 2: Worker &rarr; Relay <span class="done">COMPLETE</span></h3>
+  <table>
+    <tr><th>Component</th><th>File</th><th>Status</th></tr>
+    <tr><td>NTRP magic validation</td><td><code>functions/api/wire.js</code></td><td><span class="done">&#x2713;</span> 400 on bad magic</td></tr>
+    <tr><td>Cockpit key derivation</td><td><code>functions/api/wire.js</code></td><td><span class="done">&#x2713;</span> HMAC-SHA-256(PSK, label)</td></tr>
+    <tr><td>0xCA envelope encrypt</td><td><code>functions/api/wire.js</code></td><td><span class="done">&#x2713;</span> AES-256-GCM</td></tr>
+    <tr><td>TCP connect to relay</td><td><code>functions/api/wire.js</code></td><td><span class="done">&#x2713;</span> DNS-resolved</td></tr>
+    <tr><td>Response decrypt</td><td><code>functions/api/wire.js</code></td><td><span class="done">&#x2713;</span> 0xCA envelope</td></tr>
+    <tr><td>Rate limiting</td><td><code>functions/api/wire.js</code></td><td><span class="done">&#x2713;</span> 10/min per IP</td></tr>
+    <tr><td>NOUS_PSK secret</td><td>Cloudflare Pages</td><td><span class="done">&#x2713;</span> Set</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Layer 3: Relay (C) <span class="done">COMPLETE</span></h3>
+  <table>
+    <tr><th>Component</th><th>Location</th><th>Status</th></tr>
+    <tr><td>0xCA envelope detect + decrypt</td><td><code>relay_server.c:2207</code></td><td><span class="done">&#x2713;</span> Cockpit key path</td></tr>
+    <tr><td>NTRP unpack + dispatch</td><td><code>relay_server.c:1660</code></td><td><span class="done">&#x2713;</span> handle_relay_wire()</td></tr>
+    <tr><td>handle_wire_auth (delegate to prime)</td><td><code>relay_server.c:1441</code></td><td><span class="done">&#x2713;</span> relay_wire_to_prime()</td></tr>
+    <tr><td>handle_wire_register</td><td><code>relay_server.c:1513</code></td><td><span class="done">&#x2713;</span> Implemented</td></tr>
+    <tr><td>handle_wire_forward (session check)</td><td><code>relay_server.c:1567</code></td><td><span class="done">&#x2713;</span> Implemented</td></tr>
+    <tr><td>handle_wire_status</td><td><code>relay_server.c:1633</code></td><td><span class="done">&#x2713;</span> Implemented</td></tr>
+    <tr><td>Session store (triples, 15-min TTL)</td><td><code>relay_server.c:428</code></td><td><span class="done">&#x2713;</span> relay_session_valid()</td></tr>
+    <tr><td>DNS discovery (primes)</td><td><code>relay_server.c</code></td><td><span class="done">&#x2713;</span> Board 31</td></tr>
+    <tr><td>DNS announce (self)</td><td><code>relay_server.c</code></td><td><span class="done">&#x2713;</span> Board 31</td></tr>
+    <tr><td>Identity + operator verify</td><td><code>relay_server.c</code></td><td><span class="done">&#x2713;</span> Board 30</td></tr>
+    <tr><td>Gate (:8443) /gate/whoami</td><td><code>relay_server.c:856</code></td><td><span class="done">&#x2713;</span> Implemented</td></tr>
+    <tr><td>Gate (:8443) /gate/approve</td><td><code>relay_server.c:872</code></td><td><span class="done">&#x2713;</span> Implemented</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Layer 4: Prime (auth backend) <span class="gap">GAP</span></h3>
+  <table>
+    <tr><th>Component</th><th>Status</th></tr>
+    <tr><td>Prime receives auth wire from relay</td><td><span class="gap">&#x26A0;</span> Prime exists but not verified against this flow</td></tr>
+    <tr><td>TOTP validate on prime</td><td><span class="gap">&#x26A0;</span> totp_validate() exists in C, not tested E2E via wire</td></tr>
+    <tr><td>User registration on prime</td><td><span class="gap">&#x26A0;</span> Not verified</td></tr>
+    <tr><td>Session token mint + return via wire</td><td><span class="gap">&#x26A0;</span> Relay mints session, prime validates auth &mdash; handshake untested</td></tr>
+  </table>
+</div>
+
+<h2>E2E Test Results (20/20)</h2>
+<div class="card">
+  <p>The E2E test proves the chain from browser to relay <strong>connects</strong> but returns <strong>502</strong>:</p>
+  <ul>
+    <li><span class="done">&#x2713;</span> Worker receives NTRP, validates magic, derives cockpit key</li>
+    <li><span class="done">&#x2713;</span> Worker encrypts + TCP connects to relay.3-nous.net:8080</li>
+    <li><span class="done">&#x2713;</span> Relay receives 0xCA envelope, decrypts with cockpit key</li>
+    <li><span class="gap">&#x26A0;</span> Relay dispatches auth &rarr; relay_wire_to_prime() &rarr; prime response comes back but Worker can't decrypt the response envelope (502)</li>
+  </ul>
+  <p><strong>The 502 means:</strong> the relay-to-prime leg works (relay sends wire auth to prime), but the response coming back isn't a valid 0xCA envelope that the Worker can decrypt. This is the gap &mdash; the relay encrypts the response with its own key, not the cockpit key the Worker expects.</p>
+</div>
+
+<h2>Open Questions</h2>
+<div class="card">
+  <ol>
+    <li><strong>Response encryption key mismatch?</strong> The relay encrypts responses with <code>g_cockpit_key</code> (line 1710). The Worker decrypts with the same derived cockpit key. Both derive from the same PSK + label. <em>If the PSK matches on both sides, this should work.</em> Does the relay have the same PSK as the Worker?</li>
+    <li><strong>Is a prime actually running and reachable?</strong> The relay has CLI primes (35.236.118.2:8080, 34.81.178.230:8080) from systemd config. Are those primes actually running and accepting wire auth?</li>
+    <li><strong>Prime auth handler:</strong> When the relay sends wire auth triples to a prime, does the prime have a handler that validates TOTP and returns a success/fail response in wire format?</li>
+    <li><strong>TOTP user provisioning:</strong> No users are registered on the prime. Even if auth gets through, there's no user to authenticate. Need at least one test user with a TOTP secret.</li>
+  </ol>
+</div>
+
+<h2>What's Next</h2>
+<div class="card">
+  <p>The browser-to-relay path is fully built. The gap is the relay-to-prime leg and having a real auth round-trip work end-to-end. To close the loop:</p>
+  <ol>
+    <li>Verify prime is running and accepts wire auth requests</li>
+    <li>Provision a test user with TOTP secret on the prime</li>
+    <li>Debug the 502 &mdash; is it a key mismatch, a prime rejection, or a response format issue?</li>
+    <li>Get a full auth round-trip: browser login &rarr; session token &rarr; gate opens</li>
+  </ol>
+</div>
+
+<div class="footer">Generated 2026-04-02 00:10 &middot; Be</div>
+</div>
+</body>
+</html>

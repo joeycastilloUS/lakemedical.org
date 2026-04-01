@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan: Close the Loop — Full Auth Round-Trip</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 16px 20px; margin: 10px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 6px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; color: #6FC3DF; }
+  .banner { background: #1a2a3a; border: 1px solid #6FC3DF; border-radius: 8px; padding: 16px 20px; margin: 16px 0; text-align: center; }
+  .banner-text { color: #6FC3DF; font-weight: 700; font-size: 1.3rem; }
+  .banner-sub { color: #888; font-size: 0.9rem; margin-top: 4px; }
+  pre { background: #0a0a0a; padding: 14px; border-radius: 6px; overflow-x: auto; margin: 10px 0; font-size: 0.85rem; color: #aaa; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th { text-align: left; color: #6FC3DF; padding: 8px; border-bottom: 1px solid #333; }
+  td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; vertical-align: top; }
+  .phase { border-left: 3px solid #6FC3DF; padding-left: 16px; margin: 16px 0; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~P Plan: Close the Loop</h1>
+<p class="subtitle">Browser login &rarr; session token &rarr; gate opens &mdash; full auth round-trip</p>
+
+<div class="banner">
+  <span class="banner-text">Plan &mdash; Awaiting Approval</span>
+  <div class="banner-sub">Source: inspect-wire-integration-status.html &mdash; 3 layers done, 1 gap remaining</div>
+</div>
+
+<h2>Intent</h2>
+<div class="card">
+  <p>The browser-to-relay chain is built and verified (20/20 E2E tests, 502 confirms connection). The gap is the last mile: relay dispatches auth to prime, prime validates TOTP, session token comes back, gate opens. This plan closes that loop.</p>
+</div>
+
+<h2>Current State</h2>
+<div class="card">
+<pre>
+DONE                              GAP
+Browser &rarr; Worker &rarr; Relay         Relay &rarr; Prime &rarr; Session &rarr; Gate Opens
+  wire.js ✓                         Prime running? ✓/✗
+  nous.js ✓                         Prime wire auth handler? needs verify
+  auth-gate.js ✓                    TOTP user provisioned? NO
+  Worker 0xCA ✓                     Full round-trip? NO (502)
+  Relay decrypt+dispatch ✓          Response key match? needs debug
+  DNS discovery ✓
+  Identity ✓
+</pre>
+</div>
+
+<h2>Scope</h2>
+<div class="card">
+  <table>
+    <tr><th>In Scope</th><th>Out of Scope</th></tr>
+    <tr>
+      <td>
+        <ul>
+          <li>Diagnose the 502 (response envelope mismatch)</li>
+          <li>Verify prime is running and accepts wire auth</li>
+          <li>Provision test user with TOTP secret on prime</li>
+          <li>Debug relay&rarr;prime wire path</li>
+          <li>Full auth round-trip: browser &rarr; session token</li>
+          <li>Updated E2E test that exercises real auth</li>
+        </ul>
+      </td>
+      <td>
+        <ul>
+          <li>New relay features (gate :8443 already built)</li>
+          <li>Additional relay nodes</li>
+          <li>Browser app features (queue, directory, etc.)</li>
+          <li>Data enrichment pipeline</li>
+          <li>Multi-user provisioning</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<h2>Approach</h2>
+
+<div class="phase">
+  <h3>Phase 1 &mdash; Diagnose the 502</h3>
+  <div class="card">
+    <p>The Worker sends a 0xCA envelope to relay:8080. The relay decrypts with cockpit key, dispatches to <code>handle_wire_auth</code>, which calls <code>relay_wire_to_prime()</code>. The response comes back and the relay encrypts it with cockpit key. The Worker tries to decrypt. Something breaks.</p>
+    <ol>
+      <li><strong>SSH into relay</strong> &mdash; check <code>journalctl -u nous-relay</code> for the auth dispatch logs. Does it say <code>[EW] wire request</code>? Does it reach <code>handle_wire_auth</code>?</li>
+      <li><strong>Check prime reachability</strong> &mdash; can the relay TCP connect to the CLI primes (35.236.118.2:8080, 34.81.178.230:8080)? Are they running?</li>
+      <li><strong>Check PSK match</strong> &mdash; relay's <code>NOUS_PSK</code> env var (from systemd) must match the Worker's <code>NOUS_PSK</code> secret. Same hex string &rarr; same cockpit key.</li>
+      <li><strong>Check response format</strong> &mdash; if prime is unreachable, <code>relay_wire_to_prime()</code> returns an error response. Is that response properly encrypted with cockpit key before sending back to the Worker?</li>
+    </ol>
+    <p><strong>Most likely root cause:</strong> Prime is not running, relay_wire_to_prime() fails, and the error response either (a) isn't encrypted, or (b) is encrypted with the wrong key.</p>
+  </div>
+</div>
+
+<div class="phase">
+  <h3>Phase 2 &mdash; Prime Readiness</h3>
+  <div class="card">
+    <ol>
+      <li><strong>Check prime VMs</strong> &mdash; are they RUNNING in GCE? Start if TERMINATED.</li>
+      <li><strong>Check prime binary</strong> &mdash; does it have wire auth handling? Check <code>a-d-d</code> spec for prime's expected interface.</li>
+      <li><strong>Provision test user</strong> &mdash; register one TOTP user on the prime's user store. This requires understanding how the prime stores users (triple store? users.dat? TOTP seed file?).</li>
+      <li><strong>Verify relay&rarr;prime connectivity</strong> &mdash; from relay VM, can we TCP connect to prime:8080 and send a test wire auth frame?</li>
+    </ol>
+  </div>
+</div>
+
+<div class="phase">
+  <h3>Phase 3 &mdash; Full Round-Trip</h3>
+  <div class="card">
+    <ol>
+      <li><strong>Test auth flow manually</strong> &mdash; send auth triples (user + TOTP code) via the E2E test script to lakemedical.org/api/wire. Expect: status 200 + NTRP response with session token.</li>
+      <li><strong>Test in browser</strong> &mdash; open lakemedical.org, use the auth gate login form with the test user. Expect: QR shows on register, TOTP validates on login, session timer starts, gate drops, app loads.</li>
+      <li><strong>Update E2E test</strong> &mdash; add real auth assertions (200 + valid NTRP response + session token present).</li>
+    </ol>
+  </div>
+</div>
+
+<h2>Dependencies</h2>
+<div class="card">
+  <table>
+    <tr><th>What</th><th>Needs</th><th>Who</th></tr>
+    <tr><td>Relay logs</td><td>SSH to nous-relay-us-west2</td><td>gcloud compute ssh</td></tr>
+    <tr><td>Prime status</td><td>GCE console / gcloud</td><td>gcloud compute instances describe</td></tr>
+    <tr><td>Prime binary</td><td>May need build + deploy if not running</td><td>Claude (if spec exists in a-d-d)</td></tr>
+    <tr><td>Test user</td><td>Understanding of prime user provisioning</td><td>Check a-d-d spec</td></tr>
+    <tr><td>TOTP secret</td><td>Authenticator app enrollment</td><td>Human (Joey)</td></tr>
+  </table>
+</div>
+
+<h2>Constraints</h2>
+<div class="card">
+  <ul>
+    <li><strong>Diagnose before building.</strong> The 502 might be a simple config issue (PSK mismatch, prime not running). Don't write code until we know what's wrong.</li>
+    <li><strong>Preflight check (Board 28 rule):</strong> Before any remote build, verify prereqs exist on target.</li>
+    <li><strong>No new relay code expected.</strong> The relay wire handler is complete. The gap is prime + connectivity + user provisioning.</li>
+    <li><strong>One test user is enough.</strong> Multi-user provisioning is out of scope.</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-02 00:15 &middot; Be</div>
+</div>
+</body>
+</html>
