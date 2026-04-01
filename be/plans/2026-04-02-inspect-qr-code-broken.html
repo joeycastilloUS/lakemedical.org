@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~I: QR Code — JS Encoder Broken, C Version Working</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .fatal { color: #f87171; font-weight: 700; }
+  .warn { color: #fbbf24; font-weight: 700; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #1A1A1A; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 6px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~I: QR Code &mdash; JS Encoder Broken</h1>
+<p class="subtitle">lakemedical.org qr.js vs NOUS qr.c &middot; 4 fatal bugs found</p>
+
+<h2>What It Is</h2>
+<div class="card">
+  <p>Two QR code encoders exist in the ecosystem:</p>
+  <table>
+    <tr><th>File</th><th>Language</th><th>Lines</th><th>Status</th></tr>
+    <tr><td><code>C:\metal\auth\qr.c</code></td><td>C</td><td>606</td><td style="color:#4ade80">Working</td></tr>
+    <tr><td><code>C:\nous\user\skill\qr\qr.c</code></td><td>C</td><td>707</td><td style="color:#4ade80">Working (original)</td></tr>
+    <tr><td><code>C:\lakemedical.org\alumni\js\utils\qr.js</code></td><td>JS</td><td>413</td><td style="color:#f87171">Broken &mdash; unscannable output</td></tr>
+  </table>
+  <p>The C version (deployed on the prime) generates valid, scannable QR codes. The JS version (in the browser) was written as a port but has <strong>4 critical bugs</strong> that make its output unreadable by any QR scanner.</p>
+</div>
+
+<h2>What the C Version Does Right</h2>
+<div class="card">
+  <ul>
+    <li><span class="label">GF(256) arithmetic</span> &mdash; primitive poly 0x11D, log/exp tables, correct Reed-Solomon</li>
+    <li><span class="label">Multi-block interleaving</span> &mdash; proper data/EC block subdivision per ISO 18004</li>
+    <li><span class="label">All 4 penalty rules</span> &mdash; runs, 2&times;2 blocks, finder patterns, dark module balance</li>
+    <li><span class="label">Correct format info placement</span> &mdash; 15-bit format string, BCH error correction, correct bit positions</li>
+    <li><span class="label">Full test suite</span> &mdash; <code>test_qr.c</code> (492 lines, 200+ assertions, tests all versions + EC levels)</li>
+  </ul>
+</div>
+
+<h2>Bugs in the JS Version</h2>
+
+<div class="card">
+  <h3><span class="fatal">FATAL 1:</span> Format Info Bit Placement Reversed</h3>
+  <p>The format information (15-bit sequence encoding EC level + mask pattern) is placed at specific positions around the finder patterns. The JS version <strong>reverses the bit extraction order</strong> and uses different row/column mappings than the standard.</p>
+  <pre>
+// JS (WRONG) — bits extracted in reverse order
+var bit = (bits >> (14 - i)) & 1;  // Should be (bits >> i) for first area
+// Also: row mapping skips positions incorrectly
+
+// C (CORRECT) — matches ISO 18004 Table C.1
+static const int r1[] = {0,1,2,3,4,5,7,8,8,8,8,8,8,8,8};
+static const int c1[] = {8,8,8,8,8,8,8,8,7,5,4,3,2,1,0};</pre>
+  <p><strong>Effect:</strong> Scanner cannot determine EC level or mask pattern. QR is completely undecodable.</p>
+</div>
+
+<div class="card">
+  <h3><span class="fatal">FATAL 2:</span> No Block Interleaving</h3>
+  <p>QR versions 4+ require multiple data/EC blocks with <strong>interleaved</strong> codewords. The JS version treats all data as a single monolithic block.</p>
+  <pre>
+// JS: linear — data[], then EC[] (WRONG for V4+)
+// C:  interleaved — data[blk0][0], data[blk1][0], data[blk0][1], ...
+//     then EC[blk0][0], EC[blk1][0], ...</pre>
+  <p><strong>Effect:</strong> Data codewords placed in wrong bit positions for V4&ndash;V10. Decoder extracts garbage.</p>
+</div>
+
+<div class="card">
+  <h3><span class="fatal">FATAL 3:</span> Only 1 of 4 Penalty Rules Implemented</h3>
+  <p>Mask selection requires scoring all 8 mask patterns using 4 penalty rules. The JS version only implements Rule 1 (consecutive runs). Missing:</p>
+  <ul>
+    <li><span class="warn">Rule 2:</span> 2&times;2 same-color blocks (3 pts each)</li>
+    <li><span class="warn">Rule 3:</span> Finder-like patterns 10111010000 / 00001011101 (40 pts each)</li>
+    <li><span class="warn">Rule 4:</span> Dark module proportion deviation from 50% (10 pts per 5%)</li>
+  </ul>
+  <p><strong>Effect:</strong> Wrong mask selected. Even if other bugs were fixed, the QR would be noisy and hard to scan.</p>
+</div>
+
+<div class="card">
+  <h3><span class="warn">BUG 4:</span> Capacity Table Mismatch for Multi-Block Versions</h3>
+  <p>The JS capacity array is simplified and diverges from the C version&rsquo;s per-EC-level tables at V4+. Combined with the interleaving bug, the data payload length can be wrong.</p>
+</div>
+
+<h2>The Fix: Port C to JS Faithfully</h2>
+<div class="card">
+  <p>The C version (<code>qr.c</code>) is <strong>proven, tested (200+ assertions), and deployed in production</strong> on the prime server. The fix is straightforward:</p>
+  <ol>
+    <li>Port <code>qr.c</code> to JavaScript line-by-line, preserving all algorithms</li>
+    <li>Include multi-block interleaving, all 4 penalty rules, correct format info placement</li>
+    <li>Keep the same API: <code>qr_encode(text)</code> &rarr; <code>{data, size}</code></li>
+    <li>Test with known otpauth URIs against a scanner</li>
+  </ol>
+</div>
+
+<h2>Open Questions</h2>
+<div class="card">
+  <ul>
+    <li>Should the JS port support V7&ndash;V10? The C version tops at V6 (41&times;41). Most otpauth URIs fit in V4&ndash;V5.</li>
+    <li>Should we add version info placement for V7+? (Not needed if we cap at V6)</li>
+    <li>The prime already generates QR data server-side. Could we just send the pre-rendered matrix instead of re-encoding in the browser? (Simpler but adds wire payload.)</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-02 19:25 &middot; ~I QR Code Inspection &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
