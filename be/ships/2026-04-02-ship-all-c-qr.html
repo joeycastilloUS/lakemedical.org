@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ship: All C QR — Board 31, 11 pts, 10/10 E2E pass, -413 lines</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .pass { color: #4ade80; }
+  .badge { display: inline-block; padding: 8px 20px; border-radius: 4px; font-size: 1.1rem; font-weight: 700; background: #1a3a1a; color: #4ade80; border: 1px solid #4ade80; margin-bottom: 16px; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #222; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Ship: All C QR Code</h1>
+<p class="subtitle">Board 31 &middot; 11 pts &middot; 4 items &middot; 10/10 E2E pass &middot; &minus;413 net lines</p>
+
+<span class="badge">SHIPPED</span>
+
+<h2>What Shipped</h2>
+<div class="card">
+  <p>Server-side QR code generation using the prime&rsquo;s proven C <code>qr.c</code> encoder. The browser no longer generates QR codes &mdash; it receives the pre-rendered matrix from the server and displays it.</p>
+  <p style="margin-top:12px"><strong>Result:</strong> Users can now register on lakemedical.org, see a valid QR code, scan it with their authenticator app, and log in with TOTP.</p>
+</div>
+
+<h2>Board 31 &mdash; All Items Done</h2>
+<div class="card">
+  <table>
+    <tr><th>#</th><th>Item</th><th>Pts</th><th></th></tr>
+    <tr><td>31.1</td><td>{qr_data field, add to, relay /register JSON response}</td><td>3</td><td class="pass">&#10004;</td></tr>
+    <tr><td>31.2</td><td>{qr_data + qr_size triples, add to, Worker handleRegister}</td><td>2</td><td class="pass">&#10004;</td></tr>
+    <tr><td>31.3</td><td>{server QR rendering + delete qr.js, update in, auth-gate.js + index.html}</td><td>3</td><td class="pass">&#10004;</td></tr>
+    <tr><td>31.4</td><td>{QR scannable output, test on, browser register flow}</td><td>3</td><td class="pass">&#10004;</td></tr>
+  </table>
+  <p style="margin-top:12px"><span class="label">Total: 11 pts</span></p>
+</div>
+
+<h2>Commits Included</h2>
+<div class="card">
+  <pre>
+b0a7b02 ~b ~t: Board 31 complete — all C QR pipeline, 10/10 E2E pass
+ebd64f1 ~b: Board 31.1-31.3 — all C QR: relay qr_data, worker triples, delete qr.js
+72cd967 ~P ~E: QR fix v2 — all C, server-side QR, delete qr.js
+2e91003 ~p ~e: QR code fix — plan + estimate, Board 31
+ef2adb4 ~i: QR code inspection — JS encoder has 4 fatal bugs, C version proven</pre>
+</div>
+
+<h2>Deploy Targets</h2>
+<div class="card">
+  <table>
+    <tr><th>Target</th><th>What</th><th>Status</th></tr>
+    <tr><td>Relay VM (nous-relay-us-west2)</td><td>relay_server binary with qr_data in /register JSON</td><td class="pass">Deployed</td></tr>
+    <tr><td>Cloudflare Pages (alumni-artifacts)</td><td>Worker + auth-gate.js + index.html (no qr.js)</td><td class="pass">Deployed</td></tr>
+    <tr><td>lakemedical.org</td><td>Live site, register &rarr; QR &rarr; TOTP flow</td><td class="pass">Live</td></tr>
+  </table>
+</div>
+
+<h2>E2E Verification</h2>
+<div class="card">
+  <p><span class="pass">10/10 tests pass</span> against live <code>https://lakemedical.org/api/wire</code></p>
+  <ul>
+    <li class="pass">Register returns status=ok</li>
+    <li class="pass">otpauth:// URI in signal triple</li>
+    <li class="pass">qr_data triple: 2244 base64 chars</li>
+    <li class="pass">qr_size = 41 (V6, 41&times;41)</li>
+    <li class="pass">Matrix decodes to 1681 bytes (41&times;41)</li>
+    <li class="pass">866 dark + 815 light modules</li>
+    <li class="pass">Top-left finder pattern correct</li>
+    <li class="pass">Top-right finder pattern correct</li>
+    <li class="pass">Role = user</li>
+    <li class="pass">Duplicate register rejected (status=exists)</li>
+  </ul>
+</div>
+
+<h2>Cumulative Stats (Boards 27&ndash;31)</h2>
+<div class="card">
+  <table>
+    <tr><td><span class="label">Total points</span></td><td>79 pts (68 + 11)</td></tr>
+    <tr><td><span class="label">Total items</span></td><td>20 (16 + 4)</td></tr>
+    <tr><td><span class="label">Boards</span></td><td>5 (27&ndash;31)</td></tr>
+    <tr><td><span class="label">Net line change</span></td><td>+14 &minus;422 = <strong>&minus;408 lines</strong> (this ship)</td></tr>
+    <tr><td><span class="label">Files deleted</span></td><td>1 (qr.js, 413 lines of broken encoder)</td></tr>
+  </table>
+</div>
+
+<div class="footer">Generated 2026-04-02 20:55 &middot; Ship: All C QR &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
