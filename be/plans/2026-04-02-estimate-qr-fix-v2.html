@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~E: Fix QR Code v2 — 4 items, 1 board (31), 11 pts</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  .total { color: #6FC3DF; font-weight: 700; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~E: Fix QR Code v2 &mdash; All C</h1>
+<p class="subtitle">4 items &middot; 1 board (31) &middot; 11 pts &middot; lakemedical.org</p>
+
+<h2>Board 31 &mdash; Fix QR Code, All C (11 pts)</h2>
+<div class="card">
+  <table>
+    <tr><th>#</th><th>Work Item</th><th>Command</th><th>Pts</th></tr>
+    <tr><td>31.1</td><td>{qr_data field, add to, relay /register JSON response}</td><td>~u</td><td>3</td></tr>
+    <tr><td>31.2</td><td>{qr_data + qr_size triples, add to, Worker handleRegister}</td><td>~u</td><td>2</td></tr>
+    <tr><td>31.3</td><td>{server QR rendering + delete qr.js, update in, auth-gate.js + index.html}</td><td>~u</td><td>3</td></tr>
+    <tr><td>31.4</td><td>{QR scannable output, test on, browser register flow}</td><td>~t</td><td>3</td></tr>
+  </table>
+  <p class="total" style="margin-top:12px">Total: 11 pts</p>
+</div>
+
+<h2>Item Details</h2>
+
+<div class="card">
+  <h3>31.1 &mdash; Add qr_data to relay /register JSON (3 pts)</h3>
+  <p>Patch <code>relay_server.c :: handle_register_http()</code> on the relay VM:</p>
+  <ul>
+    <li>Extract <code>qr_data</code> via <code>wire_find2(reg_resp, n, "resp", "qr_data")</code></li>
+    <li>Add <code>"qr_data": "%s"</code> to the JSON response body</li>
+    <li>Recompile and deploy</li>
+  </ul>
+  <p><span class="label">3 pts</span> &mdash; SSH + patch + compile + restart. Known pattern from Board 30.</p>
+</div>
+
+<div class="card">
+  <h3>31.2 &mdash; Add qr_data + qr_size triples to Worker (2 pts)</h3>
+  <p>In <code>functions/api/wire.js :: handleRegister()</code>:</p>
+  <ul>
+    <li>Add <code>json.qr_data</code> as triple <code>{BASE64, qr_data, none}</code></li>
+    <li>Add <code>json.qr_size</code> as triple <code>{SIZE, qr_size, none}</code></li>
+    <li>Deploy via <code>npx wrangler pages deploy</code></li>
+  </ul>
+  <p><span class="label">2 pts</span> &mdash; 4 lines of JS in an existing file. Trivial.</p>
+</div>
+
+<div class="card">
+  <h3>31.3 &mdash; Server QR rendering + delete qr.js (3 pts)</h3>
+  <p>In <code>auth-gate.js</code> register success handler:</p>
+  <ul>
+    <li>Replace <code>qr_encode(otpUri)</code> call with base64 decode of server <code>qr_data</code></li>
+    <li>Use <code>atob()</code> + <code>Uint8Array</code> to reconstruct the matrix</li>
+    <li>Pass to existing <code>renderQR(canvas, matrix, size)</code></li>
+  </ul>
+  <p>Cleanup:</p>
+  <ul>
+    <li>Delete <code>alumni/js/utils/qr.js</code> (413 lines)</li>
+    <li>Remove <code>&lt;script src="./js/utils/qr.js"&gt;</code> from <code>alumni/index.html</code></li>
+  </ul>
+  <p><span class="label">3 pts</span> &mdash; ~12 lines changed in auth-gate.js, 2 deletions.</p>
+</div>
+
+<div class="card">
+  <h3>31.4 &mdash; Test scannable QR output (3 pts)</h3>
+  <p>Deploy to Cloudflare Pages and verify:</p>
+  <ul>
+    <li>Register a new user via the browser auth gate</li>
+    <li>QR code renders correctly on the canvas</li>
+    <li>Scan with phone authenticator app (Google Authenticator / Authy)</li>
+    <li>Enter TOTP code from the app, verify login succeeds</li>
+    <li>Verify the full round-trip: register &rarr; QR &rarr; scan &rarr; TOTP &rarr; login</li>
+  </ul>
+  <p><span class="label">3 pts</span> &mdash; deploy + manual verification cycle.</p>
+</div>
+
+<h2>vs. Previous Plan (v1)</h2>
+<div class="card">
+  <table>
+    <tr><th>Aspect</th><th>v1 (JS Port)</th><th>v2 (All C)</th></tr>
+    <tr><td>New code</td><td>~400 lines new JS</td><td>~5 lines C, ~16 lines JS changes</td></tr>
+    <tr><td>New files</td><td>1 (rewritten qr.js)</td><td>0 (delete qr.js)</td></tr>
+    <tr><td>Net lines</td><td>+400</td><td>&minus;400</td></tr>
+    <tr><td>Items</td><td>2</td><td>4</td></tr>
+    <tr><td>Points</td><td>8</td><td>11</td></tr>
+    <tr><td>Risk</td><td>New encoder could have its own bugs</td><td>Uses proven C output, zero encoding risk</td></tr>
+    <tr><td>Maintenance</td><td>Two QR encoders to maintain</td><td>One encoder (C), browser just renders</td></tr>
+  </table>
+  <p style="margin-top:12px">v2 has more items (relay + worker + browser + test vs just port + test) but each is smaller and lower risk. Total effort is comparable. The result is <strong>simpler</strong> &mdash; one encoder, one source of truth, all C.</p>
+</div>
+
+<div class="footer">Generated 2026-04-02 20:15 &middot; ~E Fix QR Code v2 (All C) &middot; lakemedical.org</div>
+</div>
+</body>
+</html>

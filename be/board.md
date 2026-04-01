@@ -63,12 +63,14 @@ Source: plan-close-the-loop.html → estimate-close-the-loop.html
 
 ---
 
-## Board 31 — Fix QR Code (8 pts)
+## Board 31 — Fix QR Code, All C (11 pts)
 
-Source: plan-qr-fix.html → estimate-qr-fix.html
+Source: plan-qr-fix-v2.html → estimate-qr-fix-v2.html
 
 ### Ready
-- {qr.js, replace with, faithful C port of qr.c} · 5 · ~u
+- {qr_data field, add to, relay /register JSON response} · 3 · ~u
+- {qr_data + qr_size triples, add to, Worker handleRegister} · 2 · ~u
+- {server QR rendering + delete qr.js, update in, auth-gate.js + index.html} · 3 · ~u
 - {QR scannable output, test on, browser register flow} · 3 · ~t
 
 ### In Progress

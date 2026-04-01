@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~P: Fix QR Code v2 — All C, Server-Side QR, Delete qr.js</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .status { display: inline-block; padding: 6px 16px; border-radius: 4px; font-size: 1rem; font-weight: 700; background: #3a3a1a; color: #fbbf24; border: 1px solid #fbbf24; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #1A1A1A; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  ul, ol { margin: 8px 0 8px 20px; }
+  li { margin: 6px 0; }
+  .deleted { color: #f87171; text-decoration: line-through; }
+  .added { color: #4ade80; font-weight: 600; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>~P: Fix QR Code v2 &mdash; All C</h1>
+<p class="subtitle">Server-side QR generation &middot; Delete qr.js &middot; Zero new JavaScript &middot; lakemedical.org</p>
+
+<span class="status">Plan &mdash; Awaiting Approval</span>
+
+<h2>Intent</h2>
+<div class="card">
+  <p><span class="label">Why:</span> Users cannot register on lakemedical.org because the browser&rsquo;s JS QR encoder is broken (4 fatal bugs). Meanwhile, the prime already generates correct QR data in C (<code>qr.c</code>, 606 lines, 200+ test assertions).</p>
+  <p><span class="label">Purpose:</span> Pipe the prime&rsquo;s server-generated QR matrix through relay &rarr; Worker &rarr; browser. No new JS encoder. Delete the broken one.</p>
+  <p><span class="label">What:</span> The browser receives <code>qr_data</code> (base64 QR matrix) + <code>qr_size</code> from the server and renders it on canvas. All QR generation stays in C.</p>
+</div>
+
+<h2>Why All C</h2>
+<div class="card">
+  <p>The prime&rsquo;s <code>catalog_server.c</code> already calls <code>qr_encode()</code> during registration and returns 5 triples:</p>
+  <pre>
+resp[0] = {resp, status,   ok}
+resp[1] = {resp, totp_uri, otpauth://totp/NOUS:user?secret=...&amp;issuer=NOUS}
+resp[2] = {resp, qr_size,  37}
+resp[3] = {resp, qr_data,  BASE64_ENCODED_MATRIX}
+resp[4] = {resp, role,     user}</pre>
+  <p>The <code>qr_data</code> is a base64-encoded byte array of <code>qr_size &times; qr_size</code> bytes, each 0x00 (white) or 0x01 (dark). This is the <strong>proven, tested</strong> QR output from <code>qr.c</code>.</p>
+  <p>The data is already being generated. It just needs to flow through to the browser. Writing a new JS QR encoder would be duplicating 606 lines of proven C for no reason.</p>
+</div>
+
+<h2>Current Data Flow (Broken)</h2>
+<div class="card">
+  <pre>
+Browser                  Worker              Relay           Prime
+  |                        |                   |               |
+  |-- register NTRP ------>|                   |               |
+  |                        |-- POST /register ->|               |
+  |                        |                   |-- wire triples ->|
+  |                        |                   |<- 5 triples ----|
+  |                        |                   |  (incl qr_data) |
+  |                        |<- JSON (otpauth, |               |
+  |                        |   qr_size, role)  |               |
+  |                        |   <span class="deleted">qr_data MISSING</span>   |               |
+  |<- NTRP (otpauth only)-|                   |               |
+  |                        |                   |               |
+  | <span class="deleted">qr_encode(otpauth)</span>     |  &larr; broken JS encoder generates garbage
+  | render canvas          |</pre>
+</div>
+
+<h2>New Data Flow (All C)</h2>
+<div class="card">
+  <pre>
+Browser                  Worker              Relay           Prime
+  |                        |                   |               |
+  |-- register NTRP ------>|                   |               |
+  |                        |-- POST /register ->|               |
+  |                        |                   |-- wire triples ->|
+  |                        |                   |<- 5 triples ----|
+  |                        |                   |  (incl qr_data) |
+  |                        |<- JSON (otpauth, |               |
+  |                        |   qr_size, role,  |               |
+  |                        |   <span class="added">qr_data</span>)        |               |
+  |<- NTRP (status, signal,|                   |               |
+  |   <span class="added">qr_data, qr_size</span>)    |                   |               |
+  |                        |                   |               |
+  | <span class="added">base64 decode qr_data</span>  |  &larr; ~12 lines of vanilla JS
+  | render canvas          |</pre>
+</div>
+
+<h2>Scope</h2>
+<div class="card">
+  <h3>Changes Required (4 files)</h3>
+  <ol>
+    <li><strong>Relay C</strong> &mdash; <code>relay_server.c :: handle_register_http()</code>
+      <ul>
+        <li>Extract <code>qr_data</code> from prime&rsquo;s wire response via <code>wire_find2(reg_resp, n, "resp", "qr_data")</code></li>
+        <li>Add <code>"qr_data": "BASE64..."</code> to the JSON response</li>
+        <li>~5 lines of C</li>
+      </ul>
+    </li>
+    <li><strong>Worker JS</strong> &mdash; <code>functions/api/wire.js :: handleRegister()</code>
+      <ul>
+        <li>Pass <code>json.qr_data</code> and <code>json.qr_size</code> as NTRP triples to the browser</li>
+        <li>Add 2 triples: <code>{BASE64, qr_data, none}</code> and <code>{SIZE, qr_size, none}</code></li>
+        <li>~4 lines of JS (no new files)</li>
+      </ul>
+    </li>
+    <li><strong>Auth gate</strong> &mdash; <code>alumni/js/auth-gate.js :: registerBtn click handler</code>
+      <ul>
+        <li>Read <code>qr_data</code> + <code>qr_size</code> from response triples</li>
+        <li>Base64-decode <code>qr_data</code> to get the module matrix</li>
+        <li>Pass to existing <code>renderQR(canvas, matrix, size)</code></li>
+        <li>Remove the <code>qr_encode(otpUri)</code> call</li>
+        <li>~12 lines changed, net reduction</li>
+      </ul>
+    </li>
+    <li><strong>Delete</strong> &mdash; <code>alumni/js/utils/qr.js</code> (413 lines)
+      <ul>
+        <li>Remove the broken JS encoder entirely</li>
+        <li>Remove <code>&lt;script src="./js/utils/qr.js"&gt;</code> from <code>alumni/index.html</code></li>
+      </ul>
+    </li>
+  </ol>
+</div>
+
+<div class="card">
+  <h3>Out of Scope</h3>
+  <ul>
+    <li>No changes to <code>qr.c</code> &mdash; it works</li>
+    <li>No changes to <code>catalog_server.c</code> &mdash; already returns <code>qr_data</code></li>
+    <li>No changes to <code>wire.js</code> (browser) or <code>nous.js</code> &mdash; transport unchanged</li>
+    <li>No new JS files</li>
+    <li>V7&ndash;V40 not needed &mdash; otpauth URIs fit in V4&ndash;V6 (max 108 bytes at EC M)</li>
+  </ul>
+</div>
+
+<h2>Approach</h2>
+<div class="card">
+  <h3>Phase 1: Relay &mdash; Add qr_data to /register JSON</h3>
+  <p>The relay&rsquo;s <code>handle_register_http()</code> already extracts <code>otpauth</code> and <code>qr_size</code> from the prime&rsquo;s wire response. Add one more extraction:</p>
+  <pre>
+/* Already done: */
+char *otpauth = wire_find2(reg_resp, n, "resp", "totp_uri");
+char *qr_size = wire_find2(reg_resp, n, "resp", "qr_size");
+
+/* Add: */
+char *qr_data = wire_find2(reg_resp, n, "resp", "qr_data");
+
+/* In JSON response, add: */
+"qr_data": "%s"    /* base64 string from prime */</pre>
+  <p>Compile, deploy to relay VM. ~5 lines.</p>
+
+  <h3>Phase 2: Worker &mdash; Pass qr_data + qr_size as triples</h3>
+  <p>In <code>handleRegister()</code>, after the existing <code>json.otpauth</code> triple:</p>
+  <pre>
+/* Already done: */
+if (json.otpauth) triples.push({ s: json.otpauth, p: 'signal', o: 'none' });
+
+/* Add: */
+if (json.qr_data) triples.push({ s: json.qr_data, p: 'qr_data', o: 'none' });
+if (json.qr_size) triples.push({ s: String(json.qr_size), p: 'qr_size', o: 'none' });</pre>
+  <p>Deploy via <code>npx wrangler pages deploy</code>. ~4 lines.</p>
+
+  <h3>Phase 3: Auth Gate &mdash; Render server QR</h3>
+  <p>In the register success handler, replace the <code>qr_encode()</code> call:</p>
+  <pre>
+/* OLD (broken): */
+var otpUri = nous_find(triples, 'signal');
+if (otpUri &amp;&amp; typeof qr_encode === 'function') {
+  var qr = qr_encode(otpUri);
+  if (qr) renderQR(qrCanvas, qr.data, qr.size);
+}
+
+/* NEW (server QR): */
+var qrB64  = nous_find(triples, 'qr_data');
+var qrSize = parseInt(nous_find(triples, 'qr_size'), 10);
+if (qrB64 &amp;&amp; qrSize) {
+  var raw = atob(qrB64);
+  var matrix = new Uint8Array(raw.length);
+  for (var i = 0; i &lt; raw.length; i++) matrix[i] = raw.charCodeAt(i);
+  renderQR(qrCanvas, matrix, qrSize);
+}</pre>
+  <p>The existing <code>renderQR()</code> function already takes <code>(canvas, matrix, size)</code> &mdash; no changes needed.</p>
+
+  <h3>Phase 4: Delete qr.js</h3>
+  <ul>
+    <li>Delete <code>alumni/js/utils/qr.js</code> (413 lines of broken code)</li>
+    <li>Remove <code>&lt;script src="./js/utils/qr.js"&gt;&lt;/script&gt;</code> from <code>alumni/index.html</code></li>
+  </ul>
+</div>
+
+<h2>Constraints</h2>
+<div class="card">
+  <ul>
+    <li>All QR generation in C &mdash; zero new JS encoders</li>
+    <li>No new JS files &mdash; only modify existing ones</li>
+    <li>Vanilla JS only &mdash; no frameworks, no build tools</li>
+    <li>Base64 decode uses <code>atob()</code> &mdash; built into every browser</li>
+    <li>The <code>qr_data</code> base64 string for a V5 QR (37&times;37) is ~1.8 KB &mdash; negligible wire cost</li>
+    <li>Relay patch requires SSH to relay VM + recompile</li>
+  </ul>
+</div>
+
+<h2>What&rsquo;s Already Done</h2>
+<div class="card">
+  <table style="width:100%; border-collapse:collapse;">
+    <tr><th style="text-align:left; padding:8px; border-bottom:1px solid #333;">Component</th><th style="text-align:left; padding:8px; border-bottom:1px solid #333;">Status</th></tr>
+    <tr><td style="padding:8px; border-bottom:1px solid #222;"><code>qr.c</code> on prime</td><td style="padding:8px; border-bottom:1px solid #222; color:#4ade80;">Done &mdash; generates correct QR, returns qr_data triple</td></tr>
+    <tr><td style="padding:8px; border-bottom:1px solid #222;"><code>catalog_server.c</code> register handler</td><td style="padding:8px; border-bottom:1px solid #222; color:#4ade80;">Done &mdash; returns 5 triples incl qr_data + qr_size</td></tr>
+    <tr><td style="padding:8px; border-bottom:1px solid #222;">Relay <code>POST /register</code> endpoint</td><td style="padding:8px; border-bottom:1px solid #222; color:#fbbf24;">Partial &mdash; returns otpauth + qr_size, missing qr_data</td></tr>
+    <tr><td style="padding:8px; border-bottom:1px solid #222;">Worker <code>handleRegister()</code></td><td style="padding:8px; border-bottom:1px solid #222; color:#fbbf24;">Partial &mdash; passes otpauth, not qr_data/qr_size</td></tr>
+    <tr><td style="padding:8px; border-bottom:1px solid #222;"><code>auth-gate.js</code> register handler</td><td style="padding:8px; border-bottom:1px solid #222; color:#f87171;">Needs update &mdash; still calls broken qr_encode()</td></tr>
+    <tr><td style="padding:8px; border-bottom:1px solid #222;"><code>renderQR(canvas, matrix, size)</code></td><td style="padding:8px; border-bottom:1px solid #222; color:#4ade80;">Done &mdash; already renders any matrix/size pair</td></tr>
+  </table>
+</div>
+
+<div class="footer">Generated 2026-04-02 20:15 &middot; ~P Fix QR Code v2 (All C) &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
