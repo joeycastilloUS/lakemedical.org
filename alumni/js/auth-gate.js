@@ -173,10 +173,14 @@
         qrView.classList.remove('hidden');
         errorSpan.textContent = '';
 
-        var otpUri = nous_find(triples, 'signal');
-        if (otpUri && typeof qr_encode === 'function') {
-          var qr = qr_encode(otpUri);
-          if (qr) renderQR(qrCanvas, qr.data, qr.size);
+        /* QR matrix comes from the server (C qr.c), base64-encoded */
+        var qrB64  = nous_find(triples, 'qr_data');
+        var qrSize = parseInt(nous_find(triples, 'qr_size'), 10);
+        if (qrB64 && qrSize) {
+          var raw = atob(qrB64);
+          var matrix = new Uint8Array(raw.length);
+          for (var j = 0; j < raw.length; j++) matrix[j] = raw.charCodeAt(j);
+          renderQR(qrCanvas, matrix, qrSize);
         }
       } else {
         var msg = nous_find(triples, 'message');

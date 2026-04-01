@@ -184,7 +184,9 @@ async function handleRegister(user) {
       { s: 'resp', p: 'status', o: status }
     ];
     /* otpauth URI → signal triple (browser auth-gate.js reads signal) */
-    if (json.otpauth) triples.push({ s: json.otpauth, p: 'signal', o: 'none' });
+    if (json.otpauth) triples.push({ s: json.otpauth, p: 'signal',  o: 'none' });
+    if (json.qr_data) triples.push({ s: json.qr_data, p: 'qr_data', o: 'none' });
+    if (json.qr_size) triples.push({ s: String(json.qr_size), p: 'qr_size', o: 'none' });
     if (json.role)    triples.push({ s: json.role,     p: 'property', o: 'none' });
     if (json.message) triples.push({ s: 'resp',        p: 'message', o: json.message });
     return ntrpResponse(triples);
