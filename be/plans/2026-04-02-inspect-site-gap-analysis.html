@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~I: Site Gap Analysis — Alumni-Artifacts vs lakemedical.org vs alumni-dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .pass { color: #4ade80; }
+  .fail { color: #f87171; }
+  .warn { color: #fbbf24; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Inspect: Site Gap Analysis</h1>
+<p class="subtitle">Alumni-Artifacts (prototype) vs lakemedical.org (production) vs NIEHS alumni-dashboard (reference)</p>
+
+<h2>What Is It</h2>
+<div class="card">
+  <ul>
+    <li><strong>Alumni-Artifacts</strong> &mdash; Feature-complete prototype of the alumni engine. Single-page app with auth overlay. WesternU branded. Queue, directory, profile (7 sections), dashboard views. NPI + PubMed enrichment pipeline. The spec.</li>
+    <li><strong>lakemedical.org</strong> &mdash; Production deployment. Landing page + login page + app. AcmeDev branded. NOUS wire auth with TOTP/QR. Same views as Alumni-Artifacts. Cloudflare Pages + Workers. The ship.</li>
+    <li><strong>LBKdotdev/alumni-dashboard</strong> &mdash; Private repo (not accessible). Inspected NIEHS/alumni-dashboard instead &mdash; R Shiny dashboard for postdoc career outcomes with advanced visualizations.</li>
+  </ul>
+</div>
+
+<h2>Feature Comparison</h2>
+<div class="card">
+  <table>
+    <tr><th>Feature</th><th>Alumni-Artifacts</th><th>lakemedical.org</th></tr>
+    <tr><td>Landing page</td><td class="fail">None</td><td class="pass">&#10004; Product page + 4-step How It Works</td></tr>
+    <tr><td>Login page (separate)</td><td class="fail">None (overlay)</td><td class="pass">&#10004; Standalone login.html</td></tr>
+    <tr><td>Session guard</td><td class="warn">Overlay re-raise</td><td class="pass">&#10004; app-guard.js redirect</td></tr>
+    <tr><td>Wire protocol auth</td><td class="pass">&#10004;</td><td class="pass">&#10004;</td></tr>
+    <tr><td>QR registration</td><td class="pass">&#10004;</td><td class="pass">&#10004; (all C, server-side)</td></tr>
+    <tr><td>Queue view</td><td class="pass">&#10004;</td><td class="pass">&#10004;</td></tr>
+    <tr><td>Alumni directory</td><td class="pass">&#10004; 6 filters + pagination</td><td class="pass">&#10004;</td></tr>
+    <tr><td>Alumni profile</td><td class="pass">&#10004; 7 sections</td><td class="pass">&#10004;</td></tr>
+    <tr><td>Dashboard / charts</td><td class="pass">&#10004; Chart.js</td><td class="pass">&#10004; Chart.js</td></tr>
+    <tr><td>NPI enrichment</td><td class="pass">&#10004;</td><td class="pass">&#10004;</td></tr>
+    <tr><td>PubMed enrichment</td><td class="pass">&#10004;</td><td class="pass">&#10004;</td></tr>
+    <tr><td>Refresh pipeline</td><td class="pass">&#10004; /api/refresh</td><td class="pass">&#10004;</td></tr>
+    <tr><td>E2E test harness</td><td class="fail">None</td><td class="pass">&#10004; e2e-auth.html</td></tr>
+    <tr><td>Multi-tenant brand</td><td class="fail">WesternU only</td><td class="pass">&#10004; AcmeDev / configurable</td></tr>
+    <tr><td>Production deploy</td><td class="fail">Prototype only</td><td class="pass">&#10004; Cloudflare Pages live</td></tr>
+  </table>
+</div>
+
+<h2>Where lakemedical.org Is Behind</h2>
+<div class="card">
+  <p>lakemedical.org is production-ready but the <strong>app itself</strong> (app.html) is essentially a copy of Alumni-Artifacts with minimal evolution. The gaps are in <strong>data depth</strong> and <strong>visualization richness</strong>:</p>
+  <ul>
+    <li class="fail"><strong>No real alumni data loaded.</strong> The static JSON in <code>data/alumni.json</code> is sample/demo data. The enrichment pipeline exists but hasn't been run against a real registrar CSV yet.</li>
+    <li class="fail"><strong>No KPI value boxes.</strong> The NIEHS dashboard opens with instant stats (total records, coverage %, years of data). lakemedical.org's dashboard has charts but no at-a-glance metrics.</li>
+    <li class="fail"><strong>No geographic visualization.</strong> The NIEHS dashboard has choropleth maps showing alumni by state. lakemedical.org has practice_city/practice_state data from NPI but doesn't visualize it on a map.</li>
+    <li class="fail"><strong>No trend analysis.</strong> No multi-year comparison or cohort tracking. The data model supports class_year but it's not sliced by time period.</li>
+    <li class="fail"><strong>No Sankey/flow diagrams.</strong> Career path visualization (specialty &rarr; practice type &rarr; location) would be powerful with NPI data.</li>
+    <li class="warn"><strong>Dashboard is basic.</strong> Chart.js bar/pie charts. No interactive drill-down, no resizable plots, no export capability.</li>
+    <li class="warn"><strong>No bulk import UI.</strong> The enrichment pipeline (<code>enrich.mjs</code>) is CLI-only. No browser-based CSV upload for the admin user.</li>
+    <li class="warn"><strong>The app.html branding is half-done.</strong> The sidebar still references WesternU styles. The AcmeDev rebrand only covers landing + login pages, not the inner app chrome.</li>
+  </ul>
+</div>
+
+<h2>What's Worth Stealing from NIEHS Dashboard</h2>
+<div class="card">
+  <ul>
+    <li><strong>KPI value boxes</strong> &mdash; Top of each section. Total alumni, active practitioners, published researchers, geographic reach. Instant visual summary.</li>
+    <li><strong>Contextual sidebar filters</strong> &mdash; Filters change based on active view. Queue gets priority + date. Directory gets specialty + location. Dashboard gets time period.</li>
+    <li><strong>State-level heatmap</strong> &mdash; We already have practice_state from NPI. A US map colored by alumni density would be high-impact for Lisa.</li>
+    <li><strong>Career flow diagrams</strong> &mdash; Sankey showing class_year &rarr; specialty &rarr; practice location. Shows where graduates end up.</li>
+    <li><strong>Time-period bucketing</strong> &mdash; Group by 5-year graduation cohorts. Compare engagement across eras.</li>
+    <li><strong>Pre-computed summaries</strong> &mdash; Build aggregates at data load time, not on each render. Already possible with vanilla JS.</li>
+  </ul>
+  <p style="margin-top:12px;color:#888;">All implementable in vanilla JS + Chart.js. No R/Shiny needed.</p>
+</div>
+
+<h2>Architecture (Current)</h2>
+<div class="card">
+  <pre style="background:#222;padding:16px;border-radius:8px;font-size:0.85rem;overflow-x:auto;color:#ddd;">
+lakemedical.org (Cloudflare Pages + Workers)
+  index.html    &rarr; Product landing page (acmedev brand)
+  login.html    &rarr; NOUS wire auth (TOTP + QR)
+  app.html      &rarr; Alumni engine (session-gated)
+    &darr;
+  /api/wire     &rarr; Worker proxy &rarr; relay.3-nous.net:8080
+    &darr;                                &darr;
+  NTRP0001 binary frames          prime (C catalog_server)
+    &darr;                                &darr;
+  register/auth/session            TOTP + user store + qr.c
+
+  /api/data     &rarr; KV cache or static JSON fallback
+  /api/refresh  &rarr; NPI + PubMed batch enrichment
+  /api/seed     &rarr; Initial KV load from static files
+  </pre>
+</div>
+
+<h2>Recommended Next Steps</h2>
+<div class="card">
+  <table>
+    <tr><th>Priority</th><th>Work Item</th><th>Impact</th></tr>
+    <tr><td class="label">1</td><td>Rebrand app.html inner chrome to AcmeDev (sidebar, nav)</td><td>Visual consistency across all pages</td></tr>
+    <tr><td class="label">2</td><td>Add KPI value boxes to dashboard view</td><td>Instant "so what" for Lisa on login</td></tr>
+    <tr><td class="label">3</td><td>Add US state heatmap to dashboard</td><td>Geographic insight from existing NPI data</td></tr>
+    <tr><td class="label">4</td><td>CSV upload UI in app (admin view)</td><td>Remove CLI dependency for data import</td></tr>
+    <tr><td class="label">5</td><td>Time-period cohort filtering</td><td>Trend analysis across graduation years</td></tr>
+    <tr><td class="label">6</td><td>Career flow Sankey diagram</td><td>Visual story of where graduates go</td></tr>
+  </table>
+</div>
+
+<h2>Open Questions</h2>
+<div class="card">
+  <ul>
+    <li>Is Scotty's alumni-dashboard (LBKdotdev) a separate front-end build? It's private &mdash; need access or a description of what he built.</li>
+    <li>Is Lisa's registrar CSV ready to run through the enrichment pipeline?</li>
+    <li>Should the app rebrand go full AcmeDev or stay institution-branded per tenant?</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-02 22:45 &middot; ~I Gap Analysis &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
