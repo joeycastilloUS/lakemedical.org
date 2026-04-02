@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~P: Platform Shell — Multi-Tenant, Provisioning, Branding, 3 Dashboards, Zero Features</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  nav .status { float: right; color: #fbbf24; font-size: 0.85rem; }
+  .container { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 36px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  h3 { color: #90C4CF; font-size: 1rem; margin: 16px 0 8px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card-accent { border-left: 4px solid #6FC3DF; }
+  .card-warn { border-left: 4px solid #fbbf24; }
+  .card-red { border-left: 4px solid #f87171; }
+  .card-green { border-left: 4px solid #4ade80; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #0a0a0a; border: 1px solid #222; border-radius: 6px; padding: 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 12px 0; color: #bbb; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; font-size: 0.9rem; }
+  th { color: #6FC3DF; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  ul, ol { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .phase { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 16px 0; border-left: 4px solid #6FC3DF; }
+  .phase-num { color: #6FC3DF; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.1em; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+  .diagram { background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 20px; margin: 16px 0; font-family: monospace; font-size: 0.8rem; line-height: 1.7; white-space: pre; overflow-x: auto; color: #90C4CF; }
+  strong { color: #ddd; }
+  em { color: #6FC3DF; font-style: normal; }
+</style>
+</head>
+<body>
+<nav>
+  <span class="brand">Be</span>
+  <span class="status">Plan &mdash; Awaiting Approval</span>
+</nav>
+<div class="container">
+
+<h1>Platform Shell</h1>
+<p class="subtitle">Multi-tenant + Provisioning + Dynamic Branding + 3 Dashboard Layouts<br>Zero application features. Platform only.</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Intent</h2>
+
+<div class="card card-accent">
+  <p><strong>Build the platform that hosts tenants, not the app that serves users.</strong></p>
+  <p style="margin-top:8px;">When this plan ships, any institution can be provisioned with its own branding, its own login, its own dashboard &mdash; but the actual application features (queue, directory, profiles, enrichment, outreach) are not wired up yet. Those come later, on top of this shell.</p>
+</div>
+
+<div class="card card-warn">
+  <h3>What this is NOT</h3>
+  <ul>
+    <li>No alumni data layer. No CSV import. No enrichment.</li>
+    <li>No queue, directory, or profile views wired to data.</li>
+    <li>No cause-effect engine. No triggers.</li>
+    <li>No Firestore. No Workers API beyond tenant config.</li>
+    <li>The app views exist as <em>empty layout shells</em> with placeholder content.</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Scope</h2>
+
+<div class="card">
+  <table>
+    <tr><th>Layer</th><th>What Ships</th><th>What Doesn't</th></tr>
+    <tr><td><strong>Multi-Tenant</strong></td><td>Tenant routing, isolation, scoped sessions</td><td>Per-tenant data stores (no data yet)</td></tr>
+    <tr><td><strong>Provisioning</strong></td><td>Admin page, tenant creation form, config storage</td><td>Payment, DNS automation, onboarding wizard</td></tr>
+    <tr><td><strong>Branding</strong></td><td>Dynamic colors/logo/name from tenant config, all hardcoded refs removed</td><td>Custom CSS per tenant, theme editor</td></tr>
+    <tr><td><strong>3 Dashboards</strong></td><td>Layout shells with placeholder cards &mdash; no real data</td><td>Live stats, charts with real data, enrichment status</td></tr>
+    <tr><td><strong>Auth</strong></td><td>Tenant-scoped login, TOTP still via NOUS relay</td><td>Per-tenant user management UI</td></tr>
+    <tr><td><strong>Pages</strong></td><td>Landing, login, app &mdash; all tenant-branded, zero hardcoded institution text</td><td>Actual feature views (queue, directory, profiles)</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Architecture</h2>
+
+<div class="diagram">
+                    ┌─────────────────────────────────┐
+                    │         BROWSER (tenant UX)      │
+                    │                                   │
+                    │  Landing ─── Login ─── App Shell  │
+                    │                          │        │
+                    │              ┌────────────┼────────┤
+                    │              │            │        │
+                    │         Dashboard 1  Dash 2  Dash 3│
+                    │        (Super-Admin) (Tenant) (Ops)│
+                    └──────────────┬────────────────────┘
+                                   │
+                    ┌──────────────▼────────────────────┐
+                    │      WORKER LAYER (Cloudflare)     │
+                    │                                    │
+                    │  /api/wire ──── NOUS relay proxy    │
+                    │  /api/tenant ── tenant config CRUD  │
+                    │  /api/provision ── create tenant    │
+                    │                                    │
+                    │  Routing: Host header → tenant_id   │
+                    └──────────────┬────────────────────┘
+                                   │
+                    ┌──────────────▼────────────────────┐
+                    │      NOUS (kastil/nous, pure C)    │
+                    │                                    │
+                    │  relay_server.c                     │
+                    │    ├── /auth (TOTP, sessions)       │
+                    │    ├── /register (user creation)    │
+                    │    └── /tenant (config triples)     │
+                    │                                    │
+                    │  org store (g_store)                │
+                    │    ├── tenant:{id} → config triples │
+                    │    ├── user:{tenant}:{id} → auth    │
+                    │    └── tenant:{id}:brand → colors   │
+                    │                                    │
+                    │  Per-tenant stores (future)         │
+                    │    └── /var/nous/tenants/{id}/store │
+                    └────────────────────────────────────┘</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Tenant Data Model</h2>
+
+<div class="card">
+  <h3>Tenant Config &mdash; Stored as Triples in Org Store</h3>
+  <pre>
+# Identity
+tenant:westernu          type              tenant
+tenant:westernu          display-name      "Western University of Health Sciences"
+tenant:westernu          short-name        "WesternU COMP"
+tenant:westernu          domain            "westernu.lakemedical.org"
+tenant:westernu          status            active
+tenant:westernu          created           2026-04-03T00:00:00Z
+
+# Branding — maps directly to CSS custom properties
+tenant:westernu:brand    primary           #8b2230
+tenant:westernu:brand    primary-dark      #58001b
+tenant:westernu:brand    accent            #d4a24a
+tenant:westernu:brand    accent-light      #f5e6c8
+tenant:westernu:brand    background        #faf9f7
+tenant:westernu:brand    logo-url          /tenants/westernu/logo.svg
+tenant:westernu:brand    nav-text          "WesternU COMP"
+
+# Campuses — N campuses per tenant
+tenant:westernu:campus:pomona    name      "COMP (Pomona)"
+tenant:westernu:campus:pomona    location  "Pomona, CA"
+tenant:westernu:campus:pomona    founded   1977
+tenant:westernu:campus:lebanon   name      "COMP-Northwest (Lebanon)"
+tenant:westernu:campus:lebanon   location  "Lebanon, OR"
+tenant:westernu:campus:lebanon   founded   2011
+
+# Contact / Voice
+tenant:westernu          admin-name        "Dr. Lisa Warren"
+tenant:westernu          admin-title       "Dean, COMP & COMP-Northwest"
+tenant:westernu          support-email     "alumni@westernu.edu"
+
+# Super-admin
+tenant:acmedev           type              platform
+tenant:acmedev           role              super-admin
+tenant:acmedev           display-name      "AcmeDev"</pre>
+</div>
+
+<div class="card card-accent">
+  <h3>Key Design Decision</h3>
+  <p>Tenant config lives in the <em>C org store</em> (relay/prime), not in Cloudflare KV or D1. The Worker fetches tenant config via <code>/api/wire</code> on first request, caches it in memory for the session. Single source of truth = triples in C.</p>
+  <p style="margin-top:8px;">For the platform shell phase, we can bootstrap with a <strong>static tenant config JSON</strong> served from the repo while the C endpoint is wired up. The browser reads <code>/api/tenant/config</code> → Worker returns cached config or falls back to static JSON.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>3 Dashboard Layouts</h2>
+
+<div class="card card-accent">
+  <h3>Dashboard 1 &mdash; Super-Admin (Platform)</h3>
+  <p><strong>Who:</strong> AcmeDev operators (Joey, team). <strong>Where:</strong> <code>/admin</code></p>
+  <ul>
+    <li><em>Tenant List</em> &mdash; card per tenant: name, domain, status, user count, created date</li>
+    <li><em>Platform Stats</em> &mdash; total tenants, total users, total sessions today</li>
+    <li><em>Provision Button</em> &mdash; [+ New Tenant] → provisioning form</li>
+    <li><em>Health</em> &mdash; relay status, prime status, last heartbeat</li>
+  </ul>
+  <p style="margin-top:8px;color:#888;">Layout: full-width, no sidebar. Admin nav bar. Grid of tenant cards.</p>
+</div>
+
+<div class="card card-accent">
+  <h3>Dashboard 2 &mdash; Tenant Admin (Institution)</h3>
+  <p><strong>Who:</strong> Institution admins. <strong>Where:</strong> <code>/dashboard</code> (admin role)</p>
+  <ul>
+    <li><em>Brand Preview</em> &mdash; live preview of institution branding (nav, card, badge)</li>
+    <li><em>Campus Cards</em> &mdash; one card per campus: name, location, founded (from config, not data)</li>
+    <li><em>User Management</em> &mdash; list of coordinator accounts for this tenant</li>
+    <li><em>Config Panel</em> &mdash; edit display name, colors, logo, support email</li>
+    <li><em>Status</em> &mdash; data pipeline status placeholder (empty &mdash; no enrichment yet)</li>
+  </ul>
+  <p style="margin-top:8px;color:#888;">Layout: sidebar nav (same as app), admin section. Tenant-branded.</p>
+</div>
+
+<div class="card card-accent">
+  <h3>Dashboard 3 &mdash; Coordinator (Operational)</h3>
+  <p><strong>Who:</strong> Day-to-day coordinators. <strong>Where:</strong> <code>/dashboard</code> (coordinator role)</p>
+  <ul>
+    <li><em>Stat Cards</em> &mdash; 4 placeholder cards with labels but no data: "Total Alumni", "States", "Mentors", "Donors" &mdash; all show "&mdash;" or "0"</li>
+    <li><em>Charts Area</em> &mdash; placeholder containers: "Specialty Distribution" and "Engagement" &mdash; show "No data yet" empty state</li>
+    <li><em>Campus Toggle</em> &mdash; dynamic from tenant config (not hardcoded Pomona/Lebanon)</li>
+    <li><em>Campus Comparison</em> &mdash; dynamic cards from tenant campuses config</li>
+  </ul>
+  <p style="margin-top:8px;color:#888;">Layout: existing sidebar layout, but all institution-specific text comes from tenant config. Data-dependent sections show empty states.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Branding System</h2>
+
+<div class="card">
+  <h3>How It Works</h3>
+  <ol>
+    <li><strong>Browser loads</strong> &mdash; detects tenant from subdomain or path</li>
+    <li><strong>Fetches config</strong> &mdash; <code>GET /api/tenant/config</code> → JSON with brand colors, name, logo, campuses</li>
+    <li><strong>Injects CSS vars</strong> &mdash; overrides <code>:root</code> custom properties with tenant colors</li>
+    <li><strong>Renders chrome</strong> &mdash; nav shows tenant name/logo, login shows tenant brand, dashboard uses tenant campuses</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h3>CSS Variable Injection</h3>
+  <pre>
+// brand.js — runs before any view renders
+async function loadTenantBrand() {
+  const config = await fetch('/api/tenant/config').then(r => r.json());
+  const root = document.documentElement.style;
+
+  // Override CSS custom properties
+  root.setProperty('--primary',      config.brand.primary);
+  root.setProperty('--primary-dark', config.brand.primaryDark);
+  root.setProperty('--accent',       config.brand.accent);
+  root.setProperty('--accent-light', config.brand.accentLight);
+  root.setProperty('--background',   config.brand.background);
+
+  // Inject text
+  document.querySelector('.nav-brand').textContent = config.shortName;
+  document.querySelector('.nav-logo').src = config.brand.logoUrl;
+
+  return config;
+}</pre>
+</div>
+
+<div class="card card-warn">
+  <h3>What Gets Removed</h3>
+  <table>
+    <tr><th>File</th><th>Hardcoded Reference</th><th>Replaced With</th></tr>
+    <tr><td>index.html</td><td>"LakeMedical powered by AcmeDev"</td><td>tenant config <code>displayName</code></td></tr>
+    <tr><td>login.html</td><td>"AcmeDev Alumni Platform"</td><td>tenant config <code>shortName</code></td></tr>
+    <tr><td>login.html</td><td>"Back to lakemedical.org"</td><td>tenant config <code>domain</code></td></tr>
+    <tr><td>app.html</td><td>"AcmeDev" sidebar logo</td><td>tenant config <code>navText</code> + <code>logoUrl</code></td></tr>
+    <tr><td>auth-gate.css</td><td>5&times; <code>#8b2230</code>, 2&times; <code>#d4a24a</code></td><td><code>var(--primary)</code>, <code>var(--accent)</code></td></tr>
+    <tr><td>login.css</td><td><code>#d4a24a</code></td><td><code>var(--accent)</code></td></tr>
+    <tr><td>dashboard.js</td><td>"Pomona, CA", "Lebanon, OR", hardcoded counts</td><td>tenant config <code>campuses[]</code></td></tr>
+    <tr><td>dashboard.js</td><td>COLORS object <code>#8b2230</code>, <code>#d4a24a</code></td><td>Read from CSS vars</td></tr>
+    <tr><td>dashboard.js</td><td>"Lisa's graduate list", "COCA", "Dean's Fund"</td><td>Removed entirely (no data = no references)</td></tr>
+    <tr><td>profile.js</td><td>"Dr. Lisa Warren" signature</td><td>tenant config <code>adminName</code> + <code>adminTitle</code></td></tr>
+    <tr><td>helpers.js</td><td>"COMP (Pomona)", "COMP-Northwest (Lebanon)"</td><td>tenant config campus lookup</td></tr>
+    <tr><td>components.js</td><td>"SOAP Mentorship &mdash; Match Day 2026"</td><td>Removed (feature, not platform)</td></tr>
+    <tr><td>triggers.json</td><td>All institution-specific outreach text</td><td>Removed (no triggers in shell)</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Provisioning Flow</h2>
+
+<div class="card">
+  <h3>Super-Admin Creates a Tenant</h3>
+  <ol>
+    <li>Navigate to <code>/admin/provision.html</code></li>
+    <li>Fill form: institution name, short name, domain, primary color, accent color, logo upload</li>
+    <li><strong>Live preview</strong> &mdash; right side shows nav bar, login card, and stat card in chosen colors</li>
+    <li>Add campuses: [+ Campus] → name, location, founded year</li>
+    <li>Set admin contact: name, title, support email</li>
+    <li>Click <strong>[Create Tenant]</strong></li>
+    <li>Worker calls relay → relay stores config triples in org store</li>
+    <li>Tenant is now accessible at configured domain/subdomain</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h3>Provisioning Form &rarr; Config Triples</h3>
+  <pre>
+Form Input                        Triple Written
+───────────                       ──────────────
+Name: "WesternU COMP"          → tenant:westernu  display-name  "WesternU COMP"
+Domain: "westernu"              → tenant:westernu  domain        "westernu.lakemedical.org"
+Primary: #8b2230                → tenant:westernu:brand  primary  #8b2230
+Accent: #d4a24a                 → tenant:westernu:brand  accent   #d4a24a
+Logo: [uploaded SVG]            → tenant:westernu:brand  logo-url  /tenants/westernu/logo.svg
+Campus: "COMP (Pomona)"        → tenant:westernu:campus:pomona  name  "COMP (Pomona)"
+Admin: "Dr. Lisa Warren"       → tenant:westernu  admin-name  "Dr. Lisa Warren"</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Tenant Routing</h2>
+
+<div class="card">
+  <h3>How Requests Find Their Tenant</h3>
+  <pre>
+Request: https://westernu.lakemedical.org/login.html
+                 ^^^^^^^^
+                 subdomain = tenant_id
+
+Worker reads Host header → extracts subdomain → tenant_id = "westernu"
+All subsequent API calls include tenant_id:
+  /api/tenant/config?t=westernu
+  /api/wire?t=westernu (auth scoped to tenant)
+
+Fallback for dev/single-tenant:
+  ?tenant=westernu query param
+  localStorage['tenant_id'] override</pre>
+</div>
+
+<div class="card card-accent">
+  <h3>Session Scoping</h3>
+  <p>Session tokens include a <code>tenant_id</code> claim. If a session token from <code>westernu</code> is used against <code>anotheruniv</code>, the relay returns 403. Zero cross-tenant session leakage.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Phases</h2>
+
+<div class="phase">
+  <span class="phase-num">PHASE 1 &mdash; BRANDING EXTRACTION</span>
+  <h3>Remove all hardcoded institution references</h3>
+  <ul>
+    <li>Rename CSS variables: <code>--burgundy</code> → <code>--primary</code>, <code>--gold</code> → <code>--accent</code></li>
+    <li>Migrate auth-gate.css and login.css to use CSS variables (no more hardcoded hex)</li>
+    <li>Replace all institution text in HTML files with placeholder slots</li>
+    <li>Remove triggers.json and alumni.json hardcoded institution content</li>
+    <li>Create <code>brand.js</code> &mdash; loads tenant config, injects CSS vars and text</li>
+    <li>Create static <code>tenant-config.json</code> as bootstrap (before C endpoint exists)</li>
+  </ul>
+  <p style="margin-top:8px;color:#888;">After this: the app renders with ANY color scheme and institution name. No WesternU, no AcmeDev hardcoded anywhere.</p>
+</div>
+
+<div class="phase">
+  <span class="phase-num">PHASE 2 &mdash; PLATFORM PAGES</span>
+  <h3>Build the 3 dashboard layouts + admin pages</h3>
+  <ul>
+    <li><code>admin/index.html</code> &mdash; Super-admin dashboard (tenant list, platform stats, provision button)</li>
+    <li><code>admin/provision.html</code> &mdash; Tenant creation form with live brand preview</li>
+    <li><code>admin/admin.css</code> &mdash; Admin-specific styling (Be palette: #111, #1A1A1A, #6FC3DF)</li>
+    <li>Tenant admin dashboard &mdash; brand preview, campus config, user list (role-gated section in app)</li>
+    <li>Coordinator dashboard &mdash; existing layout, but dynamic campuses + empty state cards</li>
+    <li>All 3 dashboards render with placeholder data &mdash; no real backend calls</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <span class="phase-num">PHASE 3 &mdash; TENANT ROUTING + CONFIG API</span>
+  <h3>Wire up tenant detection and config serving</h3>
+  <ul>
+    <li>Worker: <code>/api/tenant/config</code> &mdash; serves tenant config JSON (from static file initially, then C relay)</li>
+    <li>Worker: <code>/api/tenant/provision</code> &mdash; creates tenant config (POST → relay → triples)</li>
+    <li>Tenant routing: Host header → subdomain → tenant_id extraction</li>
+    <li><code>brand.js</code> calls <code>/api/tenant/config</code> on every page load</li>
+    <li>Session scoping: tenant_id in auth requests, relay validates tenant claim</li>
+  </ul>
+</div>
+
+<div class="phase">
+  <span class="phase-num">PHASE 4 &mdash; APP SHELL</span>
+  <h3>Gut the feature views, leave the layout</h3>
+  <ul>
+    <li>Queue view → empty state: "No triggers yet. Import alumni data to get started."</li>
+    <li>Directory view → empty state: "No alumni loaded. Upload a CSV to populate."</li>
+    <li>Profile view → removed (nothing to show without data)</li>
+    <li>Outreach panel → removed (nothing to draft without triggers)</li>
+    <li>Dashboard → empty stat cards + "No data" chart areas</li>
+    <li>Keep: nav structure, sidebar, session timer, campus toggle (dynamic from config)</li>
+  </ul>
+  <p style="margin-top:8px;color:#888;">After this: the app is a branded, authenticated, multi-tenant shell. A provisioned tenant logs in and sees empty views with clear CTAs for what comes next (import, enrichment).</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>File Plan</h2>
+
+<div class="card">
+  <table>
+    <tr><th>Action</th><th>File</th><th>What</th></tr>
+    <tr><td style="color:#4ade80;">NEW</td><td><code>alumni/js/brand.js</code></td><td>Tenant config loader + CSS var injection</td></tr>
+    <tr><td style="color:#4ade80;">NEW</td><td><code>alumni/js/tenant-config.json</code></td><td>Static bootstrap config (until C endpoint)</td></tr>
+    <tr><td style="color:#4ade80;">NEW</td><td><code>alumni/admin/index.html</code></td><td>Super-admin dashboard</td></tr>
+    <tr><td style="color:#4ade80;">NEW</td><td><code>alumni/admin/provision.html</code></td><td>Tenant provisioning form + live preview</td></tr>
+    <tr><td style="color:#4ade80;">NEW</td><td><code>alumni/admin/admin.css</code></td><td>Admin page styling</td></tr>
+    <tr><td style="color:#4ade80;">NEW</td><td><code>functions/api/tenant-config.js</code></td><td>Worker: serve tenant config</td></tr>
+    <tr><td style="color:#4ade80;">NEW</td><td><code>functions/api/provision.js</code></td><td>Worker: create tenant</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/css/style.css</code></td><td>Rename --burgundy→--primary, --gold→--accent</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/css/auth-gate.css</code></td><td>Replace hardcoded hex with CSS vars</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/css/login.css</code></td><td>Replace hardcoded hex with CSS vars</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/landing.css</code></td><td>Use CSS vars for brand colors</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/index.html</code></td><td>Remove hardcoded brand text, load brand.js</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/login.html</code></td><td>Remove hardcoded brand text, load brand.js</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/app.html</code></td><td>Remove hardcoded brand text, load brand.js</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/js/app.js</code></td><td>Wait for brand.js before rendering views</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/js/views/dashboard.js</code></td><td>Dynamic campuses, remove hardcoded text, empty states</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/js/views/queue.js</code></td><td>Empty state when no triggers</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/js/views/directory.js</code></td><td>Empty state when no alumni</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/js/utils/helpers.js</code></td><td>Campus labels from config, not hardcoded</td></tr>
+    <tr><td style="color:#fbbf24;">EDIT</td><td><code>alumni/js/components.js</code></td><td>Campus toggle from config, remove SOAP card</td></tr>
+    <tr><td style="color:#f87171;">DELETE</td><td><code>alumni/data/triggers.json</code></td><td>Institution-specific content (no triggers in shell)</td></tr>
+    <tr><td style="color:#f87171;">DELETE</td><td><code>alumni/data/alumni.json</code></td><td>Sample data removed (no data in shell)</td></tr>
+    <tr><td style="color:#f87171;">DELETE</td><td><code>alumni/js/views/profile.js</code></td><td>No profiles without data</td></tr>
+    <tr><td style="color:#f87171;">DELETE</td><td><code>alumni/js/panels/outreach.js</code></td><td>No outreach without triggers</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Constraints</h2>
+
+<div class="card card-red">
+  <h3>Rules</h3>
+  <ul>
+    <li><strong>Zero frameworks.</strong> Vanilla HTML/CSS/JS only. No React, no Tailwind, no bundlers.</li>
+    <li><strong>No application features.</strong> If it needs alumni data to work, it's out of scope. Empty states only.</li>
+    <li><strong>CSS variables for everything.</strong> No hardcoded brand colors anywhere after Phase 1.</li>
+    <li><strong>Tenant config is the single source.</strong> Every piece of institution-specific text comes from config, never from code.</li>
+    <li><strong>Static bootstrap first.</strong> tenant-config.json serves as the config source until the C relay endpoint is wired. No blocking on C work.</li>
+    <li><strong>3 dashboards must be distinct pages/layouts.</strong> Not tabs on one page. Different URL, different nav, different role.</li>
+  </ul>
+</div>
+
+<div class="card card-green">
+  <h3>What Exists in C (kastil/nous) That We Leverage</h3>
+  <table>
+    <tr><th>Primitive</th><th>Location</th><th>Used For</th></tr>
+    <tr><td>Triple store with path isolation</td><td>store.h</td><td>Tenant config storage</td></tr>
+    <tr><td>Config as triples endpoint</td><td>catalog_server.c /config</td><td>CRUD tenant config</td></tr>
+    <tr><td>Per-user stores pattern</td><td>g_user_stores[]</td><td>Model for per-tenant stores</td></tr>
+    <tr><td>Auth + sessions</td><td>auth.h</td><td>Tenant-scoped sessions</td></tr>
+    <tr><td>Vault encryption</td><td>vault.h</td><td>Seal tenant credentials</td></tr>
+    <tr><td>HTTP routing</td><td>catalog_server.c route()</td><td>Extend for /tenant endpoints</td></tr>
+    <tr><td>Policy/rate limiting</td><td>policy.h</td><td>Per-tenant rate limits</td></tr>
+  </table>
+  <p style="margin-top:8px;color:#888;">The C primitives exist. This plan wires the browser to use them.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>What Ships</h2>
+
+<div class="card card-accent">
+  <p>When this plan is complete, you can:</p>
+  <ol>
+    <li>Open <code>/admin</code> → see a super-admin dashboard with a list of tenants</li>
+    <li>Click [+ New Tenant] → fill out provisioning form with live brand preview</li>
+    <li>Create a tenant → config stored, subdomain routed</li>
+    <li>Open <code>westernu.lakemedical.org</code> → see WesternU-branded landing page</li>
+    <li>Click Sign In → see WesternU-branded login page</li>
+    <li>Log in → see WesternU-branded app shell with empty views and dynamic campus toggle</li>
+    <li>Switch to coordinator dashboard → see placeholder stat cards and "No data yet" charts</li>
+    <li>Switch to tenant admin dashboard → see brand preview, campus list, user management stub</li>
+  </ol>
+  <p style="margin-top:16px;"><strong>Zero alumni data. Zero triggers. Zero enrichment. Pure platform.</strong></p>
+</div>
+
+<div class="footer">Generated 2026-04-03 01:45 &middot; Plan &middot; Platform Shell &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
