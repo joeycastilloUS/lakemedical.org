@@ -499,20 +499,270 @@ Scheduler fires PubMed job for tenant (weekly)
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ -->
-<h2>Trigger Generation Workflow</h2>
+<h2>Cause-Effect Engine (replaces hardcoded triggers)</h2>
 <div class="card">
+  <h3>Design Principle</h3>
+  <p>The current system has 8 hardcoded trigger types with hardcoded icons, colors, labels, and detection logic baked into JS. That's not scalable. What we actually have is a <strong>generic cause-effect pattern</strong>:</p>
+<pre>
+CAUSE:  A condition becomes true (data changed, threshold crossed, time elapsed)
+EFFECT: An action is recommended (outreach, alert, review, escalation)
+</pre>
+  <p style="margin-top:12px;">The engine evaluates <strong>rules</strong> against <strong>data</strong> and produces <strong>effects</strong>. Rules are triples. Data is triples. Effects are triples. Everything is triples.</p>
+</div>
+
+<div class="card">
+  <h3>Factory Config vs Tenant Config</h3>
+  <p><strong>Factory config</strong> = platform-level triples that ship with the binary. These define the <em>capabilities</em> of the system &mdash; what causes exist, what effects are possible, what rules are available. Tenants don't own these. The platform owns them.</p>
+  <p style="margin-top:8px;"><strong>Tenant config</strong> = per-tenant overrides. Enable/disable rules, adjust thresholds, customize templates. Tenants can extend but never reduce the factory rule set.</p>
+<pre>
+Platform store (factory — ships with alumni-server):
+  rule:field-change    type        cause
+  rule:field-change    watches     "any"
+  rule:field-change    compares    "previous-value"
+  rule:field-change    produces    effect:outreach
+  rule:field-change    label       "Field Changed"
+  rule:field-change    icon        "🔄"
+  rule:field-change    enabled     "true"
+
+  rule:threshold       type        cause
+  rule:threshold       watches     "elapsed-days"
+  rule:threshold       compares    "gt"
+  rule:threshold       produces    effect:outreach
+  rule:threshold       label       "Threshold Crossed"
+  rule:threshold       icon        "⏰"
+  rule:threshold       enabled     "true"
+
+  rule:date-match      type        cause
+  rule:date-match      watches     "anniversary"
+  rule:date-match      compares    "modulo-years"
+  rule:date-match      produces    effect:outreach
+  rule:date-match      label       "Date Match"
+  rule:date-match      icon        "🎉"
+  rule:date-match      enabled     "true"
+
+  rule:new-record      type        cause
+  rule:new-record      watches     "predicate-exists"
+  rule:new-record      compares    "not-in-store"
+  rule:new-record      produces    effect:outreach
+  rule:new-record      label       "New Record"
+  rule:new-record      icon        "📄"
+  rule:new-record      enabled     "true"
+
+  effect:outreach      type        effect
+  effect:outreach      action      "suggest-outreach"
+  effect:outreach      requires    "template"
+
+  effect:alert         type        effect
+  effect:alert         action      "notify-admin"
+  effect:alert         requires    "message"
+
+  effect:escalate      type        effect
+  effect:escalate      action      "raise-priority"
+  effect:escalate      requires    "target-rule"
+</pre>
+</div>
+
+<div class="card">
+  <h3>Rule Instances (factory defaults, tenant can override)</h3>
+  <p>Each "trigger" from the old system becomes an <em>instance</em> of a generic rule. The cause type + parameters define when it fires. The effect defines what happens.</p>
   <table>
-    <tr><th>Signal</th><th>Detection</th><th>Trigger Type</th></tr>
-    <tr><td>Practice location changed</td><td>NPI practice-city diff vs previous</td><td><code>practice-move</code></td></tr>
-    <tr><td>New credential/specialty</td><td>NPI taxonomy code change</td><td><code>new-credential</code></td></tr>
-    <tr><td>New publication</td><td>PubMed PMID not in store</td><td><code>publication</code></td></tr>
-    <tr><td>Follow-up overdue</td><td>Last touchpoint &gt; 30 days ago</td><td><code>follow-up-due</code></td></tr>
-    <tr><td>Class reunion milestone</td><td>class_year anniversary (5, 10, 25, 50)</td><td><code>milestone</code></td></tr>
-    <tr><td>Re-engagement opportunity</td><td>Previously active, no interaction 90+ days</td><td><code>reengagement</code></td></tr>
-    <tr><td>License expired/inactive</td><td>NPI license_status changed</td><td><code>license-alert</code></td></tr>
-    <tr><td>Moved near campus</td><td>NPI practice-state matches campus state</td><td><code>campus-proximity</code></td></tr>
+    <tr><th>Rule Instance</th><th>Cause Type</th><th>Watches</th><th>Params</th><th>Effect</th></tr>
+    <tr>
+      <td>Practice relocation</td>
+      <td><code>field-change</code></td>
+      <td><code>practice-city</code></td>
+      <td>compare previous vs current</td>
+      <td><code>outreach</code></td>
+    </tr>
+    <tr>
+      <td>Credential update</td>
+      <td><code>field-change</code></td>
+      <td><code>specialty</code></td>
+      <td>compare previous vs current</td>
+      <td><code>outreach</code></td>
+    </tr>
+    <tr>
+      <td>License status change</td>
+      <td><code>field-change</code></td>
+      <td><code>license-status</code></td>
+      <td>compare previous vs current</td>
+      <td><code>alert</code></td>
+    </tr>
+    <tr>
+      <td>New publication</td>
+      <td><code>new-record</code></td>
+      <td><code>publication</code></td>
+      <td>PMID not in store</td>
+      <td><code>outreach</code></td>
+    </tr>
+    <tr>
+      <td>Contact overdue</td>
+      <td><code>threshold</code></td>
+      <td><code>last-touchpoint</code></td>
+      <td>elapsed &gt; 30 days</td>
+      <td><code>outreach</code></td>
+    </tr>
+    <tr>
+      <td>Dormant contact</td>
+      <td><code>threshold</code></td>
+      <td><code>last-touchpoint</code></td>
+      <td>elapsed &gt; 90 days AND was-active</td>
+      <td><code>outreach</code></td>
+    </tr>
+    <tr>
+      <td>Anniversary</td>
+      <td><code>date-match</code></td>
+      <td><code>class-year</code></td>
+      <td>modulo [5, 10, 25, 50]</td>
+      <td><code>outreach</code></td>
+    </tr>
+    <tr>
+      <td>Geographic proximity</td>
+      <td><code>field-change</code></td>
+      <td><code>practice-state</code></td>
+      <td>matches campus-state</td>
+      <td><code>outreach</code></td>
+    </tr>
   </table>
-  <p style="margin-top:12px;">Each trigger includes a suggested outreach template with personalized context from the alumni triple store.</p>
+  <p style="margin-top:12px;color:#888;">Same 8 signals. But now they're <em>instances of 4 generic cause types</em>, not 8 hardcoded enums. Adding a 9th signal means adding a row of config triples &mdash; not touching code.</p>
+</div>
+
+<div class="card">
+  <h3>Cause-Effect Engine Schematic (Pure C)</h3>
+<pre>
+┌──────────────────────────────────────────────────────┐
+│  Cause-Effect Engine (alumni-server, C)               │
+│                                                       │
+│  ┌──────────────┐     ┌──────────────┐               │
+│  │ Factory Store │     │ Tenant Store │               │
+│  │ (platform)    │     │ (per-tenant) │               │
+│  │               │     │              │               │
+│  │ rule:*        │     │ alumni:*     │               │
+│  │ effect:*      │     │ override:*   │               │
+│  │ template:*    │     │ touchpoint:* │               │
+│  └──────┬────────┘     └──────┬───────┘               │
+│         │                     │                        │
+│    ┌────▼─────────────────────▼────┐                   │
+│    │        Rule Evaluator         │                   │
+│    │                               │                   │
+│    │  for each rule instance:      │                   │
+│    │    1. read cause type          │                   │
+│    │    2. query watched field      │                   │
+│    │    3. compare against params   │                   │
+│    │    4. if TRUE → produce effect │                   │
+│    └──────────────┬────────────────┘                   │
+│                   │                                    │
+│    ┌──────────────▼────────────────┐                   │
+│    │        Effect Producer        │                   │
+│    │                               │                   │
+│    │  effect:outreach →            │                   │
+│    │    resolve template from      │                   │
+│    │    factory store, merge       │                   │
+│    │    alumni context, insert     │                   │
+│    │    signal triple to tenant    │                   │
+│    │                               │                   │
+│    │  effect:alert →               │                   │
+│    │    insert alert triple,       │                   │
+│    │    optionally notify via      │                   │
+│    │    trace stream               │                   │
+│    │                               │                   │
+│    │  effect:escalate →            │                   │
+│    │    bump priority on existing  │                   │
+│    │    signal from medium → high  │                   │
+│    └───────────────────────────────┘                   │
+│                                                       │
+│  Storage:                                              │
+│    signal:{id}  cause       "rule:field-change"        │
+│    signal:{id}  subject     "alumni:jsmith"             │
+│    signal:{id}  field       "practice-city"             │
+│    signal:{id}  old-value   "Sacramento CA"             │
+│    signal:{id}  new-value   "Baker City OR"             │
+│    signal:{id}  effect      "effect:outreach"           │
+│    signal:{id}  template    "template:relocation"       │
+│    signal:{id}  priority    "high"                      │
+│    signal:{id}  detected    "2026-04-02"                │
+│    signal:{id}  status      "pending"                   │
+└──────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<div class="card">
+  <h3>Triple Storage Hierarchy</h3>
+<pre>
+/var/nous/
+  factory/                    ← PLATFORM-OWNED (ships with binary)
+    rules.store/              ← cause types, rule instances, effect types
+    templates.store/          ← outreach template triples
+    config.store/             ← default thresholds, schedules, enums
+
+  tenants/
+    lakemedical/
+      alumni.store/           ← TENANT-OWNED (alumni data)
+      signals.store/          ← TENANT-OWNED (produced effects)
+      overrides.store/        ← TENANT-OWNED (rule overrides)
+      users/                  ← TENANT-OWNED (auth)
+      config.tri              ← TENANT-OWNED (branding)
+</pre>
+  <p style="margin-top:12px;">Factory writes never go in tenant dirs. Tenant writes never go in factory dir. The rule evaluator reads <em>both</em> &mdash; factory rules + tenant overrides merged at runtime.</p>
+</div>
+
+<div class="card">
+  <h3>Override Model</h3>
+  <p>Tenant overrides are <em>additive patches</em> on factory defaults:</p>
+<pre>
+Factory default:
+  rule:contact-overdue  threshold  "30"      ← 30 days
+
+Tenant override (lakemedical wants 14 days):
+  override:contact-overdue  threshold  "14"
+
+At evaluation time:
+  evaluator checks tenant overrides.store first.
+  If override exists → use it.
+  If not → fall through to factory default.
+
+Tenant can also:
+  override:field-change  enabled  "false"     ← disable a rule
+  override:custom-rule   type     "cause"     ← add a NEW rule
+  override:custom-rule   watches  "zip-code"
+  override:custom-rule   compares "geo-radius"
+  override:custom-rule   param    "50-miles"
+  override:custom-rule   produces effect:alert
+</pre>
+  <p style="margin-top:12px;">Factory controls the baseline. Tenants tune it. Neither can break the other.</p>
+</div>
+
+<div class="card">
+  <h3>Outreach Templates (factory triples)</h3>
+<pre>
+template:relocation   subject    "Welcome to {new-value} — {campus} connection"
+template:relocation   body       "Dr. {name},\n\nCongratulations on your move..."
+template:relocation   tone       "warm"
+template:relocation   merge      "name,new-value,old-value,campus,specialty"
+
+template:publication  subject    "Your {journal} publication — congratulations"
+template:publication  body       "Dr. {name},\n\nI saw your recent paper..."
+template:publication  tone       "warm"
+template:publication  merge      "name,journal,title,pub-date"
+
+template:overdue      subject    "Following up — {context}"
+template:overdue      body       "Dr. {name},\n\nIt's been a while since..."
+template:overdue      tone       "casual"
+template:overdue      merge      "name,last-touchpoint,specialty"
+</pre>
+  <p style="margin-top:12px;">Merge fields resolve from alumni triples at effect time. Templates are factory-owned. Tenants can override specific templates in their overrides.store.</p>
+</div>
+
+<div class="card">
+  <h3>Why This Design</h3>
+  <ul>
+    <li><strong>Scalable:</strong> Add new causes or effects by inserting triples, not by editing code.</li>
+    <li><strong>Extensible:</strong> Tenants can add custom rules (e.g., "zip code within 50 miles of campus") without platform changes.</li>
+    <li><strong>Generic nomenclature:</strong> <code>field-change</code>, <code>threshold</code>, <code>date-match</code>, <code>new-record</code> &mdash; these describe the <em>mechanics</em>, not the domain. Works for alumni, patients, donors, students, anything.</li>
+    <li><strong>Factory controlled:</strong> Platform ships with sane defaults. Tenants tune, never break. Upgrades add new rules automatically.</li>
+    <li><strong>Pure C:</strong> The rule evaluator is a loop over triples. No dynamic dispatch, no plugin system, no scripting engine. Just <code>store.h</code> queries + <code>strcmp()</code>.</li>
+    <li><strong>Auditable:</strong> Every signal is a triple with cause, subject, field, old-value, new-value, detected date. Full provenance.</li>
+  </ul>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ -->
