@@ -3,141 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alumni Relationship Engine — COMP</title>
-  <link rel="stylesheet" href="./css/style.css">
-  <link rel="stylesheet" href="./css/auth-gate.css">
+  <title>Alumni Engagement Platform — AcmeDev</title>
+  <link rel="stylesheet" href="./landing.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
 </head>
 <body>
-  <!-- Auth Gate — blocks site until authenticated -->
-  <div id="auth-gate">
-    <div id="auth-gate-inner">
-      <img id="auth-logo" src="./assets/logo-westernu-h.svg" alt="Western University of Health Sciences">
-      <div id="auth-title">ALUMNI ENGINE</div>
-      <div id="auth-subtitle">College of Osteopathic Medicine</div>
-      <div id="auth-form">
-        <input type="text" id="auth-user" placeholder="username" autocomplete="username" spellcheck="false">
-        <input type="text" id="auth-totp" placeholder="6-digit code" autocomplete="one-time-code" spellcheck="false" maxlength="6" inputmode="numeric">
-        <button id="auth-login-btn">LOGIN</button>
-        <div id="auth-divider">Not registered?</div>
-        <button id="auth-register-btn">REGISTER</button>
-        <span id="auth-error"></span>
-      </div>
-      <div id="auth-qr-view" class="hidden">
-        <canvas id="auth-qr-canvas" width="300" height="300"></canvas>
-        <div id="auth-qr-label">Scan with your authenticator app</div>
-        <input type="text" id="auth-qr-totp" placeholder="Enter code to verify" autocomplete="one-time-code" spellcheck="false" maxlength="6" inputmode="numeric">
-        <button id="auth-qr-verify-btn">VERIFY</button>
-        <span id="auth-qr-error"></span>
-      </div>
+
+  <!-- Nav -->
+  <header class="nav">
+    <a href="/" class="nav-brand">AcmeDev</a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#how" class="nav-link">How It Works</a>
+      <a href="./login.html" class="nav-signin">Sign In</a>
     </div>
-  </div>
+  </header>
 
-  <!-- Session Timer (visible when authenticated) -->
-  <div id="auth-session-timer" style="display:none;"></div>
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Alumni Engagement for Colleges &amp; Universities</h1>
+    <p>A real-time platform that connects your institution with alumni — track outreach, manage relationships, and strengthen your network.</p>
+    <a href="./login.html" class="hero-cta">Get Started</a>
+  </section>
 
-  <!-- Desktop Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <img src="./assets/logo-westernu-h.svg" alt="Western University of Health Sciences" class="logo-img">
-      <div class="sidebar-title">
-        <span class="title-text">Alumni Engine</span>
-        <span class="badge-prototype">Prototype</span>
-      </div>
-    </div>
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="features-inner">
+      <h2>Built for Higher Education</h2>
+      <div class="feature-grid">
 
-    <!-- Search -->
-    <div class="sidebar-search" id="sidebar-search">
-      <button class="search-trigger" id="search-trigger">
-        <svg class="icon"><use href="./css/icons.svg#search"></use></svg>
-        <span>Find an alumnus...</span>
-      </button>
-      <div class="search-active hidden" id="search-active">
-        <div class="search-input-wrap">
-          <svg class="icon"><use href="./css/icons.svg#search"></use></svg>
-          <input type="text" id="search-input" placeholder="Name, specialty, or city..." autocomplete="off">
-          <button class="search-close" id="search-close">
-            <svg class="icon"><use href="./css/icons.svg#x"></use></svg>
-          </button>
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>Smart Outreach Queue</h3>
+          <p>Prioritized contact lists with engagement scoring. Know who to reach out to and when.</p>
         </div>
-        <div class="search-results hidden" id="search-results"></div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>Alumni Directory</h3>
+          <p>Search by name, specialty, location, or graduation year. Every record at your fingertips.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Live Dashboard</h3>
+          <p>Real-time metrics on engagement rates, outreach volume, and alumni response patterns.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h3>TOTP Authentication</h3>
+          <p>Hardware-grade security with time-based one-time passwords. No passwords stored. Ever.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Wire Protocol</h3>
+          <p>Binary-fast communication layer. Sub-millisecond response times. Zero framework overhead.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🏛️</div>
+          <h3>Institution Branded</h3>
+          <p>White-label deployment. Your school's identity, your colors, your domain. Turnkey setup.</p>
+        </div>
+
       </div>
     </div>
+  </section>
 
-    <!-- Nav Items -->
-    <nav class="sidebar-nav">
-      <button class="nav-item active" data-view="queue">
-        <svg class="icon"><use href="./css/icons.svg#bell"></use></svg>
-        <span class="nav-label">Queue</span>
-        <span class="nav-badge" id="queue-badge">0</span>
-      </button>
-      <button class="nav-item" data-view="directory">
-        <svg class="icon"><use href="./css/icons.svg#users"></use></svg>
-        <span class="nav-label">Alumni</span>
-      </button>
-      <button class="nav-item" data-view="dashboard">
-        <svg class="icon"><use href="./css/icons.svg#layout-dashboard"></use></svg>
-        <span class="nav-label">Dashboard</span>
-      </button>
-    </nav>
+  <!-- How It Works -->
+  <section class="how" id="how">
+    <div class="how-inner">
+      <h2>How It Works</h2>
+      <div class="how-steps">
 
-    <!-- Footer -->
-    <div class="sidebar-footer">
-      <p class="disclaimer">All data shown is sample/illustrative. Built to demonstrate system capabilities using realistic scenarios. No actual alumni records are included.</p>
+        <div class="how-step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            <h3>Register Your Institution</h3>
+            <p>Create an account with TOTP-based authentication. Scan the QR code with your authenticator app — no passwords needed.</p>
+          </div>
+        </div>
+
+        <div class="how-step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            <h3>Import Your Alumni Data</h3>
+            <p>Upload your alumni records or connect to your existing student information system. The platform indexes and organizes everything.</p>
+          </div>
+        </div>
+
+        <div class="how-step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            <h3>Engage &amp; Track</h3>
+            <p>Use the outreach queue to contact alumni, log interactions, and watch your engagement metrics improve in real time.</p>
+          </div>
+        </div>
+
+      </div>
     </div>
-  </aside>
+  </section>
 
-  <!-- Mobile Bottom Nav -->
-  <nav class="mobile-nav" id="mobile-nav">
-    <button class="mobile-nav-item active" data-view="queue">
-      <span class="mobile-nav-icon-wrap">
-        <svg class="icon"><use href="./css/icons.svg#bell"></use></svg>
-        <span class="mobile-badge hidden" id="mobile-queue-badge">0</span>
-      </span>
-      <span class="mobile-nav-label">Queue</span>
-    </button>
-    <button class="mobile-nav-item" data-view="directory">
-      <svg class="icon"><use href="./css/icons.svg#users"></use></svg>
-      <span class="mobile-nav-label">Alumni</span>
-    </button>
-    <button class="mobile-nav-item" data-view="dashboard">
-      <svg class="icon"><use href="./css/icons.svg#layout-dashboard"></use></svg>
-      <span class="mobile-nav-label">Dashboard</span>
-    </button>
-    <button class="mobile-nav-item" id="mobile-search-btn">
-      <svg class="icon"><use href="./css/icons.svg#search"></use></svg>
-      <span class="mobile-nav-label">Search</span>
-    </button>
-  </nav>
-
-  <!-- Mobile Search Overlay -->
-  <div class="mobile-search-overlay hidden" id="mobile-search-overlay">
-    <div class="mobile-search-header">
-      <svg class="icon"><use href="./css/icons.svg#search"></use></svg>
-      <input type="text" id="mobile-search-input" placeholder="Name, specialty, or city..." autocomplete="off">
-      <button id="mobile-search-close">
-        <svg class="icon"><use href="./css/icons.svg#x"></use></svg>
-      </button>
+  <!-- Stats -->
+  <section class="stats">
+    <div class="stats-inner">
+      <div class="stat">
+        <h3>10K+</h3>
+        <p>Alumni Records Managed</p>
+      </div>
+      <div class="stat">
+        <h3>99.9%</h3>
+        <p>Uptime</p>
+      </div>
+      <div class="stat">
+        <h3>&lt;1ms</h3>
+        <p>Wire Protocol Latency</p>
+      </div>
     </div>
-    <div class="mobile-search-results" id="mobile-search-results"></div>
-  </div>
+  </section>
 
-  <!-- Outreach Panel Overlay -->
-  <div class="outreach-overlay hidden" id="outreach-overlay"></div>
-  <div class="outreach-panel hidden" id="outreach-panel"></div>
+  <!-- CTA -->
+  <section class="cta">
+    <h2>Ready to Connect with Your Alumni?</h2>
+    <p>Start building stronger relationships with the people who make your institution great.</p>
+    <a href="./login.html" class="cta-btn">Sign In to Get Started</a>
+  </section>
 
-  <!-- Main Content -->
-  <main class="main-content" id="main">
-    <div class="content-wrap">
-      <div id="root"></div>
-    </div>
-  </main>
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 AcmeDev &mdash; Alumni Engagement Platform &middot; <a href="https://acmedev.com">acmedev.com</a></p>
+  </footer>
 
-  <!-- Chart.js from CDN (only dep) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-  <script type="module" src="./js/app.js"></script>
-  <script src="./js/wire.js"></script>
-  <script src="./js/nous.js"></script>
-  <script src="./js/auth-gate.js"></script>
 </body>
 </html>

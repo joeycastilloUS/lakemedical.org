@@ -1,6 +1,6 @@
 # Board: lakemedical.org — NOUS Wire Auth
 
-Updated 2026-04-02 · 18 items · 76 pts · 5 boards
+Updated 2026-04-02 · 21 items · 86 pts · 6 boards
 Source: plan-lakemedical-repo-nous-auth-v3.html
 
 ---
@@ -76,3 +76,18 @@ Source: plan-qr-fix-v2.html → estimate-qr-fix-v2.html
 - {qr_data + qr_size triples, add to, Worker handleRegister} · 2 · ~u ✅
 - {server QR rendering + delete qr.js, update in, auth-gate.js + index.html} · 3 · ~u ✅
 - {QR scannable output, test on, browser register flow} · 3 · ~t ✅
+
+---
+
+## Board 32 — Landing Page + Login Split (10 pts)
+
+Source: GO chain — landing page restructure, acmedev.com branding
+
+### Ready
+
+### In Progress
+
+### Done
+- {product landing page, add as, index.html with acmedev branding} · 5 · ~a ✅
+- {auth gate + login page, add as, login.html with acmedev branding} · 3 · ~a ✅
+- {current app, update to, app.html with session guard} · 2 · ~u ✅

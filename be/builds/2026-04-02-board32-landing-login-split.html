@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board 32 — Landing Page + Login Split: acmedev branding, 3 new files</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 28px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { color: #6FC3DF; font-size: 1rem; margin-bottom: 8px; }
+  .pass { color: #4ade80; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Board 32 &mdash; Landing Page + Login Split</h1>
+<p class="subtitle">3 items &middot; 10 pts &middot; acmedev.com branding &middot; lakemedical.org</p>
+
+<h2>What Changed</h2>
+<div class="card">
+  <p>Restructured lakemedical.org from a single auth-gated page into a three-page architecture:</p>
+  <ul>
+    <li><strong>index.html</strong> &mdash; Product landing page describing the Alumni Engagement Platform for colleges &amp; universities. acmedev.com brand colors (#3779B5 blue, #E1EFF2 teal). Hero, features grid, how-it-works, stats, CTA.</li>
+    <li><strong>login.html</strong> &mdash; Standalone sign-in page with NOUS wire auth. Same QR registration flow, rebranded from WesternU burgundy to acmedev blue.</li>
+    <li><strong>app.html</strong> &mdash; The alumni engine dashboard (was index.html). Session guard redirects to login.html if no valid session.</li>
+  </ul>
+</div>
+
+<h2>Board 32 Items</h2>
+<div class="card">
+  <table>
+    <tr><th>#</th><th>Item</th><th>Pts</th><th></th></tr>
+    <tr><td>32.1</td><td>{product landing page, add as, index.html with acmedev branding}</td><td>5</td><td class="pass">&#10004;</td></tr>
+    <tr><td>32.2</td><td>{auth gate + login page, add as, login.html with acmedev branding}</td><td>3</td><td class="pass">&#10004;</td></tr>
+    <tr><td>32.3</td><td>{current app, update to, app.html with session guard}</td><td>2</td><td class="pass">&#10004;</td></tr>
+  </table>
+</div>
+
+<h2>Files Created / Modified</h2>
+<div class="card">
+  <table>
+    <tr><th>File</th><th>Action</th></tr>
+    <tr><td><code>index.html</code></td><td>Replaced &mdash; new product landing page</td></tr>
+    <tr><td><code>landing.css</code></td><td>Created &mdash; acmedev brand styles for landing</td></tr>
+    <tr><td><code>login.html</code></td><td>Created &mdash; standalone auth gate page</td></tr>
+    <tr><td><code>css/login.css</code></td><td>Created &mdash; acmedev brand styles for login</td></tr>
+    <tr><td><code>js/login-gate.js</code></td><td>Created &mdash; auth logic, redirects to app.html</td></tr>
+    <tr><td><code>app.html</code></td><td>Created &mdash; alumni engine (was index.html)</td></tr>
+    <tr><td><code>js/app-guard.js</code></td><td>Created &mdash; session check, redirects to login.html</td></tr>
+  </table>
+</div>
+
+<h2>Architecture</h2>
+<div class="card">
+  <pre style="background:#222;padding:16px;border-radius:8px;font-size:0.85rem;overflow-x:auto;color:#ddd;">
+User hits lakemedical.org
+  &darr;
+index.html (product landing page)
+  &darr; clicks "Sign In"
+login.html (NOUS wire auth)
+  &darr; successful auth
+app.html (alumni engine dashboard)
+  &darr; session expires
+login.html (redirected by app-guard.js)
+  </pre>
+</div>
+
+<h2>Brand Colors Applied</h2>
+<div class="card">
+  <table>
+    <tr><th>Color</th><th>Hex</th><th>Usage</th></tr>
+    <tr><td style="color:#3779B5;">&#9632;</td><td>#3779B5</td><td>Primary brand blue &mdash; buttons, links, accents</td></tr>
+    <tr><td style="color:#255179;">&#9632;</td><td>#255179</td><td>Dark blue &mdash; hover states</td></tr>
+    <tr><td style="color:#73A6D4;">&#9632;</td><td>#73A6D4</td><td>Light blue &mdash; secondary borders</td></tr>
+    <tr><td style="color:#E1EFF2;">&#9632;</td><td>#E1EFF2</td><td>Teal &mdash; section backgrounds</td></tr>
+    <tr><td style="color:#12283C;">&#9632;</td><td>#12283C</td><td>Dark &mdash; hero gradient, headings</td></tr>
+  </table>
+</div>
+
+<div class="footer">Generated 2026-04-02 22:15 &middot; Board 32 Build &middot; lakemedical.org</div>
+</div>
+</body>
+</html>

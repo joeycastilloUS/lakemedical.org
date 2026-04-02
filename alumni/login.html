@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — AcmeDev Alumni Platform</title>
+  <link rel="stylesheet" href="./css/login.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+
+  <!-- Back to landing -->
+  <a href="./" class="back-link">&larr; Back to AcmeDev</a>
+
+  <!-- Auth Card -->
+  <div id="auth-gate">
+    <div id="auth-gate-inner">
+      <div id="auth-brand">AcmeDev</div>
+      <div id="auth-title">ALUMNI PLATFORM</div>
+      <div id="auth-subtitle">Sign in to your account</div>
+      <div id="auth-form">
+        <input type="text" id="auth-user" placeholder="username" autocomplete="username" spellcheck="false">
+        <input type="text" id="auth-totp" placeholder="6-digit code" autocomplete="one-time-code" spellcheck="false" maxlength="6" inputmode="numeric">
+        <button id="auth-login-btn">SIGN IN</button>
+        <div id="auth-divider">Not registered?</div>
+        <button id="auth-register-btn">REGISTER</button>
+        <span id="auth-error"></span>
+      </div>
+      <div id="auth-qr-view" class="hidden">
+        <canvas id="auth-qr-canvas" width="300" height="300"></canvas>
+        <div id="auth-qr-label">Scan with your authenticator app</div>
+        <input type="text" id="auth-qr-totp" placeholder="Enter code to verify" autocomplete="one-time-code" spellcheck="false" maxlength="6" inputmode="numeric">
+        <button id="auth-qr-verify-btn">VERIFY</button>
+        <span id="auth-qr-error"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Timer (visible when authenticated) -->
+  <div id="auth-session-timer" style="display:none;"></div>
+
+  <script src="./js/wire.js"></script>
+  <script src="./js/nous.js"></script>
+  <script src="./js/login-gate.js"></script>
+</body>
+</html>
