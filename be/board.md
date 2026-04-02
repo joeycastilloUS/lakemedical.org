@@ -1,7 +1,7 @@
-# Board: lakemedical.org — NOUS Wire Auth
+# Board: lakemedical.org — Multi-Tenant Enterprise
 
-Updated 2026-04-02 · 21 items · 86 pts · 6 boards
-Source: plan-lakemedical-repo-nous-auth-v3.html
+Updated 2026-04-02 · 46 items · 197 pts · 13 boards (27–39)
+Source: plan-multi-tenant-enterprise.html → estimate-multi-tenant-enterprise.html
 
 ---
 
@@ -48,8 +48,6 @@ Source: plan-lakemedical-repo-nous-auth-v3.html
 
 ## Board 30 — Close the Loop (21 pts)
 
-Source: plan-close-the-loop.html → estimate-close-the-loop.html
-
 ### Ready
 
 ### In Progress
@@ -65,8 +63,6 @@ Source: plan-close-the-loop.html → estimate-close-the-loop.html
 
 ## Board 31 — Fix QR Code, All C (11 pts)
 
-Source: plan-qr-fix-v2.html → estimate-qr-fix-v2.html
-
 ### Ready
 
 ### In Progress
@@ -81,8 +77,6 @@ Source: plan-qr-fix-v2.html → estimate-qr-fix-v2.html
 
 ## Board 32 — Landing Page + Login Split (10 pts)
 
-Source: GO chain — landing page restructure, acmedev.com branding
-
 ### Ready
 
 ### In Progress
@@ -91,3 +85,98 @@ Source: GO chain — landing page restructure, acmedev.com branding
 - {product landing page, add as, index.html with acmedev branding} · 5 · ~a ✅
 - {auth gate + login page, add as, login.html with acmedev branding} · 3 · ~a ✅
 - {current app, update to, app.html with session guard} · 2 · ~u ✅
+
+---
+
+## Board 33 — alumni-server Scaffold (18 pts)
+
+### Ready
+- {HTTP listener + tenant router, add to, alumni-server.c} · 5 · ~a
+- {config + health endpoints, add to, alumni-server.c} · 5 · ~a
+- {tenant provisioning CLI, add to, alumni-server.c} · 5 · ~a
+- {port 9080, open on, VM firewall} · 3 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 34 — Data Layer (18 pts) ⛔ blocked by Board 33
+
+### Ready
+- {per-tenant encrypted triple store, add to, alumni-server.c} · 5 · ~a
+- {CSV import endpoint, add to, alumni-server.c} · 5 · ~a
+- {data serving endpoint, add to, alumni-server.c} · 5 · ~a
+- {tenant routing, update in, Worker proxy} · 3 · ~u
+
+### In Progress
+
+### Done
+
+---
+
+## Board 35 — Enrichment Engine (20 pts) ⛔ blocked by Board 34
+
+### Ready
+- {NPI enrichment client, add to, alumni-server.c} · 5 · ~a
+- {PubMed enrichment client, add to, alumni-server.c} · 5 · ~a
+- {scheduler event loop + cursor tracking, add to, alumni-server.c} · 5 · ~a
+- {cause-effect rule evaluator, add to, alumni-server.c} · 5 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 36 — Cause-Effect Config (13 pts) ⛔ blocked by Board 35
+
+### Ready
+- {factory rule store + 4 causes + 3 effects, add to, alumni-server.c} · 5 · ~a
+- {effect producer + outreach templates, add to, alumni-server.c} · 5 · ~a
+- {tenant override system, add to, alumni-server.c} · 3 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 37 — Auth Migration (13 pts) ⛔ blocked by Board 33
+
+### Ready
+- {TOTP auth handler, add to, alumni-server.c} · 5 · ~a
+- {session management, add to, alumni-server.c} · 5 · ~a
+- {per-tenant user store, add to, alumni-server.c} · 3 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 38 — Browser Rebrand (13 pts) ⛔ blocked by Board 33
+
+### Ready
+- {tenant-config loader, add to, alumni app JS} · 5 · ~a
+- {hardcoded brand, remove from, all HTML/CSS} · 5 · ~d
+- {app inner chrome, update with, dynamic brand variables} · 3 · ~u
+
+### In Progress
+
+### Done
+
+---
+
+## Board 39 — Operations (16 pts) ⛔ blocked by Board 34
+
+### Ready
+- {backup/export endpoint, add to, alumni-server.c} · 5 · ~a
+- {trace stream + pulse monitoring, add to, alumni-server.c} · 3 · ~a
+- {admin CLI, add to, alumni-server.c} · 5 · ~a
+- {E2E multi-tenant test, add to, test suite} · 3 · ~a
+
+### In Progress
+
+### Done

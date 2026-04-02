@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~E: Multi-Tenant Enterprise — 25 items, 7 boards (33–39), 111 pts</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 32px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  h3 { color: #90C4CF; font-size: 1rem; margin: 16px 0 8px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .pts { color: #f59e0b; font-weight: 700; }
+  .blocked { color: #f87171; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  .board-header { display: flex; justify-content: space-between; align-items: baseline; }
+  .board-header h3 { margin: 0; }
+  .board-pts { color: #f59e0b; font-size: 0.9rem; font-weight: 700; }
+  .item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #1a1a1a; }
+  .item-triple { flex: 1; }
+  .item-pts { color: #f59e0b; font-weight: 700; min-width: 40px; text-align: right; }
+  .item-cmd { color: #6FC3DF; font-size: 0.85rem; min-width: 30px; text-align: right; margin-left: 12px; }
+  .overview-row td:nth-child(3) { color: #f59e0b; font-weight: 700; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Estimate: Multi-Tenant Enterprise Platform</h1>
+<p class="subtitle">25 items &middot; 7 boards (33&ndash;39) &middot; 111 pts &middot; Pure C core, kASTIL/nous foundation</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Boards Overview</h2>
+<div class="card">
+  <table class="overview-row">
+    <tr><th>Board</th><th>Scope</th><th>Pts</th><th>Items</th><th>Dep</th></tr>
+    <tr><td><span class="label">33</span></td><td>alumni-server Scaffold</td><td>18</td><td>4</td><td>&mdash;</td></tr>
+    <tr><td><span class="label">34</span></td><td>Data Layer</td><td>18</td><td>4</td><td>⛔ 33</td></tr>
+    <tr><td><span class="label">35</span></td><td>Enrichment Engine</td><td>20</td><td>4</td><td>⛔ 34</td></tr>
+    <tr><td><span class="label">36</span></td><td>Cause-Effect Config</td><td>13</td><td>3</td><td>⛔ 35</td></tr>
+    <tr><td><span class="label">37</span></td><td>Auth Migration</td><td>13</td><td>3</td><td>⛔ 33</td></tr>
+    <tr><td><span class="label">38</span></td><td>Browser Rebrand</td><td>13</td><td>3</td><td>⛔ 33</td></tr>
+    <tr><td><span class="label">39</span></td><td>Operations</td><td>16</td><td>4</td><td>⛔ 34</td></tr>
+    <tr style="border-top:2px solid #333;"><td></td><td><strong>Total</strong></td><td><strong>111</strong></td><td><strong>25</strong></td><td></td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Board 33 — alumni-server Scaffold (18 pts)</h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">C binary with HTTP listener, tenant routing, config serving, health. Unlocks everything.</p>
+  <div class="item">
+    <span class="item-triple">{HTTP listener + tenant router, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{config + health endpoints, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{tenant provisioning CLI, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{port 9080, open on, VM firewall}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Board 34 — Data Layer (18 pts) <span class="blocked">⛔ 33</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Per-tenant encrypted triple store, CSV import, data serving. Unlocks enrichment + ops.</p>
+  <div class="item">
+    <span class="item-triple">{per-tenant encrypted triple store, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{CSV import endpoint, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{data serving endpoint, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{tenant routing, update in, Worker proxy}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~u</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Board 35 — Enrichment Engine (20 pts) <span class="blocked">⛔ 34</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">NPI + PubMed in pure C, scheduler loop, generic rule evaluator. The data gets smart.</p>
+  <div class="item">
+    <span class="item-triple">{NPI enrichment client, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{PubMed enrichment client, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{scheduler event loop + cursor tracking, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{cause-effect rule evaluator, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Board 36 — Cause-Effect Config (13 pts) <span class="blocked">⛔ 35</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Factory rule store, effect producer, tenant overrides. The intelligence layer.</p>
+  <div class="item">
+    <span class="item-triple">{factory rule store + 4 causes + 3 effects, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{effect producer + outreach templates, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{tenant override system, add to, alumni-server.c}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Board 37 — Auth Migration (13 pts) <span class="blocked">⛔ 33</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Move TOTP + sessions from relay into alumni-server. Per-tenant user stores. Relay becomes optional.</p>
+  <div class="item">
+    <span class="item-triple">{TOTP auth handler, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{session management, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{per-tenant user store, add to, alumni-server.c}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Board 38 — Browser Rebrand (13 pts) <span class="blocked">⛔ 33</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Remove all hardcoded brand. CSS variables from config endpoint. Any tenant sees their own colors.</p>
+  <div class="item">
+    <span class="item-triple">{tenant-config loader, add to, alumni app JS}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{hardcoded brand, remove from, all HTML/CSS}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~d</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{app inner chrome, update with, dynamic brand variables}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~u</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Board 39 — Operations (16 pts) <span class="blocked">⛔ 34</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Backup/export, trace stream, pulse monitoring, admin CLI. Enterprise readiness.</p>
+  <div class="item">
+    <span class="item-triple">{backup/export endpoint, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{trace stream + pulse monitoring, add to, alumni-server.c}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{admin CLI, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{E2E multi-tenant test, add to, test suite}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Dependencies</h2>
+<div class="card">
+<pre style="background:#222;padding:16px;border-radius:8px;font-size:0.85rem;color:#ddd;">
+Board 33 (Scaffold)
+  ├── Board 34 (Data)
+  │     ├── Board 35 (Enrichment)
+  │     │     └── Board 36 (Cause-Effect)
+  │     └── Board 39 (Ops)
+  ├── Board 37 (Auth)
+  └── Board 38 (Browser Rebrand)
+
+Critical path: 33 → 34 → 35 → 36  (4 boards, 69 pts)
+Parallel after 33: Auth (37) + Browser (38) can run alongside Data (34)
+Parallel after 34: Ops (39) can run alongside Enrichment (35)
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Value Rationale</h2>
+<div class="card">
+  <table>
+    <tr><th>Board</th><th>Why This Order</th></tr>
+    <tr><td><span class="label">33</span></td><td><strong>Unlocks everything.</strong> Can't do data, auth, or enrichment without the alumni-server binary running.</td></tr>
+    <tr><td><span class="label">34</span></td><td><strong>Core value.</strong> Multi-tenant data isolation is the product. Without tenant-scoped stores, there's no platform.</td></tr>
+    <tr><td><span class="label">35</span></td><td><strong>Differentiator.</strong> Automated NPI + PubMed enrichment is what makes this more than a spreadsheet. Generic rule evaluator enables the cause-effect engine.</td></tr>
+    <tr><td><span class="label">36</span></td><td><strong>Intelligence.</strong> Factory rules + tenant overrides make the system smart. Adding a new trigger type = adding triples, not code.</td></tr>
+    <tr><td><span class="label">37</span></td><td><strong>Independence.</strong> Moving auth into alumni-server removes relay dependency. Per-tenant user isolation for security.</td></tr>
+    <tr><td><span class="label">38</span></td><td><strong>Multi-tenant visual.</strong> Each institution sees their brand. Zero code changes per tenant. The "sell for show" moment.</td></tr>
+    <tr><td><span class="label">39</span></td><td><strong>Enterprise polish.</strong> Backup, monitoring, admin tools. What separates a prototype from production.</td></tr>
+  </table>
+</div>
+
+<div class="footer">Generated 2026-04-02 23:45 &middot; ~E Multi-Tenant Enterprise Estimate &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
