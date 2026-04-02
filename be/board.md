@@ -1,7 +1,7 @@
-# Board: lakemedical.org — Multi-Tenant Enterprise
+# Board: lakemedical.org — Full Stack Build
 
-Updated 2026-04-02 · 46 items · 197 pts · 13 boards (27–39)
-Source: plan-multi-tenant-enterprise.html → estimate-multi-tenant-enterprise.html
+Updated 2026-04-02 · 63 items · 278 pts · 18 boards (27–44)
+Source: Multi-Tenant + Dual-Write + Provisioning UI estimates
 
 ---
 
@@ -176,6 +176,75 @@ Source: plan-multi-tenant-enterprise.html → estimate-multi-tenant-enterprise.h
 - {trace stream + pulse monitoring, add to, alumni-server.c} · 3 · ~a
 - {admin CLI, add to, alumni-server.c} · 5 · ~a
 - {E2E multi-tenant test, add to, test suite} · 3 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 40 — Firestore Mirror Module (18 pts) ⛔ blocked by Board 39
+
+### Ready
+- {firestore_mirror.c + JWT service account auth, add to, alumni-server} · 5 · ~a
+- {subject-to-collection projector + batch writer, add to, firestore_mirror.c} · 5 · ~a
+- {async ring buffer + background mirror thread, add to, firestore_mirror.c} · 5 · ~a
+- {GCP service account + Firestore database, add to, GCP project} · 3 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 41 — Dual-Write Integration (16 pts) ⛔ blocked by Board 40
+
+### Ready
+- {mirror_queue calls after every store insert/delete, update in, alumni-server.c} · 5 · ~u
+- {batch flush after enrichment + import completion, add to, scheduler} · 3 · ~a
+- {mirror_resync full re-project command, add to, admin CLI} · 5 · ~a
+- {Firestore health + mirror queue depth, add to, pulse monitoring} · 3 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 42 — Browser Firestore Migration (18 pts) ⛔ blocked by Board 41
+
+### Ready
+- {Firestore security rules + Firebase Auth custom token, add to, GCP + alumni-server} · 5 · ~a
+- {Firebase SDK + Firestore real-time reads, add to, app.html} · 5 · ~a
+- {/api/data + /api/seed + /api/refresh Workers + KV, remove from, functions/} · 5 · ~d
+- {Firebase Auth sign-in after NOUS auth, add to, login flow} · 3 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 43 — Provisioning Page + Admin Gate (16 pts) ⛔ blocked by Board 42
+
+### Ready
+- {provision.html page + tenant creation form, add to, alumni/admin/} · 5 · ~a
+- {tenant create Worker endpoint, add to, functions/api/} · 5 · ~a
+- {admin-only session guard + super-admin role check, add to, provision.html} · 3 · ~a
+- {acmedev brand + Be style for admin pages, add to, admin/admin.css} · 3 · ~a
+
+### In Progress
+
+### Done
+
+---
+
+## Board 44 — Provisioning UX + Tenant Onboarding (13 pts) ⛔ blocked by Board 43
+
+### Ready
+- {live brand preview (color picker + logo preview), add to, provision.html} · 5 · ~a
+- {tenant list + status dashboard, add to, admin/tenants.html} · 5 · ~a
+- {first-user onboarding wizard, add to, app.html} · 3 · ~a
 
 ### In Progress
 

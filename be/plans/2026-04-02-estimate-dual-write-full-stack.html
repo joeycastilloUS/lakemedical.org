@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~E: Full Stack — Multi-Tenant + Dual-Write + Provisioning UI — 43 items, 12 boards (33–44), 192 pts</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 32px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  h3 { color: #90C4CF; font-size: 1rem; margin: 16px 0 8px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .pts { color: #f59e0b; font-weight: 700; }
+  .blocked { color: #f87171; }
+  .done-tag { color: #4ade80; font-weight: 700; }
+  .phase-tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: 700; margin-left: 8px; }
+  .phase-mt { background: #1a2a3a; color: #6FC3DF; }
+  .phase-fs { background: #2a1a00; color: #FF9100; }
+  .phase-ui { background: #1a2a1a; color: #4ade80; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  pre { background: #222; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.82rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  .item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #1a1a1a; }
+  .item-triple { flex: 1; }
+  .item-pts { color: #f59e0b; font-weight: 700; min-width: 40px; text-align: right; }
+  .item-cmd { color: #6FC3DF; font-size: 0.85rem; min-width: 30px; text-align: right; margin-left: 12px; }
+  .overview-row td:nth-child(3) { color: #f59e0b; font-weight: 700; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Estimate: Full Stack Build</h1>
+<p class="subtitle">Multi-Tenant Core + Firestore Dual-Write + Provisioning UI<br>43 items &middot; 12 boards (33&ndash;44) &middot; 192 pts &middot; Sequential, one board at a time</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Three Phases, Twelve Boards</h2>
+<div class="card">
+  <table>
+    <tr><th colspan="4" style="color:#6FC3DF;">Phase 1 — Multi-Tenant Core <span class="phase-tag phase-mt">MULTI-TENANT</span></th></tr>
+    <tr><th>Board</th><th>Scope</th><th>Pts</th><th>Items</th></tr>
+    <tr><td><span class="label">33</span></td><td>alumni-server Scaffold</td><td>18</td><td>4</td></tr>
+    <tr><td><span class="label">34</span></td><td>Data Layer</td><td>18</td><td>4</td></tr>
+    <tr><td><span class="label">35</span></td><td>Enrichment Engine</td><td>20</td><td>4</td></tr>
+    <tr><td><span class="label">36</span></td><td>Cause-Effect Config</td><td>13</td><td>3</td></tr>
+    <tr><td><span class="label">37</span></td><td>Auth Migration</td><td>13</td><td>3</td></tr>
+    <tr><td><span class="label">38</span></td><td>Browser Rebrand</td><td>13</td><td>3</td></tr>
+    <tr><td><span class="label">39</span></td><td>Operations</td><td>16</td><td>4</td></tr>
+    <tr><td></td><td style="color:#6FC3DF;font-weight:700;">Phase 1 subtotal</td><td style="color:#f59e0b;font-weight:700;">111</td><td>25</td></tr>
+  </table>
+
+  <table style="margin-top:16px;">
+    <tr><th colspan="4" style="color:#FF9100;">Phase 2 — Firestore Dual-Write <span class="phase-tag phase-fs">FIRESTORE</span></th></tr>
+    <tr><th>Board</th><th>Scope</th><th>Pts</th><th>Items</th></tr>
+    <tr><td><span class="label">40</span></td><td>Firestore Mirror Module</td><td>18</td><td>4</td></tr>
+    <tr><td><span class="label">41</span></td><td>Dual-Write Integration</td><td>16</td><td>4</td></tr>
+    <tr><td><span class="label">42</span></td><td>Browser Firestore Migration</td><td>18</td><td>4</td></tr>
+    <tr><td></td><td style="color:#FF9100;font-weight:700;">Phase 2 subtotal</td><td style="color:#f59e0b;font-weight:700;">52</td><td>12</td></tr>
+  </table>
+
+  <table style="margin-top:16px;">
+    <tr><th colspan="4" style="color:#4ade80;">Phase 3 — Provisioning UI <span class="phase-tag phase-ui">PROVISION</span></th></tr>
+    <tr><th>Board</th><th>Scope</th><th>Pts</th><th>Items</th></tr>
+    <tr><td><span class="label">43</span></td><td>Provisioning Page + Admin Gate</td><td>16</td><td>4</td></tr>
+    <tr><td><span class="label">44</span></td><td>Provisioning UX + Tenant Onboarding</td><td>13</td><td>3</td></tr>
+    <tr><td></td><td style="color:#4ade80;font-weight:700;">Phase 3 subtotal</td><td style="color:#f59e0b;font-weight:700;">29</td><td>7</td></tr>
+  </table>
+
+  <table style="margin-top:16px;border-top:2px solid #333;">
+    <tr><td></td><td><strong>Grand Total</strong></td><td style="color:#f59e0b;font-weight:700;">192</td><td><strong>44</strong></td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Execution Order (sequential, one board at a time)</h2>
+<div class="card">
+<pre>
+Board 33 (Scaffold)          ← START HERE
+  ↓
+Board 34 (Data Layer)
+  ↓
+Board 35 (Enrichment)
+  ↓
+Board 36 (Cause-Effect)
+  ↓
+Board 37 (Auth Migration)
+  ↓
+Board 38 (Browser Rebrand)
+  ↓
+Board 39 (Operations)
+  ↓
+  ── MULTI-TENANT CORE COMPLETE ──
+  ↓
+Board 40 (Firestore Mirror)
+  ↓
+Board 41 (Dual-Write Wiring)
+  ↓
+Board 42 (Browser → Firestore)
+  ↓
+  ── DUAL-WRITE COMPLETE ──
+  ↓
+Board 43 (Provisioning Page)
+  ↓
+Board 44 (Provisioning UX)
+  ↓
+  ── PROVISIONING UI COMPLETE ──
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PHASE 1 — MULTI-TENANT CORE (boards 33–39 — already estimated) -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<h2 style="color:#6FC3DF;">Phase 1 — Multi-Tenant Core</h2>
+
+<h2>Board 33 — alumni-server Scaffold (18 pts) <span class="phase-tag phase-mt">MT</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">C binary with HTTP listener, tenant routing, config serving, health. Unlocks everything.</p>
+  <div class="item">
+    <span class="item-triple">{HTTP listener + tenant router, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{config + health endpoints, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{tenant provisioning CLI, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{port 9080, open on, VM firewall}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<h2>Board 34 — Data Layer (18 pts) <span class="phase-tag phase-mt">MT</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Per-tenant encrypted triple store, CSV import, data serving. Unlocks enrichment.</p>
+  <div class="item">
+    <span class="item-triple">{per-tenant encrypted triple store, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{CSV import endpoint, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{data serving endpoint, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{tenant routing, update in, Worker proxy}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~u</span>
+  </div>
+</div>
+
+<h2>Board 35 — Enrichment Engine (20 pts) <span class="phase-tag phase-mt">MT</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">NPI + PubMed in pure C, scheduler loop, generic cause-effect rule evaluator.</p>
+  <div class="item">
+    <span class="item-triple">{NPI enrichment client, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{PubMed enrichment client, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{scheduler event loop + cursor tracking, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{cause-effect rule evaluator, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<h2>Board 36 — Cause-Effect Config (13 pts) <span class="phase-tag phase-mt">MT</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Factory rule store, effect producer, tenant overrides. The intelligence layer.</p>
+  <div class="item">
+    <span class="item-triple">{factory rule store + 4 causes + 3 effects, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{effect producer + outreach templates, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{tenant override system, add to, alumni-server.c}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<h2>Board 37 — Auth Migration (13 pts) <span class="phase-tag phase-mt">MT</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Move TOTP + sessions from relay into alumni-server. Per-tenant user stores.</p>
+  <div class="item">
+    <span class="item-triple">{TOTP auth handler, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{session management, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{per-tenant user store, add to, alumni-server.c}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<h2>Board 38 — Browser Rebrand (13 pts) <span class="phase-tag phase-mt">MT</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Remove hardcoded brand. CSS variables from config endpoint. Any tenant sees their colors.</p>
+  <div class="item">
+    <span class="item-triple">{tenant-config loader, add to, alumni app JS}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{hardcoded brand, remove from, all HTML/CSS}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~d</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{app inner chrome, update with, dynamic brand variables}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~u</span>
+  </div>
+</div>
+
+<h2>Board 39 — Operations (16 pts) <span class="phase-tag phase-mt">MT</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Backup/export, trace stream, pulse monitoring, admin CLI. Enterprise readiness.</p>
+  <div class="item">
+    <span class="item-triple">{backup/export endpoint, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{trace stream + pulse monitoring, add to, alumni-server.c}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{admin CLI, add to, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{E2E multi-tenant test, add to, test suite}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PHASE 2 — FIRESTORE DUAL-WRITE (boards 40–42) -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<h2 style="color:#FF9100;">Phase 2 — Firestore Dual-Write</h2>
+
+<h2>Board 40 — Firestore Mirror Module (18 pts) <span class="phase-tag phase-fs">FS</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Pure C Firestore REST client. JWT service account auth via crypt.h. Subject-to-document projector. Async ring buffer + background mirror thread. This is the engine that pushes triples to Firestore.</p>
+  <div class="item">
+    <span class="item-triple">{firestore_mirror.c + JWT service account auth, add to, alumni-server}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{subject-to-collection projector + batch writer, add to, firestore_mirror.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{async ring buffer + background mirror thread, add to, firestore_mirror.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{GCP service account + Firestore database, add to, GCP project}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<h2>Board 41 — Dual-Write Integration (16 pts) <span class="phase-tag phase-fs">FS</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Wire mirror calls into every store.h insert/delete. Batch flush after enrichment. Resync command for disaster recovery. Firestore health in pulse monitoring.</p>
+  <div class="item">
+    <span class="item-triple">{mirror_queue calls after every store insert/delete, update in, alumni-server.c}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~u</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{batch flush after enrichment + import completion, add to, scheduler}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{mirror_resync full re-project command, add to, admin CLI}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{Firestore health + mirror queue depth, add to, pulse monitoring}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<h2>Board 42 — Browser Firestore Migration (18 pts) <span class="phase-tag phase-fs">FS</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Browser reads from Firestore instead of Workers. Real-time subscriptions. Firestore security rules. Kill dead Worker endpoints + KV.</p>
+  <div class="item">
+    <span class="item-triple">{Firestore security rules + Firebase Auth custom token, add to, GCP + alumni-server}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{Firebase SDK + Firestore real-time reads, add to, app.html}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{/api/data + /api/seed + /api/refresh Workers + KV, remove from, functions/}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~d</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{Firebase Auth sign-in after NOUS auth, add to, login flow}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PHASE 3 — PROVISIONING UI (boards 43–44) -->
+<!-- ═══════════════════════════════════════════════════════ -->
+
+<h2 style="color:#4ade80;">Phase 3 — Provisioning UI</h2>
+
+<h2>Board 43 — Provisioning Page + Admin Gate (16 pts) <span class="phase-tag phase-ui">PROV</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Web-based tenant provisioning. Admin-only access. Form to create new institutional accounts. Provision endpoint in alumni-server already exists from Board 33 &mdash; this is the UI on top.</p>
+  <div class="item">
+    <span class="item-triple">{provision.html page + tenant creation form, add to, alumni/admin/}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{tenant create Worker endpoint (proxy to alumni-server), add to, functions/api/}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{admin-only session guard + super-admin role check, add to, provision.html}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{acmedev brand + Be style for admin pages, add to, admin/admin.css}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<h2>Board 44 — Provisioning UX + Tenant Onboarding (13 pts) <span class="phase-tag phase-ui">PROV</span></h2>
+<div class="card">
+  <p style="color:#888;margin-bottom:12px;">Polish the provisioning flow. Live brand preview as admin fills in colors/logo. Tenant onboarding wizard &mdash; after provision, guide first user through setup. Tenant list + status dashboard for super-admin.</p>
+  <div class="item">
+    <span class="item-triple">{live brand preview (color picker + logo preview), add to, provision.html}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{tenant list + status dashboard, add to, admin/tenants.html}</span>
+    <span class="item-pts">5</span>
+    <span class="item-cmd">~a</span>
+  </div>
+  <div class="item">
+    <span class="item-triple">{first-user onboarding wizard (register + CSV upload), add to, app.html}</span>
+    <span class="item-pts">3</span>
+    <span class="item-cmd">~a</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Dependencies</h2>
+<div class="card">
+<pre>
+Phase 1 — Multi-Tenant Core (sequential)
+  Board 33 (Scaffold)
+    → Board 34 (Data Layer)
+      → Board 35 (Enrichment)
+        → Board 36 (Cause-Effect)
+    → Board 37 (Auth Migration)
+    → Board 38 (Browser Rebrand)
+    → Board 39 (Operations)
+
+Phase 2 — Firestore (requires Phase 1 complete)
+  Board 40 (Mirror Module)
+    → Board 41 (Dual-Write Wiring)
+      → Board 42 (Browser → Firestore)
+
+Phase 3 — Provisioning UI (requires Board 33 + 34 minimum)
+  Board 43 (Provisioning Page)
+    → Board 44 (Provisioning UX)
+
+Recommended sequential path (one at a time):
+  33 → 34 → 35 → 36 → 37 → 38 → 39 → 40 → 41 → 42 → 43 → 44
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Value Rationale</h2>
+<div class="card">
+  <table>
+    <tr><th>Phase</th><th>Boards</th><th>Why This Order</th></tr>
+    <tr>
+      <td><span class="phase-tag phase-mt">MT</span></td>
+      <td>33&ndash;39</td>
+      <td><strong>The product.</strong> Multi-tenant alumni-server is the core platform. Can't do anything else without it. Pure C, store.h triples for all data, encrypted at rest, roll your own.</td>
+    </tr>
+    <tr>
+      <td><span class="phase-tag phase-fs">FS</span></td>
+      <td>40&ndash;42</td>
+      <td><strong>The scale layer.</strong> Firestore mirror gives browser real-time reads, eliminates 3 Worker endpoints, adds disaster recovery. Nine cents a tenant. But it's a mirror &mdash; the platform works without it.</td>
+    </tr>
+    <tr>
+      <td><span class="phase-tag phase-ui">PROV</span></td>
+      <td>43&ndash;44</td>
+      <td><strong>The sell.</strong> Provisioning UI is what lets Lisa (or any admin) create a new institution with a web form. Live brand preview. Onboarding wizard. This is the &ldquo;sell for show&rdquo; moment.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Milestone Checkpoints</h2>
+<div class="card">
+  <table>
+    <tr><th>After Board</th><th>What You Can Demo</th></tr>
+    <tr><td><span class="label">34</span></td><td>Provision a tenant via CLI, import a CSV, serve alumni data from C</td></tr>
+    <tr><td><span class="label">36</span></td><td>Full enrichment + signals. NPI/PubMed running in C. Cause-effect engine firing.</td></tr>
+    <tr><td><span class="label">39</span></td><td><strong>Multi-tenant MVP.</strong> Multiple tenants, each with their own brand, data, auth, enrichment. All C.</td></tr>
+    <tr><td><span class="label">42</span></td><td><strong>Real-time platform.</strong> Browser updates live when enrichment runs. No polling. Firestore-backed.</td></tr>
+    <tr><td><span class="label">44</span></td><td><strong>Self-service onboarding.</strong> Admin creates a tenant, picks colors, uploads CSV, first user registers. Ship it.</td></tr>
+  </table>
+</div>
+
+<div class="footer">Generated 2026-04-02 23:58 &middot; ~E Full Stack: Multi-Tenant + Dual-Write + Provisioning UI &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
