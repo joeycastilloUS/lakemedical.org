@@ -54,6 +54,14 @@ body {
   text-decoration: none;
 }
 
+.nav-powered {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0;
+  margin-left: 6px;
+}
+
 .nav-links {
   display: flex;
   gap: 24px;
