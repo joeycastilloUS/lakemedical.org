@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~P: Dual-Write — store.h Triples + Firestore Mirror</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 32px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  h3 { color: #90C4CF; font-size: 1rem; margin: 20px 0 8px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { margin-top: 0; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .pass { color: #4ade80; }
+  .fail { color: #f87171; }
+  .warn { color: #fbbf24; }
+  .c-tag { color: #f59e0b; font-weight: 700; }
+  .fs-tag { color: #FF9100; font-weight: 700; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #222; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.82rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .badge { display: inline-block; padding: 6px 16px; border-radius: 4px; font-size: 0.9rem; font-weight: 700; background: #1a2a3a; color: #6FC3DF; border: 1px solid #6FC3DF; margin-bottom: 16px; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Plan: Dual-Write &mdash; store.h Triples + Firestore Mirror</h1>
+<p class="subtitle">store.h is the source of truth &middot; Firestore is the cloud-readable mirror &middot; All data is triples</p>
+
+<span class="badge">PLAN &mdash; AWAITING APPROVAL</span>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Intent</h2>
+<div class="card">
+  <p>Use <code>store.h</code> triples as the <strong>single canonical data model</strong> for everything &mdash; alumni records, enrichment data, signals, config, sessions, audit trail. Every piece of state is a triple: <code>{subject, predicate, object}</code>.</p>
+  <p style="margin-top:12px;">Simultaneously mirror all triple writes to <strong>Google Firestore</strong> as a cloud-accessible read replica. The C triple store on our metal is authoritative. Firestore is a convenience layer for:</p>
+  <ul>
+    <li>Browser reads without custom API endpoints</li>
+    <li>Real-time subscriptions (Firestore SDK onSnapshot)</li>
+    <li>Admin dashboards and analytics queries</li>
+    <li>Disaster recovery (data lives in two places)</li>
+    <li>Third-party integrations that speak Firestore natively</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Does This Make Sense? &mdash; Analysis</h2>
+<div class="card">
+  <h3 class="pass">Why it works</h3>
+  <table>
+    <tr><th>Benefit</th><th>Detail</th></tr>
+    <tr><td>Single data model</td><td>Everything is triples. No object-relational mismatch. No schema migrations. Add a field = add a predicate. Delete a field = delete a triple.</td></tr>
+    <tr><td>Source of truth stays on your metal</td><td>store.h runs on your VM. AES-256-GCM encryption at rest. WAL crash recovery. Memory-mapped for speed. You own the bits.</td></tr>
+    <tr><td>Firestore is just a projection</td><td>If Firestore goes down, alumni-server keeps running. If Firestore drifts, re-sync from store.h. One-way authority.</td></tr>
+    <tr><td>Browser gets free reads</td><td>Firebase JS SDK reads directly from Firestore. No custom /api/data endpoint needed. Real-time updates via onSnapshot. Offline support built in.</td></tr>
+    <tr><td>No Worker CPU limits</td><td>Current enrichment in Workers hits 30s CPU limit. alumni-server in C has no limits. Firestore write is async &mdash; doesn't block the enrichment loop.</td></tr>
+    <tr><td>Multi-tenant isolation</td><td>Firestore security rules can enforce tenant isolation at the document level. <code>tenants/{tenant_id}/...</code> collections. Users only read their tenant.</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3 class="warn">The traps to avoid</h3>
+  <table>
+    <tr><th>Risk</th><th>Mitigation</th></tr>
+    <tr><td>Dual-write consistency</td><td><strong>Write store.h first, then Firestore.</strong> If Firestore fails, queue and retry. store.h is always correct. Firestore is eventually consistent. Never read from Firestore to make server-side decisions.</td></tr>
+    <tr><td>Cost at scale</td><td>Firestore charges per write ($0.18/100k). A 7,000-alumni NPI refresh = 7,000+ triple updates = ~35,000 doc writes/day. <strong>Batch writes</strong> (500 ops/batch) reduce cost. Project to document (not triple-per-doc) reduces writes 10x.</td></tr>
+    <tr><td>Data model mismatch</td><td>Triples are S/P/O. Firestore is documents/collections. Don't store raw triples in Firestore &mdash; <strong>project them into documents</strong>. See mapping below.</td></tr>
+    <tr><td>Encryption gap</td><td>store.h uses app-level AES-256-GCM. Firestore uses Google-managed encryption (TLS in transit, AES-256 at rest via Google). Accept this: Firestore is <em>not</em> your vault. Don't put secrets (TOTP keys, PSKs) in Firestore. Only alumni data + signals.</td></tr>
+    <tr><td>Latency on writes</td><td>Firestore write is async. alumni-server writes to store.h (local, &lt;1ms), then fires Firestore write in background thread. User doesn't wait.</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3 class="fail">What does NOT go to Firestore</h3>
+  <ul>
+    <li><strong>TOTP secrets</strong> &mdash; stay in vault.h only. Never leave the VM.</li>
+    <li><strong>Session tokens</strong> &mdash; stay in store.h. Firestore is not a session store.</li>
+    <li><strong>Encryption keys / PSKs</strong> &mdash; stay in vault.h.</li>
+    <li><strong>Factory rule definitions</strong> &mdash; these ship with the binary. No need to mirror.</li>
+    <li><strong>Audit/trace logs</strong> &mdash; too high volume. Stay in trace.h/pulse.h.</li>
+  </ul>
+  <p style="margin-top:12px;">Rule: <strong>if it's a secret or a system internal, it stays on our metal.</strong> If it's data a browser user should see, it goes to Firestore.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Architecture</h2>
+<div class="card">
+<pre>
+┌────────────────────────────────────────────────────────────────┐
+│  BROWSER (vanilla JS + Firebase SDK)                           │
+│                                                                │
+│  ┌──────────┐   ┌──────────┐   ┌──────────────────────┐       │
+│  │ Landing   │   │ Login    │   │ App                  │       │
+│  │ index.html│   │ login.html│  │ app.html             │       │
+│  └──────────┘   └─────┬────┘   └──────────┬───────────┘       │
+│                        │                   │                    │
+│                  wire.js/nous.js    Firebase JS SDK             │
+│                  (auth only)       onSnapshot() reads           │
+│                        │           ↕ real-time                  │
+└────────────────────────┼───────────┼───────────────────────────┘
+                         │           │
+           ┌─────────────┘           │
+           │                         │
+┌──────────┼─────────────────────────┼───────────────────────────┐
+│  EDGE    │  Cloudflare Workers     │                            │
+│          │                         │                            │
+│    /api/wire  (auth only &mdash;     │                            │
+│     thin proxy to relay)       Firestore                       │
+│                                (Google Cloud)                   │
+└──────────┼──────────────────────────────────────────────────────┘
+           │                         ↑
+┌──────────┼─────────────────────────┼───────────────────────────┐
+│  CORE    │                         │                            │
+│          │                         │  async mirror              │
+│   ┌──────▼──────────────────────────────────────────┐          │
+│   │      alumni-server (pure C)                      │          │
+│   │                                                  │          │
+│   │  ┌────────────────┐    ┌──────────────────────┐  │          │
+│   │  │ store.h         │    │ firestore_mirror.c   │  │          │
+│   │  │ (SOURCE OF      │───▶│ (ASYNC PROJECTOR)    │──┼─── HTTPS
+│   │  │  TRUTH)         │    │                      │  │    POST
+│   │  │                 │    │ triples → documents   │  │     to
+│   │  │ triple_store_   │    │ batch writes          │  │  Firestore
+│   │  │ insert()        │    │ retry queue           │  │  REST API
+│   │  │ triple_store_   │    │ conflict resolution   │  │          │
+│   │  │ delete()        │    └──────────────────────┘  │          │
+│   │  │ triple_store_   │                              │          │
+│   │  │ query()         │    ┌──────────────────────┐  │          │
+│   │  └────────────────┘    │ Enrichment / Scheduler│  │          │
+│   │                        │ NPI + PubMed (http.h) │  │          │
+│   │                        │ Cause-Effect engine   │  │          │
+│   │                        └──────────────────────┘  │          │
+│   └──────────────────────────────────────────────────┘          │
+│                                                                 │
+│   ┌──────────────────────────────┐                              │
+│   │  relay_server (existing C)   │                              │
+│   │  Wire protocol + auth only   │                              │
+│   └──────────────────────────────┘                              │
+└─────────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<div class="card">
+  <h3>Key change from previous plan</h3>
+  <p>The browser <strong>no longer reads data through Workers.</strong> It reads alumni data, signals, and dashboard data directly from Firestore via the Firebase JS SDK. Workers only handle auth (wire protocol). This eliminates:</p>
+  <ul>
+    <li>The <code>/api/data</code> Worker endpoint</li>
+    <li>The <code>/api/refresh</code> Worker endpoint</li>
+    <li>The <code>/api/seed</code> Worker endpoint</li>
+    <li>KV namespace for alumni data cache</li>
+  </ul>
+  <p style="margin-top:8px;">These are replaced by Firestore reads with real-time subscriptions. Simpler. Faster. Less Worker code.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Triple-to-Firestore Data Model Mapping</h2>
+<div class="card">
+  <h3>The projection: triples &rarr; documents</h3>
+  <p>Raw triples in store.h are <code>{subject, predicate, object}</code>. Storing each triple as a Firestore document is wasteful (too many docs, too many reads). Instead, <strong>project by subject</strong>: all triples sharing a subject become one Firestore document.</p>
+<pre>
+store.h triples (source of truth):
+  alumni:jsmith   name            "Dr. Jane Smith"
+  alumni:jsmith   class-year      "2018"
+  alumni:jsmith   campus          "pomona"
+  alumni:jsmith   specialty       "family-medicine"
+  alumni:jsmith   practice-city   "Orange"
+  alumni:jsmith   practice-state  "CA"
+  alumni:jsmith   has-npi         "1234567890"
+  alumni:jsmith   enriched-at     "2026-04-02T02:15:00Z"
+  alumni:jsmith   status          "enriched"
+
+        ↓ projection (group by subject)
+
+Firestore document:
+  Collection: tenants/{tenant_id}/alumni
+  Document ID: jsmith
+  Fields: {
+    "name":           "Dr. Jane Smith",
+    "class-year":     "2018",
+    "campus":         "pomona",
+    "specialty":      "family-medicine",
+    "practice-city":  "Orange",
+    "practice-state": "CA",
+    "has-npi":        "1234567890",
+    "enriched-at":    "2026-04-02T02:15:00Z",
+    "status":         "enriched",
+    "_updated":       Timestamp (server)
+  }
+</pre>
+  <p style="margin-top:12px;">One alumni = one document. Predicates become field names. Objects become field values. Adding a new predicate in store.h = adding a new field in Firestore. No schema changes.</p>
+</div>
+
+<div class="card">
+  <h3>Firestore collection structure</h3>
+<pre>
+firestore/
+  tenants/
+    lakemedical/
+      alumni/                  ← alumni:{id} triples → documents
+        jsmith   {name, specialty, npi, ...}
+        alee     {name, specialty, npi, ...}
+      signals/                 ← signal:{id} triples → documents
+        s001     {cause, subject, field, old-value, new-value, priority, ...}
+        s002     {cause, subject, field, ...}
+      config/                  ← tenant config (read-only mirror)
+        brand    {name, primary, accent, logo, tagline}
+      stats/                   ← pre-computed aggregates
+        summary  {total_alumni, enriched_count, active_signals, ...}
+    westernu-comp/
+      alumni/
+      signals/
+      config/
+      stats/
+</pre>
+</div>
+
+<div class="card">
+  <h3>Subject prefix &rarr; Firestore collection mapping</h3>
+  <table>
+    <tr><th>Triple subject prefix</th><th>Firestore collection</th><th>Doc ID</th></tr>
+    <tr><td><code>alumni:{id}</code></td><td><code>tenants/{t}/alumni</code></td><td><code>{id}</code></td></tr>
+    <tr><td><code>signal:{id}</code></td><td><code>tenants/{t}/signals</code></td><td><code>{id}</code></td></tr>
+    <tr><td><code>pub:{pmid}</code></td><td><code>tenants/{t}/publications</code></td><td><code>{pmid}</code></td></tr>
+    <tr><td><code>touchpoint:{id}</code></td><td><code>tenants/{t}/touchpoints</code></td><td><code>{id}</code></td></tr>
+    <tr><td><code>tenant:{id}</code></td><td><code>tenants/{t}/config</code></td><td><code>brand</code></td></tr>
+  </table>
+  <p style="margin-top:12px;">The projector parses the subject prefix to determine the target collection. <code>alumni:</code> &rarr; alumni collection. <code>signal:</code> &rarr; signals collection. Anything without a mapped prefix is <strong>not mirrored</strong> (factory rules, sessions, secrets stay local).</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>The Dual-Write Pipeline</h2>
+<div class="card">
+  <h3>Schematic: Write path</h3>
+<pre>
+Application code (CSV import, NPI refresh, trigger generation):
+  │
+  ├─ 1. triple_store_insert(store, "alumni:jsmith", "specialty", "family-medicine")
+  │     → store.h writes to local encrypted mmap file
+  │     → journal.h logs to WAL
+  │     → DONE. Sub-millisecond. Authoritative.
+  │
+  ├─ 2. mirror_queue_push(subject, predicate, object, OP_INSERT)
+  │     → Pushes to in-memory ring buffer (lock-free)
+  │     → Returns immediately. Non-blocking.
+  │
+  └─ 3. Mirror thread (background):
+        │
+        ├─ Reads from ring buffer
+        ├─ Groups by subject (batches predicates for same subject)
+        ├─ Projects triples → Firestore document fields
+        │
+        ├─ HTTP POST to Firestore REST API:
+        │    POST https://firestore.googleapis.com/v1/
+        │      projects/{project}/databases/(default)/documents/
+        │      tenants/{tenant}/alumni/{id}
+        │    Body: { fields: { "specialty": { "stringValue": "family-medicine" } } }
+        │    updateMask: { fieldPaths: ["specialty"] }
+        │
+        ├─ On success: advance cursor, clear from buffer
+        ├─ On failure: retry with exponential backoff (1s, 2s, 4s, max 60s)
+        └─ On persistent failure: log to trace.h, skip after 5 retries
+           (store.h remains correct; Firestore catches up on next write)
+</pre>
+</div>
+
+<div class="card">
+  <h3>Schematic: Delete path</h3>
+<pre>
+triple_store_delete(store, "alumni:jsmith", "practice-city", NULL)
+  │
+  ├─ 1. store.h deletes matching triples
+  │
+  ├─ 2. mirror_queue_push("alumni:jsmith", "practice-city", NULL, OP_DELETE)
+  │
+  └─ 3. Mirror thread:
+        ├─ Firestore updateDoc with FieldValue.delete() on "practice-city"
+        └─ If ALL predicates for a subject are deleted → deleteDoc
+</pre>
+</div>
+
+<div class="card">
+  <h3>Schematic: Batch enrichment (NPI refresh)</h3>
+<pre>
+NPI enrichment batch (200 alumni):
+  │
+  for each alumnus:
+  │  ├─ triple_store_insert() × 6-8 predicates   (local, fast)
+  │  ├─ mirror_queue_push() × 6-8 predicates     (buffered)
+  │  └─ sleep(200ms)                              (NPI rate limit)
+  │
+  After batch completes:
+  │
+  Mirror thread flushes buffer:
+  ├─ Groups 200 alumni × ~7 predicates = ~1400 triple ops
+  ├─ Projects to 200 Firestore document updates
+  ├─ Sends as Firestore batch writes (500 ops/batch)
+  │    → 1 batch commit (200 doc updates)
+  └─ Total Firestore cost: 200 write ops = $0.00036
+     (7,000 alumni / 200 per day = 35 days = $0.013 total)
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>The Mirror Module (<code>firestore_mirror.c</code>)</h2>
+<div class="card">
+  <h3>Pure C Firestore client &mdash; no SDK, just HTTP</h3>
+  <p>Firestore has a REST API. We don't need the Firebase Admin SDK (Node.js). We use <code>http.h</code> to POST JSON directly.</p>
+<pre>
+firestore_mirror.c
+  #include "http.h"        // HTTPS POST to Firestore REST API
+  #include "crypt.h"       // SHA-256 for JWT signing (service account auth)
+  #include "read.h"        // JSON building for Firestore document format
+
+API:
+  bool mirror_init(const char* project_id, const char* service_account_json);
+  void mirror_close(void);
+
+  // Queue operations (called from main thread, non-blocking)
+  bool mirror_queue_insert(const char* tenant, const char* subject,
+                           const char* predicate, const char* object);
+  bool mirror_queue_delete(const char* tenant, const char* subject,
+                           const char* predicate);
+
+  // Background flush (called from mirror thread)
+  int  mirror_flush(void);          // flush pending → Firestore, returns count
+  int  mirror_pending(void);        // items in queue
+  bool mirror_healthy(void);        // Firestore reachable?
+
+  // Full re-sync (disaster recovery)
+  int  mirror_resync(TripleStore* store, const char* tenant);
+                                    // re-project entire store → Firestore
+</pre>
+</div>
+
+<div class="card">
+  <h3>Service account auth (Pure C JWT)</h3>
+<pre>
+Firestore REST API requires OAuth2 token.
+Service account JSON → extract private key → sign JWT → exchange for access token.
+
+1. Build JWT header: {"alg":"RS256","typ":"JWT"}
+2. Build JWT claims:
+     iss: service_account_email
+     scope: "https://www.googleapis.com/auth/datastore"
+     aud: "https://oauth2.googleapis.com/token"
+     iat: now
+     exp: now + 3600
+3. Sign with RSA private key (crypt.h)
+4. POST https://oauth2.googleapis.com/token
+     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+     assertion={jwt}
+5. Cache access_token for 1 hour, refresh before expiry
+
+All in C. No SDK. No npm. Just http.h + crypt.h.
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Browser Read Path (Firebase JS SDK)</h2>
+<div class="card">
+<pre>
+app.html loads:
+  &lt;script src="https://www.gstatic.com/firebasejs/10.x/firebase-app-compat.js"&gt;
+  &lt;script src="https://www.gstatic.com/firebasejs/10.x/firebase-firestore-compat.js"&gt;
+
+  const app = firebase.initializeApp({ projectId: "lakemedical-prod" });
+  const db = firebase.firestore();
+
+  // Get all alumni for this tenant (real-time)
+  db.collection("tenants").doc(tenantId).collection("alumni")
+    .onSnapshot(snapshot =&gt; {
+      const alumni = snapshot.docs.map(d =&gt; ({ id: d.id, ...d.data() }));
+      renderDirectory(alumni);
+      renderDashboard(alumni);
+    });
+
+  // Get active signals (real-time queue)
+  db.collection("tenants").doc(tenantId).collection("signals")
+    .where("status", "==", "pending")
+    .orderBy("priority", "desc")
+    .onSnapshot(snapshot =&gt; {
+      const signals = snapshot.docs.map(d =&gt; ({ id: d.id, ...d.data() }));
+      renderQueue(signals);
+    });
+
+  // Dashboard stats (pre-computed)
+  db.collection("tenants").doc(tenantId).collection("stats")
+    .doc("summary")
+    .onSnapshot(doc =&gt; renderKPIs(doc.data()));
+</pre>
+  <p style="margin-top:12px;">Real-time. No polling. No Worker. No /api/data endpoint. When alumni-server writes a triple and the mirror pushes to Firestore, the browser updates <em>within seconds</em>.</p>
+</div>
+
+<div class="card">
+  <h3>Firestore security rules (tenant isolation)</h3>
+<pre>
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Tenant data — read requires valid session token in custom claim
+    match /tenants/{tenantId}/{collection}/{docId} {
+      allow read: if request.auth != null
+                  && request.auth.token.tenant == tenantId;
+      allow write: if false;  // NEVER. Only alumni-server writes.
+    }
+  }
+}
+</pre>
+  <p style="margin-top:12px;">Browser reads require Firebase Auth token with tenant claim. Writes are server-only via service account. Users can never modify data through the browser.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>What This Replaces</h2>
+<div class="card">
+  <table>
+    <tr><th>Current</th><th>With Dual-Write</th></tr>
+    <tr><td><code>/api/data</code> Worker (reads KV/static JSON)</td><td class="pass">Eliminated &mdash; browser reads Firestore directly</td></tr>
+    <tr><td><code>/api/seed</code> Worker (loads static JSON to KV)</td><td class="pass">Eliminated &mdash; alumni-server mirrors to Firestore on import</td></tr>
+    <tr><td><code>/api/refresh</code> Worker (NPI/PubMed in JS)</td><td class="pass">Eliminated &mdash; enrichment runs in C, mirrors results to Firestore</td></tr>
+    <tr><td>Cloudflare KV namespace</td><td class="pass">Eliminated &mdash; Firestore replaces KV as browser data source</td></tr>
+    <tr><td><code>alumni/data/alumni.json</code> (4.6MB static)</td><td class="pass">Eliminated &mdash; data lives in store.h + Firestore</td></tr>
+    <tr><td><code>alumni/data/triggers.json</code> (static)</td><td class="pass">Eliminated &mdash; signals live in store.h + Firestore</td></tr>
+    <tr><td><code>/api/wire</code> Worker (auth proxy)</td><td class="warn">Stays &mdash; auth still goes through wire protocol to relay</td></tr>
+  </table>
+  <p style="margin-top:12px;">Net effect: <strong>3 Worker functions eliminated, KV eliminated, 2 static JSON files eliminated.</strong> The Worker surface shrinks to auth-only.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Consistency Model</h2>
+<div class="card">
+  <h3>store.h = strong consistency (local)</h3>
+  <p>All server-side reads come from store.h. Enrichment, triggers, auth decisions, admin queries &mdash; all read from the local triple store. Zero network hops. Sub-millisecond.</p>
+
+  <h3>Firestore = eventual consistency (mirror)</h3>
+  <p>Browser reads come from Firestore. After a write to store.h, the mirror thread pushes to Firestore. Typical latency: 50&ndash;200ms. Acceptable for a dashboard.</p>
+
+  <h3>Conflict resolution: store.h always wins</h3>
+<pre>
+1. Browser NEVER writes to Firestore (security rules: write = false)
+2. Only alumni-server writes to Firestore (via service account)
+3. If Firestore is stale → mirror_resync() re-projects entire store
+4. If Firestore has unexpected data → overwrite from store.h
+5. No bidirectional sync. No merge conflicts. One direction only.
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Cost Projection</h2>
+<div class="card">
+  <table>
+    <tr><th>Operation</th><th>Volume/Month</th><th>Firestore Price</th><th>Monthly Cost</th></tr>
+    <tr>
+      <td>Doc writes (enrichment)</td>
+      <td>~7,000 docs/month<br><span style="color:#888;">(200/day × 35 days)</span></td>
+      <td>$0.18 / 100k writes</td>
+      <td>$0.013</td>
+    </tr>
+    <tr>
+      <td>Doc writes (signals)</td>
+      <td>~2,000 signals/month</td>
+      <td>$0.18 / 100k writes</td>
+      <td>$0.004</td>
+    </tr>
+    <tr>
+      <td>Doc reads (browser)</td>
+      <td>~100k reads/month<br><span style="color:#888;">(assuming ~100 active users)</span></td>
+      <td>$0.06 / 100k reads</td>
+      <td>$0.06</td>
+    </tr>
+    <tr>
+      <td>Storage</td>
+      <td>~50MB / tenant</td>
+      <td>$0.18 / GB</td>
+      <td>$0.009</td>
+    </tr>
+    <tr style="border-top:2px solid #333;">
+      <td colspan="3"><strong>Total per tenant per month</strong></td>
+      <td><strong>~$0.09</strong></td>
+    </tr>
+  </table>
+  <p style="margin-top:12px;">Nine cents a month per tenant. At 100 tenants: <strong>$9/month.</strong> Firestore free tier covers 50k reads + 20k writes/day &mdash; a single tenant runs free.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Impact on Existing Boards (33&ndash;39)</h2>
+<div class="card">
+  <table>
+    <tr><th>Board</th><th>Change</th></tr>
+    <tr><td><span class="label">33</span> Scaffold</td><td>Add <code>firestore_mirror.c</code> init + service account auth. Add mirror thread start.</td></tr>
+    <tr><td><span class="label">34</span> Data Layer</td><td>Every <code>triple_store_insert()</code> gets a <code>mirror_queue_insert()</code> call after. Worker data/seed/refresh endpoints become dead code &mdash; remove.</td></tr>
+    <tr><td><span class="label">35</span> Enrichment</td><td>No change. Enrichment writes to store.h. Mirror picks it up automatically.</td></tr>
+    <tr><td><span class="label">36</span> Cause-Effect</td><td>No change. Signals write to store.h. Mirror picks them up.</td></tr>
+    <tr><td><span class="label">37</span> Auth</td><td>No change. Auth stays on wire protocol. Sessions stay in store.h only (not mirrored).</td></tr>
+    <tr><td><span class="label">38</span> Browser Rebrand</td><td><strong>Major change:</strong> Replace fetch(/api/data) with Firebase SDK. Add Firestore reads. Remove data Worker dependency. Add Firebase Auth for Firestore security rules.</td></tr>
+    <tr><td><span class="label">39</span> Ops</td><td>Add <code>mirror_resync()</code> to admin CLI. Add Firestore health to pulse monitoring.</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Phases</h2>
+<div class="card">
+  <table>
+    <tr><th>Phase</th><th>Scope</th><th>Delivers</th></tr>
+    <tr>
+      <td><span class="label">1</span></td>
+      <td><strong>firestore_mirror.c</strong><br>Pure C Firestore REST client, JWT auth, batch writes, retry queue</td>
+      <td>alumni-server can push triples to Firestore. Mirror module compiles + runs.</td>
+    </tr>
+    <tr>
+      <td><span class="label">2</span></td>
+      <td><strong>Dual-write integration</strong><br>Wire mirror calls into triple_store_insert/delete. Background thread. Subject-to-collection mapping.</td>
+      <td>Every store.h write automatically mirrors to Firestore.</td>
+    </tr>
+    <tr>
+      <td><span class="label">3</span></td>
+      <td><strong>Browser migration</strong><br>Replace /api/data with Firebase SDK reads. Firestore security rules. Real-time subscriptions.</td>
+      <td>Browser reads from Firestore. Workers reduced to auth-only. Real-time updates.</td>
+    </tr>
+    <tr>
+      <td><span class="label">4</span></td>
+      <td><strong>Cleanup + resync</strong><br>Remove dead Worker endpoints. Add mirror_resync to admin CLI. Firestore health in pulse.</td>
+      <td>Clean codebase. Full disaster recovery. Ops visibility.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Constraints</h2>
+<div class="card">
+  <ul>
+    <li><strong>store.h is always authoritative.</strong> Firestore is a projection, never a source. Server-side code never reads from Firestore.</li>
+    <li><strong>No Firebase Admin SDK.</strong> Pure C talks to Firestore REST API via http.h. No Node.js on the server.</li>
+    <li><strong>Secrets never leave the VM.</strong> TOTP, PSKs, session tokens, encryption keys &mdash; store.h and vault.h only.</li>
+    <li><strong>One-way mirror.</strong> store.h &rarr; Firestore. Never Firestore &rarr; store.h. No bidirectional sync.</li>
+    <li><strong>Browser writes are forbidden.</strong> Firestore security rules enforce write: false. Only the service account writes.</li>
+    <li><strong>Async, non-blocking.</strong> Mirror writes never block the main thread. If Firestore is down, store.h keeps working.</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-02 23:55 &middot; ~P Dual-Write store.h + Firestore &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
