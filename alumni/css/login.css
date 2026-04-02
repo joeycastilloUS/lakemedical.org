@@ -55,27 +55,23 @@ body {
 
 /* ── Brand ── */
 
-#auth-brand {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #3779B5;
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
-}
-
 #auth-title {
   color: #3779B5;
-  font-size: 1rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   margin-bottom: 24px;
 }
 
-#auth-subtitle {
-  color: #6b7280;
-  font-size: 0.85rem;
-  margin-top: -16px;
-  margin-bottom: 24px;
+#auth-powered {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  margin-top: 24px;
+}
+
+#auth-powered strong {
+  color: #3779B5;
+  font-weight: 700;
 }
 
 /* ── Form Elements ── */
