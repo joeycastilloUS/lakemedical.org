@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~P: Multi-Tenant Alumni Engagement Platform — Enterprise Grade, Pure C Core</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 800px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 32px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  h3 { color: #90C4CF; font-size: 1rem; margin: 20px 0 8px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .card h3 { margin-top: 0; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  .pass { color: #4ade80; }
+  .c-tag { color: #f59e0b; font-weight: 700; }
+  .js-tag { color: #a78bfa; font-weight: 700; }
+  .new-tag { color: #f87171; font-weight: 700; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  pre { background: #222; border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 0.82rem; line-height: 1.5; margin: 8px 0; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; }
+  th { color: #6FC3DF; font-size: 0.85rem; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+  .badge { display: inline-block; padding: 6px 16px; border-radius: 4px; font-size: 0.9rem; font-weight: 700; background: #1a2a3a; color: #6FC3DF; border: 1px solid #6FC3DF; margin-bottom: 16px; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Plan: Multi-Tenant Alumni Engagement Platform</h1>
+<p class="subtitle">Enterprise grade &middot; Pure C core &middot; Roll your own &middot; kASTIL/nous foundation</p>
+
+<span class="badge">PLAN &mdash; AWAITING APPROVAL</span>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Intent</h2>
+<div class="card">
+  <p>Transform the single-tenant lakemedical.org alumni prototype into an enterprise-grade, multi-tenant platform where any college or university can provision their own branded alumni engagement instance &mdash; with all core logic in pure C, reusing the kASTIL/nous library stack.</p>
+  <ul style="margin-top:12px;">
+    <li><strong>Features</strong> are universal &mdash; same engine for every tenant</li>
+    <li><strong>Branding</strong> is per-tenant &mdash; colors, logo, name, domain</li>
+    <li><strong>Data</strong> is isolated &mdash; each tenant has its own encrypted triple store</li>
+    <li><strong>Enrichment</strong> runs server-side in C &mdash; not in JS Workers</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Architecture Overview</h2>
+<div class="card">
+<pre>
+┌─────────────────────────────────────────────────────────────┐
+│  BROWSER (vanilla JS/CSS/HTML)                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                  │
+│  │ Landing   │  │ Login    │  │ App      │                  │
+│  │ index.html│  │ login.html│ │ app.html │                  │
+│  └─────┬────┘  └─────┬────┘  └─────┬────┘                  │
+│        │              │             │                        │
+│        │         wire.js + nous.js  │  fetch /api/data      │
+│        │         NTRP0001 binary    │  JSON                 │
+└────────┼──────────────┼─────────────┼───────────────────────┘
+         │              │             │
+┌────────┼──────────────┼─────────────┼───────────────────────┐
+│  EDGE  │  Cloudflare Workers (JS — platform constraint)     │
+│        │              │             │                        │
+│        │    /api/wire │    /api/data│    /api/tenant-config  │
+│        │    (thin     │    (proxy   │    (brand config)      │
+│        │     proxy)   │     to C)   │                        │
+└────────┼──────────────┼─────────────┼───────────────────────┘
+         │              │             │
+┌────────┼──────────────┼─────────────┼───────────────────────┐
+│  CORE  │              │             │                        │
+│        │   ┌──────────▼─────────────▼──────────┐            │
+│        │   │      alumni-server (pure C)        │            │
+│        │   │                                    │            │
+│        │   │  ┌─────────┐  ┌──────────────┐    │            │
+│        │   │  │ Tenant   │  │ Auth         │    │            │
+│        │   │  │ Router   │  │ TOTP + QR    │    │            │
+│        │   │  └────┬─────┘  │ Sessions     │    │            │
+│        │   │       │        │ vault.h       │    │            │
+│        │   │  ┌────▼─────┐  └──────────────┘    │            │
+│        │   │  │ Tenant   │                       │            │
+│        │   │  │ Store    │  ┌──────────────┐    │            │
+│        │   │  │ store.h  │  │ Enrichment   │    │            │
+│        │   │  │ (per dir)│  │ Scheduler    │    │            │
+│        │   │  └──────────┘  │  NPI (http.h)│    │            │
+│        │   │                │  PubMed      │    │            │
+│        │   │                │  Triggers    │    │            │
+│        │   │                └──────────────┘    │            │
+│        │   └────────────────────────────────────┘            │
+│        │                                                     │
+│  ┌─────▼──────────────────────────┐                          │
+│  │  relay_server (existing C)     │                          │
+│  │  Wire protocol + 0xCA crypto   │                          │
+│  │  Session minting + IP binding  │                          │
+│  └────────────────────────────────┘                          │
+└──────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Layer Separation: Features vs Branding</h2>
+<div class="card">
+  <h3>Feature Layer (universal &mdash; same for every tenant)</h3>
+  <table>
+    <tr><th>Feature</th><th>Lang</th><th>Where</th></tr>
+    <tr><td>Auth (TOTP register/login/verify)</td><td class="c-tag">C</td><td>alumni-server + relay</td></tr>
+    <tr><td>Session management</td><td class="c-tag">C</td><td>relay (auth.h)</td></tr>
+    <tr><td>Alumni data store</td><td class="c-tag">C</td><td>alumni-server (store.h)</td></tr>
+    <tr><td>CSV import + parsing</td><td class="c-tag">C</td><td>alumni-server (read.h)</td></tr>
+    <tr><td>NPI enrichment</td><td class="c-tag">C</td><td>alumni-server (http.h)</td></tr>
+    <tr><td>PubMed enrichment</td><td class="c-tag">C</td><td>alumni-server (http.h)</td></tr>
+    <tr><td>Trigger generation</td><td class="c-tag">C</td><td>alumni-server</td></tr>
+    <tr><td>QR code generation</td><td class="c-tag">C</td><td>alumni-server (qr.h)</td></tr>
+    <tr><td>Rate limiting</td><td class="c-tag">C</td><td>alumni-server (policy.h)</td></tr>
+    <tr><td>Secret management</td><td class="c-tag">C</td><td>alumni-server (vault.h)</td></tr>
+    <tr><td>Wire protocol proxy</td><td class="js-tag">JS</td><td>Cloudflare Worker (platform constraint)</td></tr>
+    <tr><td>UI views (queue, directory, profile, dashboard)</td><td class="js-tag">JS</td><td>Browser (platform constraint)</td></tr>
+  </table>
+
+  <h3>Branding Layer (per-tenant configuration)</h3>
+  <table>
+    <tr><th>Attribute</th><th>Stored In</th><th>Applied At</th></tr>
+    <tr><td>Institution name</td><td>tenant config triple</td><td>nav, title, footer</td></tr>
+    <tr><td>Primary color</td><td>tenant config triple</td><td>CSS custom properties</td></tr>
+    <tr><td>Accent color</td><td>tenant config triple</td><td>CSS custom properties</td></tr>
+    <tr><td>Logo URL</td><td>tenant config triple</td><td>nav, login page</td></tr>
+    <tr><td>Domain</td><td>tenant config triple</td><td>routing, CORS</td></tr>
+    <tr><td>Tagline</td><td>tenant config triple</td><td>landing hero</td></tr>
+    <tr><td>Support email</td><td>tenant config triple</td><td>footer, error pages</td></tr>
+  </table>
+  <p style="margin-top:12px;color:#888;">Zero branding in code. All branding is data. The browser fetches <code>/api/tenant-config</code> on boot and injects CSS variables + content.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>C Library Reuse Map (kASTIL/nous)</h2>
+<div class="card">
+  <table>
+    <tr><th>Library</th><th>Path</th><th>Use</th></tr>
+    <tr><td><code>store.h</code></td><td>memory/skill/store/</td><td>Per-tenant alumni triple store, encrypted at rest</td></tr>
+    <tr><td><code>http.h</code></td><td>comms/skill/http/</td><td>Outbound HTTPS to NPI Registry + PubMed APIs</td></tr>
+    <tr><td><code>crypt.h</code></td><td>security/skill/crypt/</td><td>AES-256-GCM, HMAC-SHA-256, SHA-256, TOTP (SHA-1)</td></tr>
+    <tr><td><code>auth.h</code></td><td>security/skill/auth/</td><td>Session tokens, API keys, nonce ring</td></tr>
+    <tr><td><code>vault.h</code></td><td>security/skill/vault/</td><td>Seal/unseal tenant secrets (PBKDF2 + AES-GCM)</td></tr>
+    <tr><td><code>policy.h</code></td><td>security/skill/policy/</td><td>Rate limiting, input validation, origin checks</td></tr>
+    <tr><td><code>read.h</code></td><td>intelligence/skill/read/</td><td>CSV parsing (registrar imports), JSON detection</td></tr>
+    <tr><td><code>wire.h</code></td><td>comms/skill/wire/</td><td>NTRP0001 pack/unpack, inter-service messaging</td></tr>
+    <tr><td><code>qr.h</code></td><td>user/skill/qr/</td><td>QR code generation for TOTP enrollment</td></tr>
+    <tr><td><code>pack.h</code></td><td>memory/skill/pack/</td><td>Backup/export/transfer tenant data</td></tr>
+    <tr><td><code>console.h</code></td><td>user/interface/console/</td><td>Base32, TOTP validation, user name validation</td></tr>
+    <tr><td><code>journal.h</code></td><td>memory/skill/journal/</td><td>WAL for crash recovery on writes</td></tr>
+    <tr><td><code>mmap.h</code></td><td>memory/skill/mmap/</td><td>Memory-mapped file storage (cross-platform)</td></tr>
+    <tr><td><code>index.h</code></td><td>memory/skill/index/</td><td>Hash indexing for fast tenant + alumni lookups</td></tr>
+    <tr><td><code>acquire.h</code></td><td>intelligence/skill/acquire/</td><td>Public data source bootstrapping + validation</td></tr>
+    <tr><td><code>understand.h</code></td><td>intelligence/skill/understand/</td><td>Natural language query &rarr; structured triples</td></tr>
+    <tr><td><code>pulse.h</code></td><td>comms/skill/pulse/</td><td>Health monitoring JSON snapshots</td></tr>
+    <tr><td><code>trace.h</code></td><td>comms/skill/trace/</td><td>Real-time debug stream for ops</td></tr>
+  </table>
+  <p style="margin-top:12px;"><span class="c-tag">17 C libraries</span> reused. Zero new dependencies. Zero frameworks.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Multi-Tenancy Model</h2>
+<div class="card">
+  <h3>Tenant Isolation</h3>
+<pre>
+/var/nous/tenants/
+  lakemedical/
+    config.tri        # tenant config triples (name, colors, domain, logo)
+    alumni.store/     # encrypted triple store (store.h)
+    users/            # TOTP secrets, user profiles
+    secrets.vault     # sealed tenant PSK + API keys (vault.h)
+    refresh.cursor    # enrichment batch position
+  westernu-comp/
+    config.tri
+    alumni.store/
+    users/
+    secrets.vault
+    refresh.cursor
+  ...
+</pre>
+
+  <h3>Tenant Routing</h3>
+  <ul>
+    <li><strong>Domain-based:</strong> Request hits Cloudflare &rarr; Worker reads <code>Host</code> header &rarr; passes <code>tenant_id</code> to alumni-server</li>
+    <li><strong>PSK derivation:</strong> <code>tenant_psk = HMAC-SHA-256(master_key, tenant_id)</code> &mdash; no per-tenant secret management needed</li>
+    <li><strong>Session scope:</strong> Token includes tenant claim &mdash; <code>{token, meta, tenant:lakemedical}</code></li>
+    <li><strong>Data path:</strong> <code>/var/nous/tenants/{tenant_id}/alumni.store/</code></li>
+  </ul>
+
+  <h3>Tenant Provisioning (C)</h3>
+<pre>
+alumni_server --provision &lt;tenant_id&gt; \
+  --name "Lake Medical Alumni" \
+  --domain "lakemedical.org" \
+  --color-primary "#3779B5" \
+  --color-accent "#90C4CF" \
+  --logo-url "/assets/logo.svg"
+
+  1. mkdir /var/nous/tenants/{tenant_id}/
+  2. triple_store_open_encrypted() with derived key
+  3. Insert config triples (name, domain, colors, logo)
+  4. vault_seal() tenant secrets
+  5. Ready to accept registrations
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>The alumni-server Binary (Pure C)</h2>
+<div class="card">
+  <h3>New C binary &mdash; the multi-tenant core</h3>
+  <p>One process. HTTP listener on port 9080. Handles all tenant data, enrichment, auth delegation, and config serving.</p>
+
+  <h3>Endpoints</h3>
+  <table>
+    <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+    <tr><td>GET</td><td>/tenant/{id}/config</td><td>Return tenant branding (name, colors, logo)</td></tr>
+    <tr><td>GET</td><td>/tenant/{id}/data</td><td>Return alumni + triggers for tenant</td></tr>
+    <tr><td>POST</td><td>/tenant/{id}/import</td><td>CSV upload &rarr; parse &rarr; insert to store</td></tr>
+    <tr><td>POST</td><td>/tenant/{id}/refresh</td><td>Trigger enrichment batch (NPI + PubMed)</td></tr>
+    <tr><td>GET</td><td>/tenant/{id}/health</td><td>Store stats, refresh status, record count</td></tr>
+    <tr><td>POST</td><td>/tenant/{id}/export</td><td>Pack store &rarr; NTRP binary for backup</td></tr>
+    <tr><td>POST</td><td>/provision</td><td>Create new tenant (admin only)</td></tr>
+    <tr><td>GET</td><td>/health</td><td>Global health (all tenants, system metrics)</td></tr>
+  </table>
+
+  <h3>Build Dependencies (all in kASTIL/nous)</h3>
+<pre>
+alumni-server.c
+  #include "store.h"      // triple store
+  #include "http.h"       // HTTP client (NPI, PubMed) + HTTP server
+  #include "crypt.h"      // AES-256-GCM, HMAC, SHA
+  #include "auth.h"       // sessions, API keys
+  #include "vault.h"      // sealed secrets
+  #include "policy.h"     // rate limiting
+  #include "read.h"       // CSV/JSON parsing
+  #include "wire.h"       // NTRP pack/unpack
+  #include "qr.h"         // QR generation
+  #include "pack.h"       // backup serialization
+  #include "console.h"    // TOTP, base32, user validation
+  #include "journal.h"    // WAL crash recovery
+  #include "trace.h"      // debug stream
+  #include "pulse.h"      // health monitoring
+
+gcc -std=c11 -O2 alumni-server.c \
+  -I../../security/skill/crypt \
+  -I../../security/skill/auth \
+  -I../../security/skill/vault \
+  -I../../security/skill/policy \
+  -I../../comms/skill/http \
+  -I../../comms/skill/wire \
+  -I../../memory/skill/store \
+  -I../../memory/skill/pack \
+  -I../../memory/skill/journal \
+  -I../../memory/skill/mmap \
+  -I../../memory/skill/index \
+  -I../../intelligence/skill/read \
+  -I../../user/skill/qr \
+  -I../../user/interface/console \
+  -o alumni-server
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Enrichment Automations &amp; Schedules</h2>
+<div class="card">
+  <h3>Schematic: Enrichment Pipeline</h3>
+<pre>
+                    ┌─────────────────────────────┐
+                    │    alumni-server scheduler   │
+                    │    (C event loop thread)     │
+                    └──────┬──────────────────────┘
+                           │
+         ┌─────────────────┼───────────────────────────┐
+         │                 │                            │
+    ┌────▼────┐      ┌─────▼─────┐              ┌──────▼──────┐
+    │  NPI    │      │  PubMed   │              │  Trigger    │
+    │  Refresh│      │  Scan     │              │  Generator  │
+    │         │      │           │              │             │
+    │ http.h  │      │ http.h    │              │ store.h     │
+    │ GET npi │      │ GET ncbi  │              │ diff prev   │
+    │ registry│      │ eutils    │              │ vs current  │
+    └────┬────┘      └─────┬─────┘              └──────┬──────┘
+         │                 │                            │
+         │    ┌────────────┘                            │
+         │    │                                         │
+    ┌────▼────▼────────────────────────────────────────▼───┐
+    │  Tenant Triple Store (store.h, encrypted)            │
+    │                                                       │
+    │  alumni:jsmith  has-npi       1234567890               │
+    │  alumni:jsmith  specialty     family-medicine          │
+    │  alumni:jsmith  practice-city orange-ca                │
+    │  alumni:jsmith  publication   pmid:38291045            │
+    │  alumni:jsmith  enriched-at   2026-04-02T10:00:00Z    │
+    │  trigger:t001   type          practice-move            │
+    │  trigger:t001   alumni        alumni:jsmith            │
+    │  trigger:t001   detected      2026-04-02               │
+    └──────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<div class="card">
+  <h3>Schedule Matrix</h3>
+  <table>
+    <tr><th>Job</th><th>Frequency</th><th>Batch Size</th><th>Rate Limit</th><th>Runtime</th></tr>
+    <tr>
+      <td><strong>NPI Refresh</strong><br><span style="color:#888;">Verify practice location, specialty, license status</span></td>
+      <td>Daily 2:00 AM</td>
+      <td>200 records/run</td>
+      <td>200ms between calls</td>
+      <td>~40s per batch</td>
+    </tr>
+    <tr>
+      <td><strong>PubMed Scan</strong><br><span style="color:#888;">New publications, citations, co-authors</span></td>
+      <td>Weekly (Sunday 3:00 AM)</td>
+      <td>100 records/run</td>
+      <td>500ms between calls</td>
+      <td>~50s per batch</td>
+    </tr>
+    <tr>
+      <td><strong>Trigger Generation</strong><br><span style="color:#888;">Detect changes &rarr; create outreach signals</span></td>
+      <td>After each NPI/PubMed run</td>
+      <td>Full diff</td>
+      <td>N/A (local)</td>
+      <td>&lt;1s</td>
+    </tr>
+    <tr>
+      <td><strong>Session Cleanup</strong><br><span style="color:#888;">Expire stale sessions, clear nonce ring</span></td>
+      <td>Every 5 minutes</td>
+      <td>All sessions</td>
+      <td>N/A (local)</td>
+      <td>&lt;10ms</td>
+    </tr>
+    <tr>
+      <td><strong>Store Compaction</strong><br><span style="color:#888;">Reclaim deleted triple space</span></td>
+      <td>Weekly (Saturday 4:00 AM)</td>
+      <td>Per tenant</td>
+      <td>N/A (local)</td>
+      <td>~5s per tenant</td>
+    </tr>
+    <tr>
+      <td><strong>Health Pulse</strong><br><span style="color:#888;">Broadcast system state to trace stream</span></td>
+      <td>Every 60 seconds</td>
+      <td>All tenants</td>
+      <td>N/A (local)</td>
+      <td>&lt;5ms</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Full Tenant Refresh Cycle (7,000 records)</h3>
+<pre>
+Day 1:  NPI batch 1-200    (40s)  → triggers generated
+Day 2:  NPI batch 201-400  (40s)  → triggers generated
+...
+Day 35: NPI batch 6801-7000 (40s) → triggers generated
+Day 36: Full NPI cycle complete. Restart from batch 1.
+
+Sunday: PubMed batch 1-100  (50s) → publication touchpoints
+Sunday: PubMed batch 101-200 (50s)
+...
+~70 Sundays to complete full PubMed scan of 7,000 records.
+
+Cursor persists in /var/nous/tenants/{id}/refresh.cursor
+Crash-safe: journal.h WAL protects store writes.
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Data Import Workflow</h2>
+<div class="card">
+  <h3>Schematic: CSV Import Pipeline (Pure C)</h3>
+<pre>
+Admin uploads CSV via browser
+  │
+  ▼
+POST /api/import (Worker proxy)
+  │ multipart/form-data → binary body
+  ▼
+POST /tenant/{id}/import (alumni-server)
+  │
+  ├─ 1. auth.h: verify admin session token
+  ├─ 2. policy.h: rate limit check
+  ├─ 3. read.h: read_is_csv() → detect format
+  ├─ 4. read.h: read_extract() → parse headers + rows
+  │     ┌─────────────────────────────────────────┐
+  │     │ CSV Headers (flexible mapping):         │
+  │     │   first_name, last_name, class_year,    │
+  │     │   campus, email (optional),             │
+  │     │   student_id (optional)                 │
+  │     └─────────────────────────────────────────┘
+  ├─ 5. For each row:
+  │     ├─ console.h: validate_user_name() on derived ID
+  │     ├─ store.h: check for existing record (dedup)
+  │     └─ store.h: triple_store_insert() batch:
+  │         alumni:{id}  name         "Dr. Jane Smith"
+  │         alumni:{id}  class-year   "2018"
+  │         alumni:{id}  campus       "pomona"
+  │         alumni:{id}  credentials  "DO"
+  │         alumni:{id}  import-date  "2026-04-02"
+  │         alumni:{id}  import-src   "registrar-csv"
+  │         alumni:{id}  status       "pending-enrichment"
+  │
+  ├─ 6. journal.h: commit WAL
+  └─ 7. Return: {imported: N, duplicates: M, errors: K}
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>NPI Enrichment Workflow (Pure C)</h2>
+<div class="card">
+<pre>
+Scheduler fires NPI job for tenant
+  │
+  ├─ 1. Read refresh.cursor → start position
+  ├─ 2. store.h: query alumni with status=pending-enrichment
+  │     OR alumni with enriched-at older than 30 days
+  │
+  ├─ 3. For each alumnus (batch of 200):
+  │     │
+  │     ├─ http.h: GET https://npiregistry.cms.hhs.gov/api/
+  │     │    ?first_name={first}&amp;last_name={last}
+  │     │    &amp;enumeration_type=NPI-1&amp;limit=20
+  │     │
+  │     ├─ read.h: parse JSON response
+  │     │
+  │     ├─ Score matches (same algorithm as enrich.mjs):
+  │     │    +10  credential contains "DO"
+  │     │    +3   enumeration year within ±4 of class_year
+  │     │    +2   first name exact match
+  │     │    Accept if score ≥ 5
+  │     │
+  │     ├─ If matched:
+  │     │    store.h: insert/update triples:
+  │     │      alumni:{id}  has-npi        "1234567890"
+  │     │      alumni:{id}  specialty      "family-medicine"
+  │     │      alumni:{id}  practice-city  "Orange"
+  │     │      alumni:{id}  practice-state "CA"
+  │     │      alumni:{id}  license-status "active"
+  │     │      alumni:{id}  enriched-at    "2026-04-02T02:15:00Z"
+  │     │      alumni:{id}  status         "enriched"
+  │     │
+  │     ├─ Detect changes (diff previous triples):
+  │     │    If practice-city changed → create practice-move trigger
+  │     │    If specialty changed → create credential-change trigger
+  │     │
+  │     └─ sleep(200ms) — NPI rate limit
+  │
+  ├─ 4. Save refresh.cursor
+  └─ 5. journal.h: commit
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>PubMed Enrichment Workflow (Pure C)</h2>
+<div class="card">
+<pre>
+Scheduler fires PubMed job for tenant (weekly)
+  │
+  ├─ 1. For each alumnus (batch of 100):
+  │     │
+  │     ├─ http.h: GET eutils/esearch.fcgi
+  │     │    ?db=pubmed&amp;term={last}+{first_initial}[Author]
+  │     │    &amp;retmax=5&amp;sort=pub_date
+  │     │
+  │     ├─ read.h: parse XML → extract PMIDs
+  │     │
+  │     ├─ http.h: GET eutils/esummary.fcgi
+  │     │    ?db=pubmed&amp;id={pmid1,pmid2,...}
+  │     │
+  │     ├─ read.h: parse XML → title, journal, date, authors
+  │     │
+  │     ├─ For each new publication (not in store):
+  │     │    store.h: insert triples:
+  │     │      alumni:{id}  publication    "pmid:38291045"
+  │     │      pub:38291045 title          "Clinical outcomes..."
+  │     │      pub:38291045 journal        "JAMA"
+  │     │      pub:38291045 pub-date       "2026-01-15"
+  │     │      alumni:{id}  tag            "published-researcher"
+  │     │
+  │     │    Create publication trigger:
+  │     │      trigger:{t}  type           "publication"
+  │     │      trigger:{t}  alumni         "alumni:{id}"
+  │     │      trigger:{t}  detail         "New paper in JAMA"
+  │     │
+  │     └─ sleep(500ms) — PubMed rate limit
+  │
+  └─ 2. journal.h: commit
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Trigger Generation Workflow</h2>
+<div class="card">
+  <table>
+    <tr><th>Signal</th><th>Detection</th><th>Trigger Type</th></tr>
+    <tr><td>Practice location changed</td><td>NPI practice-city diff vs previous</td><td><code>practice-move</code></td></tr>
+    <tr><td>New credential/specialty</td><td>NPI taxonomy code change</td><td><code>new-credential</code></td></tr>
+    <tr><td>New publication</td><td>PubMed PMID not in store</td><td><code>publication</code></td></tr>
+    <tr><td>Follow-up overdue</td><td>Last touchpoint &gt; 30 days ago</td><td><code>follow-up-due</code></td></tr>
+    <tr><td>Class reunion milestone</td><td>class_year anniversary (5, 10, 25, 50)</td><td><code>milestone</code></td></tr>
+    <tr><td>Re-engagement opportunity</td><td>Previously active, no interaction 90+ days</td><td><code>reengagement</code></td></tr>
+    <tr><td>License expired/inactive</td><td>NPI license_status changed</td><td><code>license-alert</code></td></tr>
+    <tr><td>Moved near campus</td><td>NPI practice-state matches campus state</td><td><code>campus-proximity</code></td></tr>
+  </table>
+  <p style="margin-top:12px;">Each trigger includes a suggested outreach template with personalized context from the alumni triple store.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Browser Branding System</h2>
+<div class="card">
+  <h3>How branding flows from C to CSS</h3>
+<pre>
+Browser boot:
+  1. fetch /api/tenant-config
+     → Worker → alumni-server GET /tenant/{id}/config
+     → C reads config.tri → JSON response:
+       {
+         "name": "Lake Medical Alumni",
+         "primary": "#3779B5",
+         "accent": "#90C4CF",
+         "dark": "#12283C",
+         "logo": "/assets/logo-lakemedical.svg",
+         "tagline": "Alumni Engagement for Health Sciences",
+         "support": "alumni@lakemedical.org"
+       }
+
+  2. JavaScript applies:
+     document.documentElement.style.setProperty('--brand', json.primary);
+     document.documentElement.style.setProperty('--brand-accent', json.accent);
+     document.documentElement.style.setProperty('--brand-dark', json.dark);
+     document.querySelector('.nav-brand').textContent = json.name;
+     document.querySelector('.nav-logo').src = json.logo;
+
+  3. All CSS uses var(--brand), var(--brand-accent), etc.
+     Zero hardcoded colors. Zero hardcoded institution names.
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Phases</h2>
+<div class="card">
+  <table>
+    <tr><th>Phase</th><th>Scope</th><th>Delivers</th></tr>
+    <tr>
+      <td><span class="label">1</span></td>
+      <td><strong>alumni-server scaffold</strong><br>C binary with HTTP listener, tenant routing, config serving, health endpoint</td>
+      <td>Tenants provisionable. Branding served from C. Browser loads config dynamically.</td>
+    </tr>
+    <tr>
+      <td><span class="label">2</span></td>
+      <td><strong>Data layer</strong><br>Per-tenant triple store, CSV import endpoint, data serving endpoint</td>
+      <td>Admin can upload CSV. Browser can load tenant-scoped alumni data.</td>
+    </tr>
+    <tr>
+      <td><span class="label">3</span></td>
+      <td><strong>Enrichment engine</strong><br>NPI + PubMed in C (http.h), scheduler loop, trigger generation</td>
+      <td>Automated daily/weekly enrichment. Outreach triggers generated.</td>
+    </tr>
+    <tr>
+      <td><span class="label">4</span></td>
+      <td><strong>Auth migration</strong><br>Move TOTP/session from relay to alumni-server, per-tenant user stores</td>
+      <td>Full auth in alumni-server. Relay becomes optional relay-only.</td>
+    </tr>
+    <tr>
+      <td><span class="label">5</span></td>
+      <td><strong>Browser rebrand</strong><br>Remove all hardcoded brand. CSS variables. Dynamic config injection.</td>
+      <td>Any tenant sees their own brand. Zero code changes per tenant.</td>
+    </tr>
+    <tr>
+      <td><span class="label">6</span></td>
+      <td><strong>Operations</strong><br>Backup/export (pack.h), trace stream, pulse monitoring, admin CLI</td>
+      <td>Enterprise ops. Tenant data portable. Live debugging. Health dashboards.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>What Stays JS (Platform Constraints)</h2>
+<div class="card">
+  <ul>
+    <li><strong>Cloudflare Workers</strong> &mdash; must be JS/WASM. Cloudflare doesn't run native C. Workers become thin HTTP proxies: receive browser request, forward to alumni-server, return response. No business logic in Workers.</li>
+    <li><strong>Browser</strong> &mdash; must be JS/HTML/CSS. Vanilla only. No frameworks. The browser is a renderer, not a processor.</li>
+  </ul>
+  <p style="margin-top:12px;">Everything else is <span class="c-tag">C</span>. If it runs on our metal, it's C.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>What's New vs What's Reused</h2>
+<div class="card">
+  <table>
+    <tr><th>Component</th><th>Status</th></tr>
+    <tr><td>alumni-server.c (HTTP listener + router)</td><td class="new-tag">NEW</td></tr>
+    <tr><td>Tenant provisioning logic</td><td class="new-tag">NEW</td></tr>
+    <tr><td>NPI client in C (wraps http.h)</td><td class="new-tag">NEW</td></tr>
+    <tr><td>PubMed client in C (wraps http.h)</td><td class="new-tag">NEW</td></tr>
+    <tr><td>CSV import handler (wraps read.h)</td><td class="new-tag">NEW</td></tr>
+    <tr><td>Enrichment scheduler (event loop)</td><td class="new-tag">NEW</td></tr>
+    <tr><td>Trigger diff engine</td><td class="new-tag">NEW</td></tr>
+    <tr><td>JSON response builder</td><td class="new-tag">NEW</td></tr>
+    <tr><td>Browser tenant-config loader</td><td class="new-tag">NEW</td></tr>
+    <tr><td>Worker proxy updates (tenant routing)</td><td class="new-tag">NEW</td></tr>
+    <tr><td colspan="2" style="border-top:1px solid #333;"></td></tr>
+    <tr><td>Triple store (store.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>HTTP client (http.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>Crypto suite (crypt.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>Auth + sessions (auth.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>Vault (vault.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>Rate limiting (policy.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>CSV/JSON parsing (read.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>Wire protocol (wire.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>QR code (qr.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>Pack/unpack (pack.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>WAL (journal.h)</td><td class="pass">REUSE</td></tr>
+    <tr><td>Relay server (existing)</td><td class="pass">REUSE</td></tr>
+    <tr><td>Browser app views (existing)</td><td class="pass">REUSE</td></tr>
+  </table>
+  <p style="margin-top:12px;"><span class="new-tag">10 new components</span> + <span class="pass">13 reused</span>. The heavy lifting is already done.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Constraints</h2>
+<div class="card">
+  <ul>
+    <li><strong>Pure C</strong> for all server-side logic. JS only where platform mandates it (Cloudflare Workers, browser).</li>
+    <li><strong>No frameworks.</strong> No ORM, no Express, no React. Vanilla everything.</li>
+    <li><strong>No external dependencies.</strong> All crypto, HTTP, storage, parsing from kASTIL/nous.</li>
+    <li><strong>FERPA compliant.</strong> Only public federal APIs (NPI, PubMed) + data the institution provides. No scraping.</li>
+    <li><strong>Encryption at rest.</strong> Every tenant store uses AES-256-GCM via store.h.</li>
+    <li><strong>Cross-platform build.</strong> Compiles on Linux (production) and Windows (development).</li>
+    <li><strong>NPI rate limit:</strong> max 5 req/sec. PubMed: max 3 req/sec without API key.</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-02 23:15 &middot; ~P Multi-Tenant Enterprise Plan &middot; lakemedical.org</div>
+</div>
+</body>
+</html>
