@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Backlog — 56 Shipped, 17 Remaining — Alumni Engagement Platform</title>
+<title>Product Backlog — 54 Shipped, 19 Remaining — Alumni Engagement Platform</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
@@ -60,11 +60,11 @@
 <div class="container">
 
 <h1>Product Backlog</h1>
-<p class="subtitle">Alumni Engagement Platform &mdash; 73 stories &middot; 10 epics<br><strong style="color:#4ade80;">56 shipped</strong> &middot; <strong style="color:#f87171;">17 remaining</strong></p>
+<p class="subtitle">Alumni Engagement Platform &mdash; 73 stories &middot; 10 epics<br><strong style="color:#4ade80;">54 shipped</strong> &middot; <strong style="color:#f87171;">19 remaining</strong><br><span style="color:#888;font-size:0.85rem;">Rule: JS Worker code &ne; done. Only C backend (kastil/nous) + deployed frontend (lakemedical.org) count.</span></p>
 
 <div class="progress-bar">
-  <div class="progress-fill" style="width:76.7%"></div>
-  <div class="progress-label">56 / 73 shipped (77%)</div>
+  <div class="progress-fill" style="width:74%"></div>
+  <div class="progress-label">54 / 73 shipped (74%)</div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ -->
@@ -78,18 +78,19 @@
     <tr><td>4. Alumni Profile</td><td>12</td><td style="color:#4ade80;">12</td><td>0</td></tr>
     <tr><td>5. Dashboard &amp; Analytics</td><td>7</td><td style="color:#4ade80;">7</td><td>0</td></tr>
     <tr><td>6. Outreach &amp; Communication</td><td>6</td><td style="color:#4ade80;">6</td><td>0</td></tr>
-    <tr><td>7. Data Import &amp; Enrichment</td><td>8</td><td style="color:#4ade80;">2</td><td style="color:#f87171;">6</td></tr>
+    <tr><td>7. Data Import &amp; Enrichment</td><td>8</td><td>0</td><td style="color:#f87171;">8</td></tr>
     <tr><td>8. Multi-Tenant &amp; Branding</td><td>6</td><td>0</td><td style="color:#f87171;">6</td></tr>
     <tr><td>9. Provisioning &amp; Onboarding</td><td>5</td><td>0</td><td style="color:#f87171;">5</td></tr>
     <tr><td>10. Platform &amp; UX</td><td>4</td><td style="color:#4ade80;">4</td><td>0</td></tr>
-    <tr style="border-top:2px solid #333;"><td><strong>Total</strong></td><td><strong>73</strong></td><td style="color:#4ade80;font-weight:700;"><strong>56</strong></td><td style="color:#f87171;font-weight:700;"><strong>17</strong></td></tr>
+    <tr style="border-top:2px solid #333;"><td><strong>Total</strong></td><td><strong>73</strong></td><td style="color:#4ade80;font-weight:700;"><strong>54</strong></td><td style="color:#f87171;font-weight:700;"><strong>19</strong></td></tr>
   </table>
 </div>
 
 <div class="card">
-  <h3>6 Epics Complete. 3 Epics Remaining.</h3>
-  <p style="margin-top:8px;">Epics 1&ndash;6 and 10 are <strong style="color:#4ade80;">fully shipped</strong>. Every view, every interaction, every UI component from the Alumni-Artifacts prototype is live in production.</p>
-  <p style="margin-top:8px;">The remaining 17 stories are in 3 epics: <strong>Data Pipeline</strong> (6), <strong>Multi-Tenant</strong> (6), and <strong>Provisioning</strong> (5). These are all backend/infrastructure &mdash; the visible product is built.</p>
+  <h3>6 Epics Complete. 4 Epics Remaining.</h3>
+  <p style="margin-top:8px;">Epics 1&ndash;6 and 10 are <strong style="color:#4ade80;">fully shipped</strong>. Every view, every interaction, every UI component from the Alumni-Artifacts prototype is live in production at lakemedical.org.</p>
+  <p style="margin-top:8px;">The remaining 19 stories are in 4 epics: <strong>Data Import &amp; Enrichment</strong> (8 &mdash; NPI + PubMed Workers are JS, not C), <strong>Multi-Tenant</strong> (6), and <strong>Provisioning</strong> (5).</p>
+  <p style="margin-top:8px;color:#fbbf24;"><strong>Rule applied:</strong> JS Worker implementations (_npi.js, _pubmed.js, refresh.js) do NOT count as done. Only C code in kastil/nous and deployed frontend UI count. NPI and PubMed enrichment flipped back to NOT DONE.</p>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ -->
@@ -391,22 +392,22 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ -->
-<!-- EPIC 7: IMPORT & ENRICHMENT — 2/8 -->
+<!-- EPIC 7: IMPORT & ENRICHMENT — 0/8 -->
 <!-- ═══════════════════════════════════════════════════════ -->
 <div class="epic-header">
-  <h2>Epic 7 — Data Import &amp; Enrichment <span style="color:#fbbf24;">2/8</span></h2>
-  <span class="epic-count">6 remaining</span>
+  <h2>Epic 7 — Data Import &amp; Enrichment <span style="color:#f87171;">0/8</span></h2>
+  <span class="epic-count">8 remaining &mdash; NPI + PubMed flipped: JS Workers &ne; C</span>
 </div>
 
-<div class="story done">
-  <span class="story-id">PB-052 ✅</span><span class="pri pri-done">DONE</span>
-  <p class="story-text">As an admin, I want imported alumni automatically enriched with NPI Registry data.</p>
-  <p class="story-ac">Shipped in Workers (_npi.js + refresh.js). Batch processing, score matching, rate limiting. Triggered via POST /api/refresh.</p>
+<div class="story p1">
+  <span class="story-id">PB-052</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want imported alumni automatically enriched with NPI Registry data.</p>
+  <p class="story-ac"><span>AC:</span> NPI matching by name + class year + state. JS Worker exists (_npi.js + refresh.js) but <strong style="color:#fbbf24;">NOT in C</strong>. kastil/nous has no NPI client. Must be alumni-server.c.</p>
 </div>
-<div class="story done">
-  <span class="story-id">PB-053 ✅</span><span class="pri pri-done">DONE</span>
-  <p class="story-text">As an admin, I want imported alumni enriched with PubMed publication data.</p>
-  <p class="story-ac">Shipped in Workers (_pubmed.js + refresh.js). Author search, PMID extraction, publication tagging.</p>
+<div class="story p1">
+  <span class="story-id">PB-053</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want imported alumni enriched with PubMed publication data.</p>
+  <p class="story-ac"><span>AC:</span> PubMed author search + PMID extraction. JS Worker exists (_pubmed.js + refresh.js) but <strong style="color:#fbbf24;">NOT in C</strong>. kastil/nous has no PubMed client. Must be alumni-server.c.</p>
 </div>
 
 <div class="story p1">
@@ -542,10 +543,12 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ -->
-<h2>What's Left — The 17</h2>
+<h2>What's Left — The 19</h2>
 <div class="card">
   <table>
     <tr><th>ID</th><th>Story</th><th>Pri</th><th>Epic</th></tr>
+    <tr style="background:#1f1a10;"><td>PB-052</td><td>NPI enrichment <strong style="color:#fbbf24;">⚠ JS→C</strong></td><td style="color:#f87171;">P1</td><td>Import</td></tr>
+    <tr style="background:#1f1a10;"><td>PB-053</td><td>PubMed enrichment <strong style="color:#fbbf24;">⚠ JS→C</strong></td><td style="color:#f87171;">P1</td><td>Import</td></tr>
     <tr><td>PB-051</td><td>CSV upload UI in browser</td><td style="color:#f87171;">P1</td><td>Import</td></tr>
     <tr><td>PB-054</td><td>Scheduled enrichment (NPI daily, PubMed weekly)</td><td style="color:#f87171;">P1</td><td>Import</td></tr>
     <tr><td>PB-055</td><td>Change detection → live trigger generation</td><td style="color:#f87171;">P1</td><td>Import</td></tr>
@@ -564,11 +567,12 @@
     <tr><td>PB-068</td><td>First-user onboarding wizard</td><td style="color:#fbbf24;">P2</td><td>Provisioning</td></tr>
     <tr><td>PB-069</td><td>Super-admin role restriction</td><td style="color:#6FC3DF;">P3</td><td>Provisioning</td></tr>
   </table>
-  <p style="margin-top:16px;"><strong>9 P1s</strong> (must-have) &middot; <strong>5 P2s</strong> (should-have) &middot; <strong>3 P3s</strong> (nice-to-have)</p>
-  <p style="margin-top:8px;color:#888;">The entire user-facing product is shipped. What remains is the backend pipeline (CSV upload, scheduled enrichment, change detection) and the multi-tenant/provisioning infrastructure.</p>
+  <p style="margin-top:16px;"><strong>11 P1s</strong> (must-have) &middot; <strong>5 P2s</strong> (should-have) &middot; <strong>3 P3s</strong> (nice-to-have)</p>
+  <p style="margin-top:8px;color:#888;">The entire user-facing UI is shipped. What remains: enrichment pipeline in C (NPI + PubMed were JS Workers, now must be alumni-server.c), CSV import, change detection, multi-tenant infrastructure, and provisioning.</p>
+  <p style="margin-top:8px;color:#fbbf24;">⚠ PB-052 + PB-053 flipped from Done → Not Done. JS Workers (_npi.js, _pubmed.js) exist but don't count. C implementation required.</p>
 </div>
 
-<div class="footer">Generated 2026-04-03 00:45 &middot; Product Backlog &middot; 56/73 shipped &middot; lakemedical.org</div>
+<div class="footer">Generated 2026-04-03 01:30 &middot; Product Backlog &middot; 54/73 shipped (JS→C audit applied) &middot; lakemedical.org</div>
 </div>
 </body>
 </html>
