@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~I: Product Backlog — Alumni Engagement Platform — 73 User Stories, 10 Epics</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111111; color: #ccc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; line-height: 1.6; }
+  nav { position: sticky; top: 0; background: #000; border-bottom: 2px solid #6FC3DF; padding: 12px 24px; z-index: 100; }
+  nav .brand { color: #6FC3DF; font-weight: 700; font-size: 1.2rem; }
+  .container { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+  h1 { color: #6FC3DF; font-size: 1.8rem; margin-bottom: 8px; }
+  .subtitle { color: #888; margin-bottom: 24px; }
+  h2 { color: #6FC3DF; font-size: 1.2rem; margin: 36px 0 12px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+  h3 { color: #90C4CF; font-size: 1rem; margin: 16px 0 8px; }
+  .card { background: #1A1A1A; border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .label { color: #6FC3DF; font-weight: 600; }
+  code { background: #222; padding: 2px 6px; border-radius: 3px; font-size: 0.9rem; color: #ddd; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #222; font-size: 0.9rem; }
+  th { color: #6FC3DF; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  ul { margin: 8px 0 8px 20px; }
+  li { margin: 4px 0; }
+
+  .story { background: #1A1A1A; border-radius: 8px; padding: 14px 18px; margin: 8px 0; border-left: 4px solid #333; }
+  .story-id { color: #6FC3DF; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.05em; }
+  .story-text { margin: 6px 0; color: #ddd; }
+  .story-text em { color: #90C4CF; font-style: normal; font-weight: 600; }
+  .story-ac { color: #888; font-size: 0.85rem; margin-top: 6px; }
+  .story-ac span { color: #555; }
+
+  .p1 { border-left-color: #f87171; }
+  .p2 { border-left-color: #fbbf24; }
+  .p3 { border-left-color: #6FC3DF; }
+
+  .pri { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; margin-left: 8px; }
+  .pri-1 { background: #2a1010; color: #f87171; }
+  .pri-2 { background: #2a2010; color: #fbbf24; }
+  .pri-3 { background: #102030; color: #6FC3DF; }
+
+  .epic-header { display: flex; justify-content: space-between; align-items: baseline; }
+  .epic-count { color: #888; font-size: 0.85rem; }
+
+  .overview-row td:nth-child(3) { color: #f59e0b; font-weight: 700; }
+  .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #222; color: #555; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+<nav><span class="brand">Be</span></nav>
+<div class="container">
+
+<h1>Product Backlog</h1>
+<p class="subtitle">Alumni Engagement Platform &mdash; Every feature as a user story<br>73 stories &middot; 10 epics &middot; Sourced from Alumni-Artifacts prototype inspection</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Backlog Overview</h2>
+<div class="card">
+  <table>
+    <tr><th>Epic</th><th>Stories</th><th>P1</th><th>P2</th><th>P3</th></tr>
+    <tr><td>1. Authentication &amp; Sessions</td><td>7</td><td>5</td><td>2</td><td>0</td></tr>
+    <tr><td>2. Queue &amp; Outreach Triggers</td><td>10</td><td>6</td><td>3</td><td>1</td></tr>
+    <tr><td>3. Alumni Directory</td><td>8</td><td>5</td><td>2</td><td>1</td></tr>
+    <tr><td>4. Alumni Profile</td><td>12</td><td>7</td><td>4</td><td>1</td></tr>
+    <tr><td>5. Dashboard &amp; Analytics</td><td>7</td><td>3</td><td>3</td><td>1</td></tr>
+    <tr><td>6. Outreach &amp; Communication</td><td>6</td><td>3</td><td>2</td><td>1</td></tr>
+    <tr><td>7. Data Import &amp; Enrichment</td><td>8</td><td>5</td><td>2</td><td>1</td></tr>
+    <tr><td>8. Multi-Tenant &amp; Branding</td><td>6</td><td>3</td><td>2</td><td>1</td></tr>
+    <tr><td>9. Provisioning &amp; Onboarding</td><td>5</td><td>2</td><td>2</td><td>1</td></tr>
+    <tr><td>10. Platform &amp; UX</td><td>4</td><td>2</td><td>1</td><td>1</td></tr>
+    <tr style="border-top:2px solid #333;"><td><strong>Total</strong></td><td><strong>73</strong></td><td><strong>41</strong></td><td><strong>23</strong></td><td><strong>9</strong></td></tr>
+  </table>
+  <p style="margin-top:12px;color:#888;">
+    <span style="color:#f87171;">P1</span> = must have for launch &nbsp;&middot;&nbsp;
+    <span style="color:#fbbf24;">P2</span> = should have, high value &nbsp;&middot;&nbsp;
+    <span style="color:#6FC3DF;">P3</span> = could have, polish
+  </p>
+</div>
+
+<div class="card">
+  <h3>Roles</h3>
+  <table>
+    <tr><td><strong>Coordinator</strong></td><td>Alumni relations staff (Lisa). Primary user. Works the queue, manages profiles, runs outreach.</td></tr>
+    <tr><td><strong>Admin</strong></td><td>Super-admin. Provisions tenants, imports data, configures the platform.</td></tr>
+    <tr><td><strong>Leadership</strong></td><td>Dean, president, board members. Views dashboards and reports. Read-only.</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 1: AUTH -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 1 — Authentication &amp; Sessions</h2>
+  <span class="epic-count">7 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-001</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to register with a username and TOTP authenticator app, so that I can access the platform without passwords.</p>
+  <p class="story-ac"><span>AC:</span> Enter username &rarr; server generates TOTP secret &rarr; QR code displayed &rarr; scan with authenticator &rarr; enter 6-digit code &rarr; account created.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-002</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to log in with my username and a 6-digit TOTP code, so that I can resume my work securely.</p>
+  <p class="story-ac"><span>AC:</span> Username + code &rarr; validated via wire protocol &rarr; session minted &rarr; redirected to app. Invalid code shows error.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-003</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want my session to automatically expire after 15 minutes of inactivity, so that unattended screens don't expose data.</p>
+  <p class="story-ac"><span>AC:</span> 900s TTL. Timer visible. Warning at 2 minutes (yellow). Critical at 1 minute (red). Auto-redirect to login on expiry.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-004</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want the app to check my session on page load, so that I'm redirected to login if my session is invalid.</p>
+  <p class="story-ac"><span>AC:</span> On load, verify session token. Valid &rarr; show app. Invalid/expired &rarr; redirect to login.html. No flash of app content.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-005</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see a QR code during registration that I can scan with Google Authenticator, so that I can set up TOTP without typing a secret key.</p>
+  <p class="story-ac"><span>AC:</span> QR code rendered from server-generated data. Scannable by Google Authenticator, Authy, 1Password. otpauth:// URI with correct issuer + account.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-006</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As an <em>admin</em>, I want sessions bound to the originating IP, so that stolen tokens can't be used from another location.</p>
+  <p class="story-ac"><span>AC:</span> Session token includes IP claim. Requests from different IP &rarr; session rejected &rarr; re-auth required.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-007</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As an <em>admin</em>, I want all auth traffic encrypted via binary wire protocol, so that credentials never travel as plaintext JSON.</p>
+  <p class="story-ac"><span>AC:</span> NTRP0001 binary frames. AES-256-GCM 0xCA envelope between Worker and relay. No credentials in query params or plain headers.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 2: QUEUE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 2 — Queue &amp; Outreach Triggers</h2>
+  <span class="epic-count">10 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-008</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see today's queue of outreach triggers sorted by priority, so that I work the most important items first.</p>
+  <p class="story-ac"><span>AC:</span> Queue view is default landing. Shows date, greeting, item count. Cards sorted: high &rarr; medium &rarr; low, then by newest date. Each card shows: name, specialty, class year, trigger type, priority badge, summary.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-009</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want each trigger card to show contextual insights (campus proximity, student matches, days since last contact), so that I can prioritize with real context, not just a label.</p>
+  <p class="story-ac"><span>AC:</span> Up to 4 insight bullets per card. Computed from alumni data: distance to campus, students wanting that specialty, last touchpoint age, days overdue.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-010</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to filter the queue by trigger type (practice moves, publications, follow-ups, etc.), so that I can focus on one category at a time.</p>
+  <p class="story-ac"><span>AC:</span> Toggle pills for: All, Practice Moves, Credentials, Publications, Follow-ups, Milestones, Re-engagement, SOAP, Achievements. Active pill highlighted. Count updates.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-011</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to filter the queue by campus (All / Pomona / Lebanon), so that I can work one campus at a time.</p>
+  <p class="story-ac"><span>AC:</span> Campus toggle. Filters trigger cards by campus field. "All" shows both. Count updates per filter.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-012</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to dismiss a trigger from my queue, so that I can clear items I've handled or don't need to act on.</p>
+  <p class="story-ac"><span>AC:</span> [Dismiss] button on each card. Card removed from queue. Moved to archived section. Queue count decrements.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-013</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to restore a dismissed trigger, so that I can undo an accidental dismiss.</p>
+  <p class="story-ac"><span>AC:</span> Archived section (collapsible) shows dismissed items. [Restore] button returns item to active queue. Archived section hidden when empty.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-014</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want trigger cards color-coded by type (blue=moves, gold=credentials, green=publications, red=follow-ups), so that I can visually scan the queue at a glance.</p>
+  <p class="story-ac"><span>AC:</span> 4px left border color per trigger type. Icon + label matches type. 8 distinct trigger type colors.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-015</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want a SOAP Mentorship card in my queue during Match Day season, so that I can connect unmatched students with alumni mentors.</p>
+  <p class="story-ac"><span>AC:</span> Gold-bordered special card. Shows unmatched student count, mentor names, inspirational quote. Links to mentor profiles.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-016</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to click "View Profile" on any trigger card, so that I can see the full alumni record before taking action.</p>
+  <p class="story-ac"><span>AC:</span> Click navigates to profile view. Back button returns to queue (not directory). Trigger context preserved.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-017</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As a <em>coordinator</em>, I want the queue badge count visible in the navigation at all times, so that I know when new triggers arrive without switching views.</p>
+  <p class="story-ac"><span>AC:</span> Badge on Queue nav item shows pending count. Updates when items dismissed/restored. Visible from directory, profile, and dashboard views.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 3: DIRECTORY -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 3 — Alumni Directory</h2>
+  <span class="epic-count">8 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-018</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to browse all alumni in a paginated card list, so that I can scroll through the full directory without loading everything at once.</p>
+  <p class="story-ac"><span>AC:</span> 25 alumni per page. Previous/Next buttons. "Page X of Y" display. Total count shown. Cards show: avatar, name, credentials, specialty, location, class year, last touchpoint.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-019</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to search alumni by name, specialty, city, state, or tag, so that I can quickly find a specific person or group.</p>
+  <p class="story-ac"><span>AC:</span> Search input at top. Filters in real-time after 2+ characters. Case-insensitive. Matches across: name, specialty, practice_city, practice_state, tags, notables. Results count updates.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-020</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to filter the directory by campus, specialty, engagement type, class year, and tags, so that I can narrow the list to a specific cohort.</p>
+  <p class="story-ac"><span>AC:</span> Dropdowns for: campus, specialty (all unique specialties), engagement (8 types), class year (all years descending), tags. Filters combine (AND logic). Results count updates.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-021</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to sort the directory by name, class year, last touchpoint, or engagement level, so that I can find who I need based on different criteria.</p>
+  <p class="story-ac"><span>AC:</span> Sort dropdown with 4 options. Default: name (A-Z). Class year: newest first. Last touchpoint: most recent first. Engagement: most engaged first (count of true engagement flags).</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-022</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to click any alumni card to open their full profile, so that I can review and manage their record.</p>
+  <p class="story-ac"><span>AC:</span> Click card &rarr; navigate to profile view. Back button returns to directory with scroll position and filters preserved.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-023</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want each alumni card to show engagement badges (mentor, donor, preceptor, etc.), so that I can see involvement at a glance.</p>
+  <p class="story-ac"><span>AC:</span> Up to 4 badges shown inline. "+N more" if &gt;4. Color-coded per type. Shows icon + label. VIP badge if applicable.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-024</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see "Notable: [text]" on alumni cards when someone has a notable achievement, so that standout alumni are immediately visible.</p>
+  <p class="story-ac"><span>AC:</span> If notables array is non-empty, show first notable as italic text below engagement badges. Gold text.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-025</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As a <em>coordinator</em>, I want alumni cards to fade in with a staggered animation when the page loads, so that the directory feels polished and responsive.</p>
+  <p class="story-ac"><span>AC:</span> Cards animate with 0.4s fade-up. 50ms stagger between cards. No animation on filter/search (instant re-render).</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 4: PROFILE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 4 — Alumni Profile</h2>
+  <span class="epic-count">12 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-026</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see a profile header with the alumnus's name, credentials, specialty, practice name, location, class year, and campus, so that I have the full professional identity at a glance.</p>
+  <p class="story-ac"><span>AC:</span> Avatar (initials, colored). Name + credentials. Specialty + practice name. City, State + Class of YYYY + Campus. VIP badge if applicable.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-027</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see a relationship context box showing last contact date and next suggested action, so that I know where I stand with this person before reaching out.</p>
+  <p class="story-ac"><span>AC:</span> Shows: "Last connected: [date] — [event type]" or "No touchpoints on record — first connection opportunity." Next action with due date and days-overdue indicator if late.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-028</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see NPI number, license status, and last verified date on the profile, so that I can confirm the alumnus's current professional standing.</p>
+  <p class="story-ac"><span>AC:</span> NPI number displayed. License status with colored dot (green=active, gray=inactive, red=expired). License state. "Last verified" date from NPI sync.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-029</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to toggle engagement checkboxes (mentor, donor, preceptor, advisory board, RCME events, social events, SOAP mentor, guest speaker, champion), so that I can track what each alumnus is involved in.</p>
+  <p class="story-ac"><span>AC:</span> 9 checkboxes in 2-column grid. Click toggles on/off. Checked = green highlight + checkmark. State persists in alumni record. Changes reflected in directory badges.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-030</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see a timeline of all touchpoints (meetings, outreach, mentorship, gifts, publications, signals, events), so that I can review the full history of our relationship with this alumnus.</p>
+  <p class="story-ac"><span>AC:</span> Vertical timeline. Colored dots (burgundy=manual, gray=system). Each item: date + time ago + author + icon + title + detail. Newest first. Count badge in section header.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-031</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to add a personal note to an alumnus's profile, so that I can record observations, context, or follow-up reminders that aren't captured elsewhere.</p>
+  <p class="story-ac"><span>AC:</span> [+ Add Note] button. Opens: author field (pre-filled) + textarea. [Save] creates note with date + author. Note appears in notes section (newest first). Also adds "note" touchpoint to timeline.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-032</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to add notables to an alumnus's profile ("Faculty at OHSU", "Published in NEJM"), so that exceptional achievements are recorded and visible on directory cards.</p>
+  <p class="story-ac"><span>AC:</span> [+ Add] button in notables section. Text input + Save/Cancel. Added notable appears in list. Adds "Notable" tag to alumni if not already present. Visible on directory card.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-033</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see contact info (email, phone, preferred method) with a bounced indicator if the email has bounced, so that I know how to reach this person and whether their email works.</p>
+  <p class="story-ac"><span>AC:</span> Email + phone shown if available. Preferred method highlighted. Bounced email shows red "bounced" badge. Contact source (self-reported vs NPI registry) shown.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-034</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see outreach history on the profile (date, subject, status: sent/replied/opened/bounced), so that I can see what we've already sent and whether they responded.</p>
+  <p class="story-ac"><span>AC:</span> Outreach history section. Each entry: date + subject + status dot (green=replied, blue=opened, gray=sent, red=bounced). Most recent first. Links to draft if applicable.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-035</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see tags on the profile (Published, Faculty, Notable, etc.) with emoji badges, so that I can quickly see this person's categories.</p>
+  <p class="story-ac"><span>AC:</span> Tags rendered as pills with emoji prefix. Examples: 📚 Published, 🎓 Faculty, ⭐ Notable. Auto-generated from data (publications &rarr; Published tag) + manually addable.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-036</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see data source provenance at the bottom of the profile, so that I can verify where each piece of information came from (FERPA compliance).</p>
+  <p class="story-ac"><span>AC:</span> Section shows: Identity source (Registrar), Professional source (NPPES), License source (State Board), Publications source (PubMed), Engagement source (Internal). Audit trail for compliance.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-037</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As a <em>coordinator</em>, I want the back button on a profile to return me to whichever view I came from (queue or directory), so that navigation feels natural.</p>
+  <p class="story-ac"><span>AC:</span> Back button says "← Back to Queue" or "← Back to Directory" based on previous view. Returns to exact scroll position and filters.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 5: DASHBOARD -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 5 — Dashboard &amp; Analytics</h2>
+  <span class="epic-count">7 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-038</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As <em>leadership</em>, I want to see KPI stat cards (total alumni located, states covered, active mentors, donors), so that I get the big picture instantly.</p>
+  <p class="story-ac"><span>AC:</span> 4 stat cards in a grid (responsive: 1 col mobile, 2 tablet, 4 desktop). Each: label + large value + subtitle. Accent color on key numbers. Computed from alumni data.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-039</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As <em>leadership</em>, I want to see a specialty distribution chart (horizontal bar), so that I can see which specialties our graduates are practicing.</p>
+  <p class="story-ac"><span>AC:</span> Chart.js horizontal bar chart. Top specialties by count. Branded color. Responsive height. Labels readable. Sorted by count descending.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-040</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As <em>leadership</em>, I want to see an engagement distribution pie chart (highly engaged / moderate / not yet engaged), so that I can understand our engagement coverage.</p>
+  <p class="story-ac"><span>AC:</span> Chart.js pie chart. 3 segments: Highly Engaged (4+ activities) / Moderately (1-3) / Not Yet (0). Legend with counts + percentages. Branded colors.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-041</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As <em>leadership</em>, I want to filter the dashboard by campus, so that I can see metrics for Pomona and Lebanon independently.</p>
+  <p class="story-ac"><span>AC:</span> Campus toggle at top of dashboard. Filters all stats + charts. "All" shows combined. Charts re-render with filtered data.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-042</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As <em>leadership</em>, I want to see a campus comparison card when viewing "All" campuses, so that I can compare Pomona vs Lebanon side by side.</p>
+  <p class="story-ac"><span>AC:</span> Two-column card. Each campus: name, total alumni, sample records, engaged count, active mentors, primary corridor, founded year. Only visible when campus filter = "All".</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-043</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As <em>leadership</em>, I want a SOAP Mentorship impact card on the dashboard, so that I can see Match Day placement results and mentor contributions.</p>
+  <p class="story-ac"><span>AC:</span> Gold card. Shows: unmatched students placed count, mentor names with details, placement rate. Seasonal (March-April). Links to mentor profiles.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-044</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As <em>leadership</em>, I want the dashboard to include a disclaimer about sample data vs full dataset, so that I know the scope of what I'm seeing.</p>
+  <p class="story-ac"><span>AC:</span> Footer text: "Dashboard showing X sample records. Full dataset (~7,042) populates when registrar list is connected." Disappears when real data is loaded.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 6: OUTREACH -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 6 — Outreach &amp; Communication</h2>
+  <span class="epic-count">6 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-045</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to click "Draft Outreach" on a trigger card or profile and see a pre-written email draft in a slide-out panel, so that I can review and send personalized outreach without writing from scratch.</p>
+  <p class="story-ac"><span>AC:</span> Panel slides in from right. Shows: To (name + email), Subject (pre-filled), Body (pre-filled, trigger-aware). Warm, personal tone referencing the specific trigger. Editable before sending.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-046</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to copy the outreach draft to my clipboard (To + Subject + Body), so that I can paste it into my actual email client.</p>
+  <p class="story-ac"><span>AC:</span> [📋 Copy to Clipboard] button. Copies formatted text: "To: [name]\nSubject: [subject]\n\n[body]". Shows "Copied!" feedback for 2 seconds. Icon changes to checkmark.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-047</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to mark outreach as sent, so that it's recorded in the alumni's outreach history and timeline.</p>
+  <p class="story-ac"><span>AC:</span> [✉️ Mark as Sent] button. Adds entry to outreach_history (date, subject, status=sent). Adds "outreach" touchpoint to timeline. Shows "Marked as Sent" feedback. Panel closes after 600ms.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-048</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to see a "Draft only — a human reviews and sends every message" badge on the outreach panel, so that I know the system never sends emails automatically.</p>
+  <p class="story-ac"><span>AC:</span> Amber badge with ✋ icon. Always visible on outreach panel. Reinforces that the system assists but doesn't act autonomously.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-049</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want outreach drafts to reference the specific trigger (practice move, publication, etc.) with personalized context, so that the email feels genuine, not templated.</p>
+  <p class="story-ac"><span>AC:</span> Draft subject and body include: alumnus name, trigger detail (new city, journal name, etc.), campus connection, warm dean's office tone. Different template per trigger type.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-050</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As a <em>coordinator</em>, I want to cancel an outreach draft without saving, so that I can abandon drafts I don't want to send.</p>
+  <p class="story-ac"><span>AC:</span> [Cancel] text button below action buttons. Closes panel. No state change. No touchpoint added.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 7: IMPORT & ENRICHMENT -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 7 — Data Import &amp; Enrichment</h2>
+  <span class="epic-count">8 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-051</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want to upload a CSV of graduates (first_name, last_name, class_year, campus), so that alumni records are created in the system from the registrar's data.</p>
+  <p class="story-ac"><span>AC:</span> CSV upload form. Accepts: first_name, last_name, class_year, campus (required) + email, student_id (optional). Validates format. Shows import progress. Returns: imported count, duplicates skipped, errors.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-052</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want imported alumni automatically enriched with NPI Registry data (NPI number, specialty, practice location, license status), so that professional profiles are built without manual research.</p>
+  <p class="story-ac"><span>AC:</span> After import, NPI enrichment runs in batches (200/day). Matches by name + credential + enumeration year. Score threshold &ge; 5. Populates: npi, specialty, practice_city, practice_state, license_status. Status changes from "pending-enrichment" to "enriched".</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-053</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want imported alumni enriched with PubMed publication data (papers, journals, citations), so that published researchers are identified and tagged automatically.</p>
+  <p class="story-ac"><span>AC:</span> PubMed scan runs weekly (100/batch). Searches by author name. Stores: PMID, title, journal, pub date. Adds "published-researcher" tag. Creates publication touchpoints. Creates "new publication" trigger for queue.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-054</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want enrichment to run on a schedule (NPI daily, PubMed weekly) with cursor tracking, so that all alumni are progressively enriched without manual intervention.</p>
+  <p class="story-ac"><span>AC:</span> NPI: daily 2AM, 200 records/batch, 200ms rate limit. PubMed: weekly Sunday 3AM, 100 records/batch, 500ms rate limit. Cursor persists across runs. Crash-safe (WAL). Full cycle completes in ~35 days (NPI) / ~70 weeks (PubMed) for 7,000 records.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-055</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want enrichment to detect changes (practice move, credential update, license change) and generate triggers for my queue, so that I'm notified when something important changes.</p>
+  <p class="story-ac"><span>AC:</span> After each NPI refresh, diff previous triples vs current. If practice_city changed &rarr; practice_move trigger. If specialty changed &rarr; credential_change trigger. If license_status changed &rarr; alert. Triggers appear in queue with priority.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-056</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As an <em>admin</em>, I want to see enrichment status (records enriched, pending, errors, last run time), so that I can monitor the pipeline health.</p>
+  <p class="story-ac"><span>AC:</span> Health endpoint or admin view: total records, enriched count, pending count, error count, last NPI run, last PubMed run, cursor position, estimated completion date.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-057</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As an <em>admin</em>, I want to deduplicate alumni on import, so that re-uploading a CSV doesn't create duplicate records.</p>
+  <p class="story-ac"><span>AC:</span> On import, check for existing record by name + class_year + campus. If match found, skip (don't overwrite). Report duplicates count in import summary.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-058</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As an <em>admin</em>, I want to manually trigger an enrichment refresh for a single alumnus, so that I can update a specific record without waiting for the batch schedule.</p>
+  <p class="story-ac"><span>AC:</span> Button on profile (admin only): [🔄 Refresh NPI]. Runs NPI + PubMed for this one record immediately. Shows result (updated fields or "no changes").</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 8: MULTI-TENANT -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 8 — Multi-Tenant &amp; Branding</h2>
+  <span class="epic-count">6 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-059</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want each institution to have its own isolated data store, so that no institution can see another's alumni data.</p>
+  <p class="story-ac"><span>AC:</span> Per-tenant directory with encrypted triple store. Tenant ID in every request. Data path: /tenants/{id}/alumni.store/. PSK derived per tenant. Zero cross-tenant data leakage.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-060</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want each institution to see their own branding (name, colors, logo) across all pages, so that the platform feels like their own tool, not a generic product.</p>
+  <p class="story-ac"><span>AC:</span> Tenant config triples: name, primary color, accent color, logo URL, tagline. Browser fetches config on boot. CSS variables injected. Nav, login, app all reflect tenant brand. Zero hardcoded institution names or colors.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-061</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want tenant routing based on domain, so that lakemedical.org shows Lake Medical data and westernu.alumni-engine.com shows WesternU data.</p>
+  <p class="story-ac"><span>AC:</span> Worker reads Host header &rarr; maps to tenant_id. All subsequent requests scoped to that tenant. Unknown domains &rarr; error page. Custom domain or subdomain both supported.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-062</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As an <em>admin</em>, I want tenant data encrypted at rest with a derived key, so that a compromised disk doesn't expose alumni data.</p>
+  <p class="story-ac"><span>AC:</span> AES-256-GCM encryption via store.h. Per-tenant key derived: HMAC-SHA-256(master_key, tenant_id). Encrypted on disk. Decrypted only in memory during server runtime.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-063</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As an <em>admin</em>, I want session tokens scoped to a tenant, so that a session from one institution can't access another's data.</p>
+  <p class="story-ac"><span>AC:</span> Session token includes tenant claim. Server validates tenant claim matches request tenant_id. Mismatch &rarr; 403. No cross-tenant session reuse.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-064</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As an <em>admin</em>, I want a support email configured per tenant, so that error pages and footers show the right contact for each institution.</p>
+  <p class="story-ac"><span>AC:</span> Tenant config includes support_email. Shown in footer and error pages. Defaults to platform support if not set.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 9: PROVISIONING -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 9 — Provisioning &amp; Onboarding</h2>
+  <span class="epic-count">5 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-065</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want to provision a new tenant with a web form (institution name, domain, primary color, accent color, logo), so that I can onboard a new institution without using the command line.</p>
+  <p class="story-ac"><span>AC:</span> Admin page: provision.html. Form fields: name, domain, primary color (picker), accent color (picker), logo (upload or URL). [Create Tenant] button. On success: tenant directory created, config triples written, vault sealed.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-066</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As an <em>admin</em>, I want to see a live brand preview as I fill in colors and logo on the provisioning form, so that I can see what the institution's pages will look like before creating the tenant.</p>
+  <p class="story-ac"><span>AC:</span> Preview pane updates in real-time. Shows: nav bar with logo + name + colors. Login page preview. Sample card with accent color. "This is what [Name] users will see."</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-067</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As an <em>admin</em>, I want to see a list of all tenants with status (active, record count, last enrichment), so that I can manage the platform from one view.</p>
+  <p class="story-ac"><span>AC:</span> Admin page: tenants.html. Table: tenant name, domain, alumni count, enriched count, last NPI run, last PubMed run, status (active/paused). Click &rarr; tenant detail.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-068</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want a first-time onboarding wizard after my institution is provisioned (register account, upload CSV, see first enrichment), so that I can get started without reading documentation.</p>
+  <p class="story-ac"><span>AC:</span> On first login to a new tenant: Step 1 = Register your account. Step 2 = Upload registrar CSV. Step 3 = "Enrichment started — we'll notify you when complete." Step 4 = Queue shows first triggers. Wizard dismissible, doesn't repeat.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-069</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As an <em>admin</em>, I want provisioning restricted to super-admin role, so that regular coordinators can't create or modify tenants.</p>
+  <p class="story-ac"><span>AC:</span> Admin pages require super-admin session claim. Regular coordinator sessions &rarr; 403 on admin routes. No admin links visible in regular nav.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EPIC 10: PLATFORM -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="epic-header">
+  <h2>Epic 10 — Platform &amp; UX</h2>
+  <span class="epic-count">4 stories</span>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-070</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want a sidebar navigation on desktop and bottom nav bar on mobile, so that I can switch between Queue, Directory, and Dashboard from any view.</p>
+  <p class="story-ac"><span>AC:</span> Desktop (&gt;768px): sticky sidebar with logo, search, nav items (Queue + badge, Alumni, Dashboard), footer. Mobile (&lt;768px): bottom bar with 4 icons (Queue, Alumni, Dashboard, Search). Active state highlighted.</p>
+</div>
+
+<div class="story p1">
+  <span class="story-id">PB-071</span><span class="pri pri-1">P1</span>
+  <p class="story-text">As a <em>coordinator</em>, I want a global search that finds alumni by name, specialty, city, or state from any view, so that I can quickly locate someone without switching to the directory.</p>
+  <p class="story-ac"><span>AC:</span> Desktop: sidebar search box. Mobile: search icon in bottom nav &rarr; full-screen overlay. Real-time results after 2+ characters. Results show: avatar, name, specialty, location. Click result &rarr; profile. "View all X results in Directory" link.</p>
+</div>
+
+<div class="story p2">
+  <span class="story-id">PB-072</span><span class="pri pri-2">P2</span>
+  <p class="story-text">As a <em>coordinator</em>, I want the app to be fully responsive on mobile, tablet, and desktop, so that I can work from my phone, iPad, or office computer.</p>
+  <p class="story-ac"><span>AC:</span> 3 breakpoints: mobile (&lt;768px), tablet (768-1024px), desktop (&gt;1024px). Single column on mobile. Cards, grids, forms all adapt. Font size 16px on inputs (prevent iOS zoom). Charts max-height 250px on mobile.</p>
+</div>
+
+<div class="story p3">
+  <span class="story-id">PB-073</span><span class="pri pri-3">P3</span>
+  <p class="story-text">As a <em>coordinator</em>, I want a FERPA compliance disclaimer visible on the login page and profile footer, so that I'm reminded that data handling follows FERPA guidelines.</p>
+  <p class="story-ac"><span>AC:</span> Auth gate: "All alumni data sourced from FERPA-compliant channels." Profile footer: data source provenance. Sidebar footer: "Sample data" disclaimer when no real data loaded.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>Backlog Summary</h2>
+<div class="card">
+  <table>
+    <tr><th>Priority</th><th>Stories</th><th>Description</th></tr>
+    <tr><td style="color:#f87171;font-weight:700;">P1</td><td>41</td><td>Must have for launch. The product doesn't work without these.</td></tr>
+    <tr><td style="color:#fbbf24;font-weight:700;">P2</td><td>23</td><td>Should have. High-value polish that makes the difference between demo and product.</td></tr>
+    <tr><td style="color:#6FC3DF;font-weight:700;">P3</td><td>9</td><td>Could have. Nice touches. Do them when everything else is done.</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>What This Backlog Covers</h3>
+  <ul>
+    <li><strong>4 core views:</strong> Queue (10 stories), Directory (8), Profile (12), Dashboard (7)</li>
+    <li><strong>Full auth flow:</strong> Register, login, sessions, IP binding, wire protocol (7)</li>
+    <li><strong>Outreach engine:</strong> Draft generation, clipboard copy, mark sent, history tracking (6)</li>
+    <li><strong>Data pipeline:</strong> CSV import, NPI enrichment, PubMed enrichment, scheduled refresh, change detection (8)</li>
+    <li><strong>Multi-tenant:</strong> Data isolation, branding, domain routing, encryption (6)</li>
+    <li><strong>Provisioning:</strong> Admin UI, live preview, tenant list, onboarding wizard (5)</li>
+    <li><strong>Platform:</strong> Navigation, search, responsive design, compliance (4)</li>
+  </ul>
+</div>
+
+<div class="footer">Generated 2026-04-03 00:30 &middot; ~I Product Backlog &middot; Alumni-Artifacts &rarr; lakemedical.org</div>
+</div>
+</body>
+</html>
